@@ -1,0 +1,39 @@
+/* Add global styles for the table container */
+.deads-table {
+  font-family: 'Arial', sans-serif;
+  border-collapse: collapse; /* Collapse borders to avoid spacing issues */
+  width: 100%; /* Optional: Set the table width to 100% */
+  border: 1px solid black; /* Add a border to the entire table */
+  margin-top: 12px;
+}
+  
+/* Style the table header */
+.deads-table th {
+  background: linear-gradient(0deg, #5b8bc6d6, #6eeeff87);
+  padding: 8px;
+  text-align: center;
+  border: 1px solid black; /* Add a border to each header cell */
+}
+  
+/* Style the table body rows */
+.deads-table td {
+  border-bottom: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+  font-weight: lighter;
+  border: 1px solid black;
+}
+
+.deads-table tr {
+  background-color: #c8c8c8; /* Change this color to your preference */
+}
+
+/* Style alternate rows differently */
+.deads-table tr:nth-child(even) {
+  background-color: #99c7ff;
+}
+
+/* Style odd rows differently */
+.deads-table tr:nth-child(odd) {
+  background-color: #c8c8c8;
+}

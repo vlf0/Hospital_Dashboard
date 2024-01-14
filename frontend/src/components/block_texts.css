@@ -1,0 +1,23 @@
+
+
+
+.chart_themes {
+  position: relative;
+  font-family: sans-serif;
+  width: max-content;
+  display: flex;
+  flex-direction: column;
+  color: #2a4968;
+  padding: 10px;
+  font-weight: bold;
+  font-variant: all-small-caps;
+  text-shadow: 3px 3px 12px #4d4d4d;
+  text-align: center;
+}
+
+.theme_lables {
+  margin: 10px;
+  font-size: 25px;
+}
+
+

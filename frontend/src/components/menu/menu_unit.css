@@ -1,0 +1,39 @@
+/* Dropping menu */
+.dropdown {
+  /* width: 80%; */
+  width: -webkit-fill-available;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+
+}
+/* Elements (buttons) of dropping menu */
+.menu_point {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  overflow-wrap: anywhere;
+  justify-content: center;
+  text-decoration: none;
+  width: 280px;
+  border: 2px solid #7b849a;
+  box-shadow: 0px 7px 10px 0px rgb(6 26 70 / 68%);
+  border-radius: 10px;
+  font-size: 22px;
+  font-weight: bold;
+  font-family: sans-serif;
+  color: #272728;
+  background: linear-gradient(359deg, #667a8b, #88a5e9e0);
+  margin: 15px;
+  /* padding: 15px; */
+}
+
+/* Behavior of menu_point button on hover */
+.menu_point:hover {
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  transform: scale(1.02); 
+  text-decoration: none;
+  background: linear-gradient(359deg, #819cb3, #b0c3f3e0);
+  color: rgb(10, 73, 104);
+  transition: color 0.3s, background 1s;
+}

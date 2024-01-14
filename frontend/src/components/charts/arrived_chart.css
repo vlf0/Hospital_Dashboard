@@ -1,0 +1,12 @@
+
+.arrived_chart {
+  position: relative;
+  width: 420px;
+  height: 220px;
+  padding: 10px;
+  margin: 10px;
+  border: 1px solid black;
+  box-shadow: 4px 13px 20px 0px #434343;
+  border-radius: 10px;
+  background: radial-gradient(#778ec654, #28529194);
+}
