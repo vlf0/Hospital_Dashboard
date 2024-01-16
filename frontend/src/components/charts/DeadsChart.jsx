@@ -25,8 +25,13 @@ const DeadsChart = () => {
 
     const arrived_data = {
         labels: [
-            current_date-6, current_date-5, current_date-4,
-            current_date-3, current_date-2, current_date-1, current_date
+            `${current_date.day-6}.${current_date.month}`,
+            `${current_date.day-5}.${current_date.month}`,
+            `${current_date.day-4}.${current_date.month}`,
+            `${current_date.day-3}.${current_date.month}`,
+            `${current_date.day-2}.${current_date.month}`,
+            `${current_date.day-1}.${current_date.month}`,
+            `${current_date.day}.${current_date.month}`,
         ],
         datasets: [
             {
@@ -56,7 +61,7 @@ const DeadsChart = () => {
                     color: '#090b1f',   
                     font: {
                         // size: 14,
-                        weight: 'bold' 
+                        // weight: 'bold' 
                 },},
             },
             y: {
@@ -138,12 +143,7 @@ const DeadsChart = () => {
                 text: 'Динамика умерших за неделю',
                 color: '#090b1f',
             },
-    
         },
-        onClick: function () {
-                var link = '/deads'; 
-                navigate(link); // Changes the current page's URL
-        }
     };
 
     // Chart component

@@ -4,6 +4,8 @@ import Header from './Header';
 import SignInDetailBoard from './signIn_detail_board/SigInDetailBoard';
 import SignOutDetailBoard from './signout_detail_board/SignOutDetailBoard';
 import OARDetailBoard from './OAR_detail_board/OARDetailBoard';
+import TopBlock from '../menu/TopBlock';
+import MenuUnit from '../menu/MenuUnit';
 import '../menu/top_block.css';
 import '../dashboard/dashboard_content.css';
 
@@ -13,7 +15,7 @@ const profiles = ['Кардио', 'Невро', 'Терапия']; //List of dep
 const arrivedFacts = [10, 15, 8]; //List of fact arrived patients
 const combinedData = profiles.map((profile, index) => ({ профиль: profile, план: arrivedFacts[index] })); //Mapping two lists above
 
-function DetailBoard({textHeader, currentDatetime, sign}) {
+function DetailBoard({ sign }) {
 
   const props = useSpring({
     from: { opacity: 0 },
@@ -21,26 +23,35 @@ function DetailBoard({textHeader, currentDatetime, sign}) {
     config: { duration: 700 },
   }); 
 
+  let topBlockHeader;
   let content;
+
   if (sign === 'in') {
-    content = <SignInDetailBoard signInCount={30} refuseCount={10} combinedData={combinedData} />;
+    content = 
+    <SignInDetailBoard signInCount={30} refuseCount={10} combinedData={combinedData} />
+    topBlockHeader = 'Детализация поступивших';
   } else if (sign === 'out') {
     content = <SignOutDetailBoard profiles={profiles} />;
+    topBlockHeader = 'Детализация выписанных';
   } else if (sign === 'oar') {
     content = <div className='detail_block'>
               <OARDetailBoard dept={'ОРИТ №1'} values={[10,15,20]} /> 
               <OARDetailBoard dept={'ОРИТ №2'} values={[33,19,24]} />
               <OARDetailBoard dept={'ОРИТ №3'} values={[33,19,24]} />              
-              </div>
-  }
+              </div>;
+    topBlockHeader = 'Детализация по реанимациям';
+  };
+
 
   return (
     <>
-    <animated.div
+    {/* <animated.div
     className='top_block'
     style={props}>
       <Header textHeader={textHeader} currentDatetime={currentDatetime}/>
-    </animated.div>
+    </animated.div> */}
+    <TopBlock menu_point={sign} textContent={topBlockHeader} />
+    
     <animated.div className='dashboard' style={props}>
       {content}
     </animated.div>

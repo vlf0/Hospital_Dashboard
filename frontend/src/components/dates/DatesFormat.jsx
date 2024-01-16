@@ -3,7 +3,10 @@ const full_date = new Date();
 const month = full_date.getMonth() + 1;
 const day = full_date.getDate();
 
-const current_date = `${day}.${month}`
+const current_date = {
+    day: day,
+    month: month
+};
 
 export default current_date;
 

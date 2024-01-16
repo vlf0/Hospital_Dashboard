@@ -36,7 +36,7 @@ function GetAnalysis() {
 
   return (
     <>  
-      <TopBlock />
+      <TopBlock textContent={'Оперативная сводка ГКБ Им. Демихова'}/>
       <animated.div className='dashboard' style={props}>
         <div className='board-cards'>
           <BlockInfo headerText='Поступившие' data={[122, 147]}/>
