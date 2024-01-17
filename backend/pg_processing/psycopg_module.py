@@ -2,12 +2,9 @@
 # -*- coding: utf-8 -*-
 """Describes connection and sql queries to Postgres DB."""
 
-from django.utils.translation import gettext as _
 from psycopg2 import OperationalError, ProgrammingError
 from psycopg2.errors import UndefinedTable, SyntaxError
 import psycopg2
-from collections import Counter
-from .sql_queries import BASE_QUERY
 
 
 class BaseConnectionDB:
@@ -19,11 +16,10 @@ class BaseConnectionDB:
 
     Classes:
     - BaseConnectionDB: Handles the base database connection and common operations.
-    - ChangingQueriesDB: Extends BaseConnectionDB and provides functionality for executing custom SQL queries.
 
     Usage:
     1. Create an instance of BaseConnectionDB by providing connection parameters.
-    2. Use methods like execute_query, _get_columns_list, and get_connection_data for database operations.
+    2. Use methods like execute_query, and get_connection_data for database operations.
 
     Args:
     - user (str): The username for the database connection. Defaults to 'postgres'.
@@ -34,7 +30,7 @@ class BaseConnectionDB:
 
     Attributes:
     - conn: The database connection instance if the connection is established successfully.
-           Otherwise, a string with an error message.
+    Otherwise, a string with an error message.
     - cursor: The database cursor for executing SQL queries.
     """
 
@@ -79,68 +75,66 @@ class BaseConnectionDB:
             self.conn = f'Проверьте данные подключения к БД (порт). Оригинальный текст ошибки: \n{connection_error}'
             if type(connection_error) is UnicodeDecodeError:
                 self.conn = f'Проверьте данные подключения к БД. Неверные логин/пароль/хост.'
+                return self.conn
         return self.conn
-
-    def _get_columns_list(self, table_name=None):
-        """
-        Get a list of column names for a given table.
-
-        Args:
-        - table_name (str): The name of the table.
-
-        Returns:
-        - list: A list of column names.
-        """
-        if type(self.conn) is str:
-            return 'Class method get_column_names() can\'t be used with string object.'
-        result = self.check_query(self.cursor, BaseSQLQueries.column_names_query)
-        self._close_connection
-        result = [column[0] for column in result]
-        return result
 
     def _close_connection(self):
         """
-        Closes the database connection and cursor.
+        Close the database connection and cursor.
+
+        :return: None
         """
         if type(self.conn) is str:
             return
         self.cursor.close()
         self.conn.close()
 
-    def check_query(self, cursor, query):
+    def execute_query(self, query):
         """
-        Helper method to execute a SQL query and handle errors.
+        Execute a SQL query and return the result set based on the query type.
 
-        :param cursor: Database cursor.
-        :param query: (str) A pure SQL query.
-        :return: (list) Result set as a list of tuples or the exception object.
+        :param query: (str or list): A SQL query string or a list containing the query and its parameters.
+        :return: List of tuples. In case of an error (UndefinedTable, SyntaxError, ProgrammingError, TypeError),
+        the exception object is returned.
         """
+        if type(self.conn) is str:
+            return self.conn
+
         try:
-            cursor.execute(query)
-        except (UndefinedTable, SyntaxError, ProgrammingError) as err:
+            if type(query) is str:
+                result = self.get_query(query)
+                return result
+            self.insert_query(query)
+        except (UndefinedTable, SyntaxError, ProgrammingError, TypeError) as err:
             return err
-        return cursor.fetchall()
 
-    def execute_query(self):
+    def get_query(self, query):
         """
-        Execute a SQL query and return the result set.
+        Execute a get SQL query and return the result set.
 
-        :param table_name: (str) A part of a fixed pure SQL query - table only.
+        :param query: (str) A part of a fixed pure SQL query - table only.
         :return: Result set as a list of tuples.
         In case of an undefined table (UndefinedTable exception),
         the exception object is returned as an error.
         """
-        if type(self.conn) is str:
-            return self.conn
-        result = self.check_query(self.cursor, BaseSQLQueries.base_query)
-        self._close_connection
-        counted_dict = Counter([item[0] for item in result])
-        result = dict(counted_dict.items())
+        self.cursor.execute(query)
+        result = self.cursor.fetchall()
+        self._close_connection()
         return result
 
-    def count_data(self, data):
+    def insert_query(self, query):
+        """
+        Execute an insert SQL query and return None.
 
-        pass
+        :param query: (list) List that contains sql query itself and queryset from KIS db as a values for our db.
+        :return: Result set as a list of tuples.
+        In case of an undefined table (UndefinedTable exception),
+        the exception object is returned as an error.
+        """
+        self.cursor.executemany(query[0], query[1])
+        self.conn.commit()
+        self._close_connection()
+        return None
 
     def get_connection_data(self):
         """
