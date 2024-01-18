@@ -5,6 +5,9 @@
 from psycopg2 import OperationalError, ProgrammingError
 from psycopg2.errors import UndefinedTable, SyntaxError
 import psycopg2
+import logging
+
+pg_loger = logging.getLogger(__name__)
 
 
 class BaseConnectionDB:
@@ -99,14 +102,14 @@ class BaseConnectionDB:
         """
         if type(self.conn) is str:
             return self.conn
-
         try:
             if type(query) is str:
                 result = self.get_query(query)
                 return result
             self.insert_query(query)
         except (UndefinedTable, SyntaxError, ProgrammingError, TypeError) as err:
-            return err
+            pg_loger.error(f'\n\n{err}')
+            self._close_connection()
 
     def get_query(self, query):
         """
@@ -131,8 +134,12 @@ class BaseConnectionDB:
         In case of an undefined table (UndefinedTable exception),
         the exception object is returned as an error.
         """
-        self.cursor.executemany(query[0], query[1])
+        try:
+            self.cursor.executemany(query[0], query[1])
+        except TypeError as err:
+            pg_loger.exception(err)
         self.conn.commit()
+        pg_loger.info('Insert in our BD success.')
         self._close_connection()
         return None
 
@@ -149,6 +156,7 @@ class BaseConnectionDB:
             'user': self.user,
             'password': self.password
         }
+
 
 
 
