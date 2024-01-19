@@ -2,11 +2,16 @@
 # -*- coding: utf-8 -*-
 """Describes connection and sql queries to Postgres DB."""
 
-from psycopg2 import OperationalError, ProgrammingError
+from psycopg2 import OperationalError, ProgrammingError, extensions
 from psycopg2.errors import UndefinedTable, SyntaxError
 import psycopg2
 import logging
+from sql_queries import BASE_QUERY, INSERT_QUERY
 
+
+# Local logger config and call
+formater = '[%(levelname)s:%(asctime)sms] [Module - %(name)s]\n %(message)s'
+logging.basicConfig(filename='pg_logs.log', filemode='w', format=formater)
 pg_loger = logging.getLogger(__name__)
 
 
@@ -30,14 +35,10 @@ class BaseConnectionDB:
     - dbname (str): The name of the database. Defaults to 'postgres'.
     - host (str): The host address of the database. Defaults to 'localhost'.
     - port (int): The port number for the database connection. Defaults to 5432.
-
-    Attributes:
-    - conn: The database connection instance if the connection is established successfully.
-    Otherwise, a string with an error message.
-    - cursor: The database cursor for executing SQL queries.
+    - auto_close (bool): Define whether the connection closes after each transaction.
+      If True, all cursors and connection will be closed automatically; no need to call close_connection() method.
+      By default, False is configured.
     """
-
-    conn = None
 
     def __init__(self, **kwargs):
         """
@@ -48,6 +49,9 @@ class BaseConnectionDB:
         - *dbname* (str): The name of the database. Defaults to 'postgres'.
         - *host* (str): The host address of the database. Defaults to 'localhost'.
         - *port* (int): The port number for the database connection. Defaults to 5432.
+        - *auto_close* (bool): Define whether the connection closes after each transaction.
+          If True, all cursors and connection will be closed automatically; no need to call close_connection() method.
+          By default, False is configured.
 
         :param kwargs: connection parameters of the database.
         """
@@ -56,6 +60,7 @@ class BaseConnectionDB:
         self.dbname = kwargs.get('dbname', 'postgres')
         self.host = kwargs.get('host', 'localhost')
         self.port = kwargs.get('port', 5432)
+        self.auto_close = kwargs.get('auto_close', False)
         self.__connect()
 
     # Private method that trying to establish connection and set result in class attribute.
@@ -63,85 +68,83 @@ class BaseConnectionDB:
         """
         Private method to establish a database connection.
 
-        Raises:
-        - OperationalError: If the connection cannot be established.
-        - UnicodeDecodeError: If there is an issue with decoding connection parameters.
+        :raise OperationalError: If the connection can't be established due to incorrect creds
+               or other operational issues.
+        :raise UnicodeDecodeError: If there is an issue with decoding connection parameters,
+               such as when the target database was initialized with a non-UTF-8 encoding format.
 
-        Returns:
-        - None: If the connection is successful, otherwise sets an error message in self.conn.
+        :return: (psycopg2.extensions.connection) A valid psycopg2 connection object if the connection is successful.
+                 If an error occurs during connection, the method returns the specific exception instance
+                 (OperationalError or UnicodeDecodeError).
         """
         try:
             self.conn = psycopg2.connect(user=self.user, password=self.password,
                                          dbname=self.dbname, host=self.host, port=self.port)
-            self.cursor = self.conn.cursor()
+
         except (OperationalError, UnicodeDecodeError) as connection_error:
-            self.conn = f'Проверьте данные подключения к БД (порт). Оригинальный текст ошибки: \n{connection_error}'
-            if type(connection_error) is UnicodeDecodeError:
-                self.conn = f'Проверьте данные подключения к БД. Неверные логин/пароль/хост.'
-                return self.conn
+            self.conn = connection_error
         return self.conn
 
-    def _close_connection(self):
+    def close_connection(self):
         """
-        Close the database connection and cursor.
+        Save commits and close the database connection and all its cursors.
 
         :return: None
         """
-        if type(self.conn) is str:
-            return
-        self.cursor.close()
+        self.conn.commit()
         self.conn.close()
 
-    def execute_query(self, query):
+    def execute_query(self, query, insert_data=None):
         """
-        Execute a SQL query and return the result set based on the query type.
+        Execute a SQL query.
 
-        :param query: (str or list): A SQL query string or a list containing the query and its parameters.
-        :return: List of tuples. In case of an error (UndefinedTable, SyntaxError, ProgrammingError, TypeError),
-        the exception object is returned.
+        :param query: (str): The SQL query to be executed.
+        :param insert_data: (list): Data to be inserted if provided for insert query.
+               When is provided will be executed inserting query and simple get query if not. Defaults to None.
+
+        :return: (list) The result of the query execution - list of tuples.
+                 (None) If insert_data was provided then executing insert query. In this case function returns None
+                 because we get nothing from DB, insert only.
         """
-        if type(self.conn) is str:
+        if type(self.conn) is not psycopg2.extensions.connection:
+            pg_loger.error(self.conn)
+            # Return Error text, type - Error class
             return self.conn
-        try:
-            if type(query) is str:
-                result = self.get_query(query)
-                return result
-            self.insert_query(query)
-        except (UndefinedTable, SyntaxError, ProgrammingError, TypeError) as err:
-            pg_loger.error(f'\n\n{err}')
-            self._close_connection()
 
-    def get_query(self, query):
-        """
-        Execute a get SQL query and return the result set.
-
-        :param query: (str) A part of a fixed pure SQL query - table only.
-        :return: Result set as a list of tuples.
-        In case of an undefined table (UndefinedTable exception),
-        the exception object is returned as an error.
-        """
-        self.cursor.execute(query)
-        result = self.cursor.fetchall()
-        self._close_connection()
+        if insert_data is not None:
+            self.__execute_insert(query, insert_data)
+            return None
+        result = self.__execute_get(query)
+        if self.auto_close:
+            self.close_connection()
         return result
 
-    def insert_query(self, query):
+    def __execute_get(self, query):
         """
-        Execute an insert SQL query and return None.
+        Execute a SQL SELECT query and return the result set.
 
-        :param query: (list) List that contains sql query itself and queryset from KIS db as a values for our db.
-        :return: Result set as a list of tuples.
-        In case of an undefined table (UndefinedTable exception),
-        the exception object is returned as an error.
+        :param query: (str): The SQL SELECT query to be executed.
+
+        :return: (list) Result set as a list of tuples.
         """
-        try:
-            self.cursor.executemany(query[0], query[1])
-        except TypeError as err:
-            pg_loger.exception(err)
-        self.conn.commit()
-        pg_loger.info('Insert in our BD success.')
-        self._close_connection()
-        return None
+        cursor = self.conn.cursor()
+        cursor.execute(query)
+        queryset = cursor.fetchall()
+        return queryset
+
+    def __execute_insert(self, query, insert_data):
+        """
+        Execute a SQL INSERT query.
+
+        Args:
+        :param query: (str): The SQL INSERT query to be executed.
+        :param insert_data: (list): Data to be inserted.
+
+        :return: None
+        """
+        cursor = self.conn.cursor()
+        cursor.executemany(query, insert_data)
+        self.close_connection()
 
     def get_connection_data(self):
         """
@@ -156,6 +159,7 @@ class BaseConnectionDB:
             'user': self.user,
             'password': self.password
         }
+
 
 
 

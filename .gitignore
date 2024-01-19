@@ -11,6 +11,9 @@ settings_prod.py
 *.xls
 *.xlsx
 
+# My dirs
+KIS_queries/
+
 
 # Distribution / packaging
 .Python
