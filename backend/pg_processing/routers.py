@@ -1,7 +1,7 @@
 """This file is responsible for router objects working."""
 from rest_framework import routers
-from .views import MainDataViewSet
+from .views import MainDataReadViewSet
 
 router = routers.SimpleRouter()
-router.register(r'main_data', MainDataViewSet)
+router.register(r'main_data', MainDataReadViewSet)
 

@@ -6,27 +6,20 @@ import SignOutChart from '../charts/SignOutChart';
 import DeadsChart from '../charts/DeadsChart';
 import TopBlock from '../menu/TopBlock';
 import BlockInfo from '../boards/BlockInfo';
+import GetData from '../GetData';
 import "../parent.css" 
 import './dashboard_content.css'
 
 
-function GetData() {
 
-  const [data, userData] = useState(null);
-
-  useEffect(() => {
-    fetch()
-  }
-  );
-
-  return (
-    userData
-  )
-}
 
 function GetAnalysis() {
 
+  const data = GetData();
+  console.log(data);
+
   const location = useLocation();
+
 
   const props = useSpring({
     from: { opacity: 0 },
@@ -35,16 +28,19 @@ function GetAnalysis() {
   });
 
   return (
-    <>  
+    <> 
+
+      {/* <h1>{data.arrived}</h1> */}
+
       <TopBlock textContent={'Оперативная сводка ГКБ Им. Демихова'}/>
       <animated.div className='dashboard' style={props}>
         <div className='board-cards'>
-          <BlockInfo headerText='Поступившие' data={[122, 147]}/>
-          <BlockInfo headerText='Госпитализировано' data={[90, 88]}/>
-          <BlockInfo headerText='Отказано' data={[32, 18]}/>
-          <BlockInfo headerText='Выписанные' data={[54, 62]}/>
-          <BlockInfo headerText='Умершие' data={[12, 7]}/>
-          <BlockInfo headerText='ОАР' data={[18, 19]}/>
+          <BlockInfo headerText='Поступившие' data={[data.arrived, 10]}/>
+          <BlockInfo headerText='Госпитализировано' data={[data.hosp, 88]}/>
+          <BlockInfo headerText='Отказано' data={[data.refused, 18]}/>
+          <BlockInfo headerText='Выписанные' data={[data.signout, 62]}/>
+          <BlockInfo headerText='Умершие' data={[data.deads, 7]}/>
+          <BlockInfo headerText='ОАР' data={[data.reanimation, 19]}/>
         </div>
         <div className='board-charts'>
           <ArrivedChart />
