@@ -15,8 +15,8 @@ import './dashboard_content.css'
 
 function GetAnalysis() {
 
-  const data = GetData();
-  console.log(data);
+  const todayData = GetData();
+
 
   const location = useLocation();
 
@@ -35,12 +35,12 @@ function GetAnalysis() {
       <TopBlock textContent={'Оперативная сводка ГКБ Им. Демихова'}/>
       <animated.div className='dashboard' style={props}>
         <div className='board-cards'>
-          <BlockInfo headerText='Поступившие' data={[data.arrived, 10]}/>
-          <BlockInfo headerText='Госпитализировано' data={[data.hosp, 88]}/>
-          <BlockInfo headerText='Отказано' data={[data.refused, 18]}/>
-          <BlockInfo headerText='Выписанные' data={[data.signout, 62]}/>
-          <BlockInfo headerText='Умершие' data={[data.deads, 7]}/>
-          <BlockInfo headerText='ОАР' data={[data.reanimation, 19]}/>
+          <BlockInfo headerText='Поступившие' data={todayData.arrived}/>
+          <BlockInfo headerText='Госпитализировано' data={todayData.hosp}/>
+          <BlockInfo headerText='Отказано' data={todayData.refused}/>
+          <BlockInfo headerText='Выписанные' data={todayData.signout}/>
+          <BlockInfo headerText='Умершие' data={todayData.deads}/>
+          <BlockInfo headerText='ОАР' data={todayData.reanimation}/>
         </div>
         <div className='board-charts'>
           <ArrivedChart />

@@ -1,6 +1,7 @@
 """Responsible for models (tables in DMK BD)."""
 from django.urls import path, include
 from django.db import models
+from .models_managers import TwoDaysFilterManager
 
 
 class MainData(models.Model):
@@ -8,6 +9,8 @@ class MainData(models.Model):
 
     In Meta class defined based B-tree index.
     """
+    # Custom manager
+    objects = TwoDaysFilterManager()
 
     id = models.IntegerField(primary_key=True)
     dates = models.DateField(unique=True)

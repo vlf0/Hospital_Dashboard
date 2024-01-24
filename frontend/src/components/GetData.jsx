@@ -22,27 +22,26 @@ function GetData() {
     if (!data || data.length === 0) {
       return '';
     }
-  
+    console.log(data);
+
+
+
     // Accessing specific properties of the first object
-    const firstData = data[0];
-    const chosen_date = firstData.dates;
-    const arrived = firstData.arrived;
-    const hosp = firstData.hosp;
-    const refused = firstData.refused;
-    const signout = firstData.signout;
-    const deads = firstData.deads;
-    const reanimation = firstData.reanimation;
-  
+    const currentDay = data[1];
+    const yesterday = data[0];
+
+
+    const dates = [currentDay.dates, yesterday.dates];
+    const arrived = [currentDay.arrived, yesterday.arrived];
+    const hosp = [currentDay.hosp, yesterday.hosp];
+    const refused = [currentDay.refused, yesterday.refused];
+    const signout = [currentDay.signout, yesterday.signout];
+    const deads = [currentDay.deads, yesterday.deads];
+    const reanimation = [currentDay.reanimation, yesterday.reanimation];;
 
     
     return {
-      chosen_date,
-      arrived,
-      hosp,
-      refused,
-      signout,
-      deads,
-      reanimation
+      dates, arrived, hosp, refused, signout, deads, reanimation
     };
 };
 
