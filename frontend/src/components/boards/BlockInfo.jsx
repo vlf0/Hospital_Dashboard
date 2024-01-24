@@ -23,12 +23,13 @@ const BlockInfo = ({data, headerText}) => {
           <span className='headers'>{headerText}</span>
           <p className='text_data'>{data[0]}</p>
           <img src={imagePath} className='logo' alt=''/>
+          <span className='percent'>{data[2]}</span>
           <p className='text_data'>{data[1]}</p>
-          
+
           {/* Add more properties as needed */}
         </>
       ) : (
-        <p>Loading...</p>
+        <p>...</p>
       )}
     </animated.div>
   );

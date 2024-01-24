@@ -17,7 +17,7 @@ Chart.defaults.font.size = 12;
 Chart.defaults.color = '#090b1f';  
 
 
-const SignOutChart = () => {
+const SignOutChart = ({data}) => {
 
     const navigate = useNavigate();
 
@@ -37,7 +37,7 @@ const SignOutChart = () => {
         datasets: [
             {
               label: 'total',
-              data: [80, 73, 84, 35, 69, 76, 92],//data ? [data.data, data.data, data.data] : [10,20,10],
+              data: data,//data ? [data.data, data.data, data.data] : [10,20,10],
               backgroundColor: ['#2d8587', '#2d8587', '#2d8587'],
               borderColor: '#090b1f',
               borderWidth: 1,
@@ -105,21 +105,32 @@ const SignOutChart = () => {
                           },
                         anchor: 'end',
                         align: 'end',
-                        // formatter: title => {
-                        //     const percernts = ((title / plan  * 100) - 100).toFixed(1);
-                        //     return '\t' + percernts+'%';
-                        // },
+                        // Return N/A string if bar value is null
+                        formatter: (title, context) => {
+                            if (context.dataset.data[context.dataIndex] === null) {
+                              return 'N/A';
+                            }
+                            return title; // Use the default title if the value is not null
+                          },
                     },
                     value: {
-                        formatter: title => {
+                        formatter: (title, context) => {
+                            if (context.dataset.data[context.dataIndex] === null) {
+                                return '';
+                            }
                             const percernts = ((title / plan  * 100) - 100).toFixed(1);
                             return '\t' + percernts+'%';
                         },
-                        color: 'blue',
                         font: {
                           size: 10,
                           weight: 'bold',
-                          },
+                        },
+                        color: (context) => {
+                          const value = context.dataset.data[context.dataIndex];
+                          const percent = ((value / plan) * 100 - 100).toFixed(1);
+
+                          return percent < 0 ? '#980101' : '#049d00';
+                        },
                     },
                 },
 

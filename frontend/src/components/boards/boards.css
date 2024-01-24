@@ -24,6 +24,14 @@
   margin: 8px
 }
 
+.percent {
+  height: 0;
+  position: relative;
+  bottom: 29px;
+  left: 55px;
+  color: #143ba0;
+}
+
 .headers {
   margin-bottom: 10px;
   font-size: 18px;

@@ -20,10 +20,4 @@ class CustomReadOnlyRouter(routers.SimpleRouter):
 
 router = CustomReadOnlyRouter()
 router.register(r'main_data', MainDataReadViewSet)
-print(router.urls)
 
-
-# router2 = routers.DefaultRouter()
-# router2.register(r'main_data', MainDataReadViewSet)
-# print()
-# print(router2.urls)

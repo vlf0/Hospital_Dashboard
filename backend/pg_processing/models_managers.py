@@ -10,6 +10,6 @@ class TwoDaysFilterManager(models.Manager):
     """
 
     def custom_filter(self):
-        today = date.today()
-        yesterday = today - timedelta(days=1)
-        return self.filter(dates__in=[today, yesterday])
+        """Filter last 7 rows from queryset using __in filter method and list comprehension."""
+        week_days = [(date.today() - timedelta(days=day)) for day in range(7)]
+        return self.filter(dates__in=week_days)

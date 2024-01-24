@@ -16,39 +16,11 @@ Chart.defaults.font.size = 12;
 Chart.defaults.color = '#090b1f';  
 
 
-const ArrivedChart = () => {
+const ArrivedChart = ({data}) => {
 
+    
     const navigate = useNavigate();
-
     const plan = 60
-
-    // const chartRef = useRef();
-
-    // useEffect(() => {
-    //   if (chartRef.current) {
-    //     const chartInstance = chartRef.current.chartInstance;
-  
-    //     if (chartInstance) {
-    //       chartInstance.annotation.elements.push({
-    //         type: 'line',
-    //         mode: 'horizontal',
-    //         scaleID: 'y-axis-0',
-    //         value: 60,
-    //         borderColor: 'rgb(255, 99, 132)',
-    //         borderWidth: 2,
-    //         label: {
-    //           content: 'Annotation at 60',
-    //           enabled: true,
-    //           position: 'end',
-    //         },
-    //       });
-  
-
-    //     chartInstance.update(); // Update the chart to apply the changes
-    //   }
-    // }
-    // }, []);
-
 
     const arrived_data = {
         labels: [
@@ -63,8 +35,8 @@ const ArrivedChart = () => {
         datasets: [
             {
               label: 'total',
-              data: [80, 73, 84, 35, 69, 76, 92],//data ? [data.data, data.data, data.data] : [10,20,10],
-              backgroundColor: ['#2d8587', '#2d8587', '#2d8587'],
+              data: data,
+              backgroundColor: ['#212e93b3'],
               borderColor: '#090b1f',
               borderWidth: 1,
             },
@@ -87,8 +59,8 @@ const ArrivedChart = () => {
                     beginAtZero: true,
                     color: '#090b1f',   
                     font: {
-                        // size: 14,
-                        // weight: 'bold' 
+                    // size: 14,
+                    // weight: 'bold' 
                 },},
             },
             y: {
@@ -131,21 +103,33 @@ const ArrivedChart = () => {
                           },
                         anchor: 'end',
                         align: 'end',
-                        // formatter: title => {
-                        //     const percernts = ((title / plan  * 100) - 100).toFixed(1);
-                        //     return '\t' + percernts+'%';
-                        // },
+                          formatter: (title, context) => {
+                            if (context.dataset.data[context.dataIndex] === null) {
+                              return 'N/A';
+                            }
+                            return title; // Use the default title if the value is not null
+                          },
                     },
                     value: {
-                        formatter: title => {
+                        formatter: (title, context) => {
+                            if (context.dataset.data[context.dataIndex] === null) {
+                                return '';
+                            }
                             const percernts = ((title / plan  * 100) - 100).toFixed(1);
+                            const color = percernts < 0 ? 'red' : 'blue';
+
                             return '\t' + percernts+'%';
                         },
-                        color: 'blue',
                         font: {
                           size: 10,
                           weight: 'bold',
                           },
+                        color: (context) => {
+                          const value = context.dataset.data[context.dataIndex];
+                          const percent = ((value / plan) * 100 - 100).toFixed(1);
+  
+                          return percent < 0 ? '#980101' : '#00a318';
+                        },
                     },
                 },
 

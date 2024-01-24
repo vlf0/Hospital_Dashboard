@@ -17,7 +17,6 @@ function GetAnalysis() {
 
   const todayData = GetData();
 
-
   const location = useLocation();
 
 
@@ -43,9 +42,9 @@ function GetAnalysis() {
           <BlockInfo headerText='ОАР' data={todayData.reanimation}/>
         </div>
         <div className='board-charts'>
-          <ArrivedChart />
-          <SignOutChart />
-          <DeadsChart />
+          <ArrivedChart data={todayData.arrivedArray}/>
+          <SignOutChart data={todayData.signOutArray} />
+          <DeadsChart data={todayData.deadsArray} />
         </div>
       </animated.div>
     </>
