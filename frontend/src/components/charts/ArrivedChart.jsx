@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { useNavigate} from 'react-router-dom';
 // import { useSpring, animated } from 'react-spring';
 import {Bar} from 'react-chartjs-2';
@@ -6,6 +6,7 @@ import Chart from 'chart.js/auto';
 import AnnotationPlugin from 'chartjs-plugin-annotation';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import current_date from '../dates/DatesFormat';
+import DataContext from '../DataContext';
 import "./arrived_chart.css";
 
 Chart.register(AnnotationPlugin);
@@ -16,9 +17,12 @@ Chart.defaults.font.size = 12;
 Chart.defaults.color = '#090b1f';  
 
 
-const ArrivedChart = ({data}) => {
 
+
+const ArrivedChart = () => {
     
+    // Use data from localStorage
+    const readyData = useContext(DataContext);
     const navigate = useNavigate();
     const plan = 60
 
@@ -35,7 +39,7 @@ const ArrivedChart = ({data}) => {
         datasets: [
             {
               label: 'total',
-              data: data,
+              data: readyData.arrivedArray,
               backgroundColor: ['#212e93b3'],
               borderColor: '#090b1f',
               borderWidth: 1,

@@ -2,13 +2,15 @@ import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import GetAnalysis from './components/dashboard/Analysis';
 import DetailBoard from './components/details/Details';
-import { DataProvider } from './components/DataContext';
+import DataContext from './components/DataContext';
+import { storedData } from './components/dashboard/Analysis';
+
 
 
 
 function App() {
   return (
-  <DataProvider value={<DetailBoard />}>
+  <DataContext.Provider value={storedData}>
     <Router>
       <Routes>
         <Route path="/" element={<GetAnalysis />} />
@@ -17,7 +19,7 @@ function App() {
         <Route path="/OAR_detail" element={<DetailBoard sign={'oar'} textHeader={'Детализация реанимационных отделений'} />} />
       </Routes>
     </Router>
-  </DataProvider>
+  // </DataContext.Provider>
   );
 }
 

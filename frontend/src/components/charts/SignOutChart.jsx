@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext} from 'react';
 import { useNavigate } from 'react-router-dom';
 // import { useSpring, animated } from 'react-spring';
 import { Bar } from 'react-chartjs-2';
@@ -6,7 +6,10 @@ import Chart from 'chart.js/auto';
 import AnnotationPlugin from 'chartjs-plugin-annotation';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import current_date from '../dates/DatesFormat';
+import DataContext from '../DataContext';
 import "./arrived_chart.css";
+
+
 
 
 Chart.register(AnnotationPlugin);
@@ -18,6 +21,9 @@ Chart.defaults.color = '#090b1f';
 
 
 const SignOutChart = ({data}) => {
+
+    // Use data from localStorage
+    const readyData = useContext(DataContext);
 
     const navigate = useNavigate();
 
@@ -37,7 +43,7 @@ const SignOutChart = ({data}) => {
         datasets: [
             {
               label: 'total',
-              data: data,//data ? [data.data, data.data, data.data] : [10,20,10],
+              data: readyData.signOutArray,//data ? [data.data, data.data, data.data] : [10,20,10],
               backgroundColor: ['#2d8587', '#2d8587', '#2d8587'],
               borderColor: '#090b1f',
               borderWidth: 1,

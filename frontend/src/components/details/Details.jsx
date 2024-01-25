@@ -1,14 +1,14 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { useSpring, animated } from 'react-spring';
-import Header from './Header';
 import SignInDetailBoard from './signIn_detail_board/SigInDetailBoard';
 import SignOutDetailBoard from './signout_detail_board/SignOutDetailBoard';
 import OARDetailBoard from './OAR_detail_board/OARDetailBoard';
 import TopBlock from '../menu/TopBlock';
-import MenuUnit from '../menu/MenuUnit';
-import { useData } from '../DataContext';
+import DataContext from '../DataContext';
 import '../menu/top_block.css';
 import '../dashboard/dashboard_content.css';
+
+
 
 
 
@@ -18,8 +18,7 @@ const combinedData = profiles.map((profile, index) => ({ профиль: profile
 
 function DetailBoard({ sign }) {
 
-  const { data } = useData();
-  console.log(data);
+  const readyData = useContext(DataContext);
 
   const props = useSpring({
     from: { opacity: 0 },
@@ -32,14 +31,14 @@ function DetailBoard({ sign }) {
 
   if (sign === 'in') {
     content = 
-    <SignInDetailBoard signInCount={30} refuseCount={10} combinedData={combinedData} />
+    <SignInDetailBoard combinedData={combinedData} />
     topBlockHeader = 'Детализация поступивших';
   } else if (sign === 'out') {
     content = <SignOutDetailBoard profiles={profiles} />;
     topBlockHeader = 'Детализация выписанных';
   } else if (sign === 'oar') {
     content = <div className='detail_block'>
-              <OARDetailBoard dept={'ОРИТ №1'} values={[10,15,20]} /> 
+              <OARDetailBoard dept={'ОРИТ №1'} values={[readyData.reanimation[0],15,20]} /> 
               <OARDetailBoard dept={'ОРИТ №2'} values={[33,19,24]} />
               <OARDetailBoard dept={'ОРИТ №3'} values={[33,19,24]} />              
               </div>;
