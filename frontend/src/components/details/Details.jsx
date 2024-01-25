@@ -6,6 +6,7 @@ import SignOutDetailBoard from './signout_detail_board/SignOutDetailBoard';
 import OARDetailBoard from './OAR_detail_board/OARDetailBoard';
 import TopBlock from '../menu/TopBlock';
 import MenuUnit from '../menu/MenuUnit';
+import { useData } from '../DataContext';
 import '../menu/top_block.css';
 import '../dashboard/dashboard_content.css';
 
@@ -16,6 +17,9 @@ const arrivedFacts = [10, 15, 8]; //List of fact arrived patients
 const combinedData = profiles.map((profile, index) => ({ профиль: profile, план: arrivedFacts[index] })); //Mapping two lists above
 
 function DetailBoard({ sign }) {
+
+  const { data } = useData();
+  console.log(data);
 
   const props = useSpring({
     from: { opacity: 0 },

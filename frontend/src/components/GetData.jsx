@@ -9,8 +9,6 @@ function Persents(today, yesterday) {
   return percent
 };
 
-console.log(Persents(50, 60));
-
 function ensureArrayLength(array, desiredLength) {
   if (array.length !== desiredLength) {
     const numberOfTimesToInsert = desiredLength - array.length;
@@ -43,7 +41,6 @@ function GetData() {
     if (!data || data.length === 0) {
       return '';
     }
-    console.log(data);
     // Accessing specific properties of the first object
     const currentDay = data[data.length - 1];
     const yesterday = data[data.length - 2];
@@ -54,8 +51,6 @@ function GetData() {
     ensureArrayLength(arrivedArray, 7);
     ensureArrayLength(signOutArray, 7);
     ensureArrayLength(deadsArray, 7);
-
-    console.log(arrivedArray)
 
     const dates = [currentDay.dates, yesterday.dates];
     const arrived = [currentDay.arrived, yesterday.arrived, Persents(currentDay.arrived, yesterday.arrived)];
