@@ -6,7 +6,7 @@ from psycopg2 import OperationalError, ProgrammingError, extensions
 from psycopg2.errors import UndefinedTable, SyntaxError
 import psycopg2
 import logging
-from sql_queries import BASE_QUERY, INSERT_QUERY
+from .sql_queries import *
 
 
 # Local logger config and call
@@ -30,37 +30,35 @@ class BaseConnectionDB:
     2. Use methods like execute_query, and get_connection_data for database operations.
 
     Args:
-    - user (str): The username for the database connection. Defaults to 'postgres'.
-    - password (str): The password for the database connection. Defaults to 'root'.
-    - dbname (str): The name of the database. Defaults to 'postgres'.
-    - host (str): The host address of the database. Defaults to 'localhost'.
+    - user (str): The username for the database connection.
+    - password (str): The password for the database connection.
+    - dbname (str): The name of the database.
+    - host (str): The host address of the database.
     - port (int): The port number for the database connection. Defaults to 5432.
     - auto_close (bool): Define whether the connection closes after each transaction.
       If True, all cursors and connection will be closed automatically; no need to call close_connection() method.
       By default, False is configured.
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, user, password, dbname, host, port=5432, auto_close=False):
         """
         Pass the connection values to the database you need.
 
-        - *user* (str): The username for the database connection. Defaults to 'postgres'.
-        - *password* (str): The password for the database connection. Defaults to 'root'.
-        - *dbname* (str): The name of the database. Defaults to 'postgres'.
-        - *host* (str): The host address of the database. Defaults to 'localhost'.
-        - *port* (int): The port number for the database connection. Defaults to 5432.
-        - *auto_close* (bool): Define whether the connection closes after each transaction.
-          If True, all cursors and connection will be closed automatically; no need to call close_connection() method.
-          By default, False is configured.
-
-        :param kwargs: connection parameters of the database.
+        :param user: The username for the database connection. Defaults to 'postgres'.
+        :param password: The password for the database connection. Defaults to 'root'.
+        :param dbname: The name of the database. Defaults to 'postgres'.
+        :param host: The host address of the database. Defaults to 'localhost'.
+        :param port: The port number for the database connection. Defaults to 5432.
+        :param auto_close: Define whether the connection closes after each transaction.
+                          If True, all cursors and connection will be closed automatically;
+                          no need to call close_connection() method. Defaults to False.
         """
-        self.user = kwargs.get('user', 'postgres')
-        self.password = kwargs.get('password', 'root')
-        self.dbname = kwargs.get('dbname', 'postgres')
-        self.host = kwargs.get('host', 'localhost')
-        self.port = kwargs.get('port', 5432)
-        self.auto_close = kwargs.get('auto_close', False)
+        self.user = user
+        self.password = password
+        self.dbname = dbname
+        self.host = host
+        self.port = port
+        self.auto_close = auto_close
         self.__connect()
 
     # Private method that trying to establish connection and set result in class attribute.
@@ -160,6 +158,12 @@ class BaseConnectionDB:
             'password': self.password
         }
 
+
+KIS_queryset = BaseConnectionDB(dbname='postgres',
+                                host='localhost',
+                                user='postgres',
+                                password='root'
+                                ).execute_query(ARRIVED_QUERY)
 
 
 
