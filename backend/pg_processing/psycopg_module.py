@@ -6,7 +6,6 @@ from psycopg2 import OperationalError, ProgrammingError, extensions
 from psycopg2.errors import UndefinedTable, SyntaxError
 import psycopg2
 import logging
-from .sql_queries import *
 
 
 # Local logger config and call
@@ -79,7 +78,8 @@ class BaseConnectionDB:
             self.conn = psycopg2.connect(user=self.user, password=self.password,
                                          dbname=self.dbname, host=self.host, port=self.port)
 
-        except (OperationalError, UnicodeDecodeError) as connection_error:
+        except (OperationalError, UnicodeDecodeError, UndefinedTable,
+                SyntaxError, ProgrammingError) as connection_error:
             self.conn = connection_error
         return self.conn
 
@@ -159,11 +159,11 @@ class BaseConnectionDB:
         }
 
 
-KIS_queryset = BaseConnectionDB(dbname='postgres',
-                                host='localhost',
-                                user='postgres',
-                                password='root'
-                                ).execute_query(ARRIVED_QUERY)
+kis_conn = BaseConnectionDB(dbname='postgres',
+                            host='localhost',
+                            user='postgres',
+                            password='root'
+                            )
 
 
 

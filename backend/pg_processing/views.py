@@ -4,7 +4,7 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 from .models import MainData
 from .serializers import MainDataSerializer, KISDataSerializer
-from .psycopg_module import KIS_queryset
+from .kis_data import arr_dict
 
 
 class MainDataReadViewSet(viewsets.ReadOnlyModelViewSet):
@@ -14,32 +14,10 @@ class MainDataReadViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = MainDataSerializer
 
 
-data = (2, 'test dept', '103', 'Москва')
-
-
-class Row:
-
-    def __init__(self, id, dept, channel, patient_type):
-        self.id = id
-        self.dept = dept
-        self.channel = channel
-        self.patient_type = patient_type
-
-
-r = [
-     Row(id=data[0], dept=data[1], channel=data[2], patient_type=data[3]),
-     Row(id=data[0], dept=data[1], channel=data[2], patient_type=data[3])
-    ]
-
 class KISDataReadViewSet(viewsets.ViewSet):
 
     def list(self, request):
-        queryset = r
+        queryset = arr_dict
         serializer = KISDataSerializer(queryset, many=True)
         print(serializer.data)
         return Response(serializer.data)
-
-
-
-
-
