@@ -13,11 +13,20 @@ class MainDataSerializer(serializers.ModelSerializer):
 
 class KISDataSerializer(serializers.Serializer):
 
-    id = serializers.IntegerField(required=False)
     dept = serializers.CharField(required=False)
     channel = serializers.CharField(required=False)
     patient_type = serializers.CharField(required=False)
     status = serializers.CharField(required=False)
+
+    pat_fio = serializers.CharField(required=False)
+    ib_num = serializers.CharField(required=False)
+    sex = serializers.CharField(required=False)
+    ages = serializers.CharField(required=False)
+    arriving_dt = serializers.DateTimeField(required=False)
+    state = serializers.CharField(required=False)
+    days = serializers.IntegerField(required=False)
+    diag_arr = serializers.CharField(required=False)
+    diag_dead = serializers.CharField(required=False)
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
