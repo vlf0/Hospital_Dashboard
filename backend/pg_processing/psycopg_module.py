@@ -58,17 +58,13 @@ class BaseConnectionDB:
         self.host = host
         self.port = port
         self.auto_close = auto_close
+        self.conn = None
         self.__connect()
 
     # Private method that trying to establish connection and set result in class attribute.
     def __connect(self):
         """
         Private method to establish a database connection.
-
-        :raise OperationalError: If the connection can't be established due to incorrect creds
-               or other operational issues.
-        :raise UnicodeDecodeError: If there is an issue with decoding connection parameters,
-               such as when the target database was initialized with a non-UTF-8 encoding format.
 
         :return: (psycopg2.extensions.connection) A valid psycopg2 connection object if the connection is successful.
                  If an error occurs during connection, the method returns the specific exception instance
@@ -77,11 +73,9 @@ class BaseConnectionDB:
         try:
             self.conn = psycopg2.connect(user=self.user, password=self.password,
                                          dbname=self.dbname, host=self.host, port=self.port)
-
         except (OperationalError, UnicodeDecodeError, UndefinedTable,
                 SyntaxError, ProgrammingError) as connection_error:
-            self.conn = connection_error
-        return self.conn
+            pg_loger.error(connection_error)
 
     def close_connection(self):
         """
@@ -89,8 +83,22 @@ class BaseConnectionDB:
 
         :return: None
         """
-        self.conn.commit()
-        self.conn.close()
+        if self.conn is not None:
+            self.conn.commit()
+            self.conn.close()
+
+    @property
+    def connection_status(self):
+        """
+        Read-only property represent boll status in integer format.
+
+        :return: (int): Connection status. If return 0 - connection is opened now.
+        If 1 - connection is already closed.
+        """
+        if self.conn is None:
+            # -2 - custom error code telling about connection was not established
+            return -2
+        return self.conn.closed
 
     def execute_query(self, query, insert_data=None):
         """
@@ -104,11 +112,9 @@ class BaseConnectionDB:
                  (None) If insert_data was provided then executing insert query. In this case function returns None
                  because we get nothing from DB, insert only.
         """
-        if type(self.conn) is not psycopg2.extensions.connection:
-            pg_loger.error(self.conn)
-            # Return Error text, type - Error class
-            return self.conn
-
+        # Return empty list to any sql query if connection was not established
+        if self.conn is None:
+            return []
         if insert_data is not None:
             self.__execute_insert(query, insert_data)
             return None
@@ -157,14 +163,6 @@ class BaseConnectionDB:
             'user': self.user,
             'password': self.password
         }
-
-
-kis_conn = BaseConnectionDB(dbname='postgres',
-                            host='localhost',
-                            user='postgres',
-                            password='root'
-                            )
-
 
 
 

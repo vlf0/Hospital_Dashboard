@@ -1,13 +1,23 @@
-from .psycopg_module import kis_conn
+"""Responsible for classes defining non-model query-sets from another DB."""
+from .psycopg_module import BaseConnectionDB
 from .sql_queries import *
 from .serializers import KISDataSerializer
+
+kis_conn = BaseConnectionDB(dbname='postgres',
+                            host='localhost',
+                            user='postgres',
+                            password='root'
+                            )
 
 
 class KISData:
     """
-    KISData Class
+    KISData class.
 
-    This class facilitates the creation of a list of CleanData class objects, which can be processed by a DRF serializer.
+    This class facilitates the creation of a list of CleanData class objects,
+    which can be processed by a DRF serializer.
+    Attention! If db_conn attribute is None (it means that connection was not established)
+    then all class methods returns empty list.
 
     Attributes:
     db_conn:  The connection module to the PostgreSQL database.
@@ -15,7 +25,6 @@ class KISData:
     """
 
     db_conn = kis_conn
-    cursor = db_conn.execute_query
 
     def __init__(self, query_set):
         """
@@ -32,7 +41,8 @@ class KISData:
 
         :return: List of tuples.
         """
-        data = self.cursor(self.query)
+        cursor = self.db_conn.execute_query
+        data = cursor(self.query)
         return data
 
     def create_instance(self, target_class):
@@ -42,8 +52,11 @@ class KISData:
         :param target_class: The class to instantiate for each row.
         :return: List of class instances.
         """
-        obj_list = [target_class(**dict(zip(self.columns_list, row))) for row in self.count_data()]
-        return obj_list
+        print(self.db_conn.conn)
+        if self.db_conn.conn is not None:
+            instances_list = [target_class(**dict(zip(self.columns_list, row))) for row in self.count_data()]
+            return instances_list
+        return []
 
 
 class CleanData:
@@ -60,11 +73,10 @@ class CleanData:
 
     def __init__(self, **kwargs):
         """
-        Initializes an object with attributes based on key-value pairs provided as keyword arguments.
+        Initialize an object with attributes based on key-value pairs provided as keyword arguments.
 
         :param kwargs: (dict): Keyword arguments representing attribute names and values for the object.
         """
         for key, value in kwargs.items():
             setattr(self, key, value)
-
 
