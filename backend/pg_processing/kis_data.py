@@ -3,7 +3,7 @@ from .psycopg_module import BaseConnectionDB
 from .sql_queries import *
 from .serializers import KISDataSerializer
 
-kis_conn = BaseConnectionDB(dbname='postgres',
+kis_conn = BaseConnectionDB(dbname='potgres',
                             host='localhost',
                             user='postgres',
                             password='root'
@@ -52,11 +52,11 @@ class KISData:
         :param target_class: The class to instantiate for each row.
         :return: List of class instances.
         """
-        print(self.db_conn.conn)
-        if self.db_conn.conn is not None:
-            instances_list = [target_class(**dict(zip(self.columns_list, row))) for row in self.count_data()]
-            return instances_list
-        return []
+        if self.db_conn.error is not None:
+            # List of one class with error text
+            return [CleanData(error=self.db_conn.error)]
+        instances_list = [target_class(**dict(zip(self.columns_list, row))) for row in self.count_data()]
+        return instances_list
 
 
 class CleanData:

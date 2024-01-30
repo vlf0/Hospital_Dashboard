@@ -28,8 +28,11 @@ class KISDataSerializer(serializers.Serializer):
     diag_arr = serializers.CharField(required=False)
     diag_dead = serializers.CharField(required=False)
 
+    error = serializers.CharField(required=False)
+
     def to_representation(self, instance):
         data = super().to_representation(instance)
+        # Remove all dict pairs with None values
         clean_dict = {key: value for key, value in data.items() if value is not None}
         return clean_dict
 

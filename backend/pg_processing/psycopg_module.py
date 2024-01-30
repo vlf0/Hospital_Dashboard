@@ -59,6 +59,7 @@ class BaseConnectionDB:
         self.port = port
         self.auto_close = auto_close
         self.conn = None
+        self.error = None
         self.__connect()
 
     # Private method that trying to establish connection and set result in class attribute.
@@ -75,7 +76,8 @@ class BaseConnectionDB:
                                          dbname=self.dbname, host=self.host, port=self.port)
         except (OperationalError, UnicodeDecodeError, UndefinedTable,
                 SyntaxError, ProgrammingError) as connection_error:
-            pg_loger.error(connection_error)
+            self.error = connection_error
+            pg_loger.error(self.error)
 
     def close_connection(self):
         """
@@ -92,12 +94,12 @@ class BaseConnectionDB:
         """
         Read-only property represent boll status in integer format.
 
-        :return: (int): Connection status. If return 0 - connection is opened now.
-        If 1 - connection is already closed.
+        :return: (int): Connection status. If return "0" - connection is opened now.
+        If "1" - connection is already closed. If "-2" - connection is already closed.
         """
-        if self.conn is None:
+        if self.error is not None:
             # -2 - custom error code telling about connection was not established
-            return -2
+            return -2, self.error
         return self.conn.closed
 
     def execute_query(self, query, insert_data=None):
@@ -109,12 +111,13 @@ class BaseConnectionDB:
                When is provided will be executed inserting query and simple get query if not. Defaults to None.
 
         :return: (list) The result of the query execution - list of tuples.
+                 ()
                  (None) If insert_data was provided then executing insert query. In this case function returns None
                  because we get nothing from DB, insert only.
         """
-        # Return empty list to any sql query if connection was not established
-        if self.conn is None:
-            return []
+        # Return list of ine tuple containing error text to any sql query if connection was not established
+        if self.error is not None:
+            return [('Error', self.error)]
         if insert_data is not None:
             self.__execute_insert(query, insert_data)
             return None
