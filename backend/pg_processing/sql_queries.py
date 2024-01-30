@@ -4,8 +4,8 @@ ARRIVED = [
 ]
 
 SIGNOUT = [
-            "SELECT * FROM mm.signout;",
-            ['id', 'dept', 'status']
+            "SELECT dept, status FROM mm.signout;",
+            ['dept', 'status']
 ]
 
 DEADS = [

@@ -3,7 +3,7 @@ from .psycopg_module import BaseConnectionDB
 from .sql_queries import *
 from .serializers import KISDataSerializer
 
-kis_conn = BaseConnectionDB(dbname='potgres',
+kis_conn = BaseConnectionDB(dbname='postgres',
                             host='localhost',
                             user='postgres',
                             password='root'
@@ -79,4 +79,26 @@ class CleanData:
         """
         for key, value in kwargs.items():
             setattr(self, key, value)
+
+
+arr_data = KISData(ARRIVED).count_data()
+out_data = KISData(SIGNOUT).count_data()
+deads_data = KISData(DEADS).count_data()
+
+# sr = KISDataSerializer
+# arr = KISData(ARRIVED).create_instance(CleanData)
+# out = KISData(SIGNOUT).create_instance(CleanData)
+# dead = KISData(DEADS).create_instance(CleanData)
+
+# a = sr(arr, many=True).data
+# o = sr(out, many=True).data
+# d = sr(dead, many=True).data
+
+print(arr_data)
+print()
+print(out_data)
+print()
+print(deads_data)
+
+
 
