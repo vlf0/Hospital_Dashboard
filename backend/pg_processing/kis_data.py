@@ -1,6 +1,6 @@
 """Responsible for classes defining non-model query-sets from another DB."""
 from .psycopg_module import BaseConnectionDB
-from .sql_queries import *
+from .sql_queries import QuerySets
 from .serializers import KISDataSerializer
 
 kis_conn = BaseConnectionDB(dbname='postgres',
@@ -8,55 +8,6 @@ kis_conn = BaseConnectionDB(dbname='postgres',
                             user='postgres',
                             password='root'
                             )
-
-
-class KISData:
-    """
-    KISData class.
-
-    This class facilitates the creation of a list of CleanData class objects,
-    which can be processed by a DRF serializer.
-    Attention! If db_conn attribute is None (it means that connection was not established)
-    then all class methods returns empty list.
-
-    Attributes:
-    db_conn:  The connection module to the PostgreSQL database.
-    cursor:  The method to execute queries on the PostgreSQL database.
-    """
-
-    db_conn = kis_conn
-
-    def __init__(self, query_set):
-        """
-        Initialize an instance of KISData.
-
-        :param query_set: A list containing the query and columns list.
-        """
-        self.query = query_set[0]
-        self.columns_list = query_set[1]
-
-    def count_data(self):
-        """
-        Retrieve data from the database based on the specified query.
-
-        :return: List of tuples.
-        """
-        cursor = self.db_conn.execute_query
-        data = cursor(self.query)
-        return data
-
-    def create_instance(self, target_class):
-        """
-        Create instances of a target class with data retrieved from the database.
-
-        :param target_class: The class to instantiate for each row.
-        :return: List of class instances.
-        """
-        if self.db_conn.error is not None:
-            # List of one class with error text
-            return [CleanData(error=self.db_conn.error)]
-        instances_list = [target_class(**dict(zip(self.columns_list, row))) for row in self.count_data()]
-        return instances_list
 
 
 class CleanData:
@@ -81,24 +32,51 @@ class CleanData:
             setattr(self, key, value)
 
 
-arr_data = KISData(ARRIVED).count_data()
-out_data = KISData(SIGNOUT).count_data()
-deads_data = KISData(DEADS).count_data()
+class KISData:
+    """
+    KISData class.
 
-# sr = KISDataSerializer
-# arr = KISData(ARRIVED).create_instance(CleanData)
-# out = KISData(SIGNOUT).create_instance(CleanData)
-# dead = KISData(DEADS).create_instance(CleanData)
+    This class facilitates the creation of a generator-iterator object for retrieving data from the PostgreSQL database
+    using a series of queries specified in the query_sets attribute. Each query pair in query_sets is a list containing
+    the data query and its corresponding column queries.
 
-# a = sr(arr, many=True).data
-# o = sr(out, many=True).data
-# d = sr(dead, many=True).data
+    Attributes:
+    db_conn:  The connection module to the PostgreSQL database.
+    cursor:  The method to execute queries on the PostgreSQL database.
+    """
 
-print(arr_data)
-print()
-print(out_data)
-print()
-print(deads_data)
+    db_conn = kis_conn
+    cursor = db_conn.execute_query
 
+    def __init__(self, query_sets):
+        """
+        Initialize an instance of KISData.
 
+        :param query_sets: A list containing the data queries and queries of its columns. Each query pair is a list.
+        """
+        self.query_sets = query_sets
+
+    def get_data_generator(self):
+        """
+        Create a generator-iterator object performing each query from queryset by request.
+
+        Retrieves data from the database based on the specified query passed as a list into init method as arg.
+
+        :return: List of tuples.
+        """
+        for dataset in self.query_sets:
+            yield self.cursor(dataset[0])
+
+    # def create_instance(self, target_class):
+    #     """
+    #     Create instances of a target class with data retrieved from the database.
+    #
+    #     :param target_class: The class to instantiate for each row.
+    #     :return: List of class instances.
+    #     """
+    #     if self.db_conn.error:
+    #         # List of one class with error text
+    #         return [CleanData(error=self.db_conn.error)]
+    #     instances_list = [target_class(**dict(zip(self.columns_list, row))) for row in self.get_data()]
+    #     return instances_list
 
