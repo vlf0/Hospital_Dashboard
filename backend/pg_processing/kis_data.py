@@ -66,17 +66,110 @@ class KISData:
         """
         for dataset in self.query_sets:
             yield self.cursor(dataset[0])
+        self.db_conn.close_connection()
 
-    # def create_instance(self, target_class):
-    #     """
-    #     Create instances of a target class with data retrieved from the database.
+    # def get_dmk_data(self):
+    #     """Get calculated main values for detail boards on front-end to rather save them into DMK DB."""
     #
-    #     :param target_class: The class to instantiate for each row.
-    #     :return: List of class instances.
-    #     """
-    #     if self.db_conn.error:
-    #         # List of one class with error text
-    #         return [CleanData(error=self.db_conn.error)]
-    #     instances_list = [target_class(**dict(zip(self.columns_list, row))) for row in self.get_data()]
-    #     return instances_list
+    #     return
+
+    def create_instance(self, target_class):
+        """
+        Create instances of a target class with data retrieved from the database.
+
+        :param target_class: The class to instantiate for each row.
+        :return: List of class instances.
+        """
+        if self.db_conn.error:
+            # List of one class with error text
+            return [CleanData(error=self.db_conn.error)]
+        generator = self.get_data_generator()
+        columns, data = next(generator), next(generator)
+        instances_list = [target_class(**dict(zip(columns, row))) for row in data]
+        return instances_list
+
+
+kis_data_object = KISData(QuerySets().get_ready_queryset())
+
+
+class DataForDMK:
+
+    @staticmethod
+    def get_datasets_generator():
+        generator = kis_data_object.get_data_generator()
+        arrived_dataset = ArrivedDataProcessing(next(generator))
+        yield arrived_dataset
+        signout_dataset = SignOutDataProcessing(next(generator))
+        yield signout_dataset
+        deads_dataset = next(generator)
+        yield deads_dataset
+        reanimation_dataset = next(generator)
+        yield reanimation_dataset
+
+    def collect_data(self):
+        generator = self.get_datasets_generator()
+        arrived_data = next(generator).data_to_dmk()
+        signout_data = next(generator).data_to_dmk()
+        return arrived_data | signout_data
+
+
+class DataProcessing:
+
+    error = False
+    total_amount = 0
+
+    def __init__(self, dataset):
+        self.dataset = dataset
+        self.error = True if self.dataset[0][0] == 'Error' else False
+        self.__define_amounts_attrs()
+
+    def __define_amounts_attrs(self):
+        if not self.error:
+            self.total_amount = len(self.dataset)
+
+    def filter_dataset(self, ind, value):
+        return [row for row in self.dataset if row[ind] == value]
+
+
+class ArrivedDataProcessing(DataProcessing):
+
+    def __init__(self, dataset):
+        super().__init__(dataset)
+
+    def data_to_dmk(self):
+        hosp_data = self.filter_dataset(0, 1)
+        hosp_amount = len(hosp_data)
+        refused_amount = self.total_amount - hosp_amount
+        arrived_set = {'arrived': self.total_amount, 'hosp': hosp_amount, 'refused': refused_amount}
+        return arrived_set
+
+    # def arrived_process(self):
+    #     custom_filter = self.filter_dataset
+    #     hosp_data = self.filter_dataset(self.dataset, 0, 1)
+    #     singly = custom_filter(hosp_data, 2, 'Самотек')
+    #     clinic_103 = custom_filter(hosp_data, 2, '103 Поликлиника')
+    #     only_clinic = custom_filter(hosp_data, 2, 'Поликлиника')
+    #     only_103 = custom_filter(hosp_data, 2, '103')
+    #     t = list(map(len, (singly, clinic_103, only_clinic, only_103)))
+    #     return t
+
+
+class SignOutDataProcessing(ArrivedDataProcessing):
+
+    def __init__(self, dataset):
+        super().__init__(dataset)
+
+    def data_to_dmk(self):
+        signout_data = self.filter_dataset(1, 'Другая причина')
+        signout_amount = len(signout_data)
+        deads_amount = self.total_amount - signout_amount
+        signout_set = {'signout': self.total_amount, 'deads': deads_amount}
+        return signout_set
+
+
+q = DataForDMK().collect_data()
+print(q)
+
+sr = KISDataSerializer
+
 
