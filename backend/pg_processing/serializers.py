@@ -8,7 +8,7 @@ class MainDataSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = MainData
-        fields = '__all__'
+        fields = ['dates', 'arrived', 'hosp', 'refused', 'signout', 'deads', 'reanimation']
 
 
 class KISDataSerializer(serializers.Serializer):

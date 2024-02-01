@@ -4,7 +4,7 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 from .models import MainData
 from .serializers import MainDataSerializer, KISDataSerializer
-from .kis_data import arr_dict
+from .kis_data import DataForDMK
 
 
 class MainDataReadViewSet(viewsets.ReadOnlyModelViewSet):
@@ -17,7 +17,7 @@ class MainDataReadViewSet(viewsets.ReadOnlyModelViewSet):
 class KISDataReadViewSet(viewsets.ViewSet):
 
     def list(self, request):
-        queryset = arr_dict
+        queryset = 1
         serializer = KISDataSerializer(queryset, many=True)
         print(serializer.data)
         return Response(serializer.data)

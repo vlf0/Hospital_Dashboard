@@ -1,7 +1,9 @@
 """Responsible for classes defining non-model query-sets from another DB."""
 from .psycopg_module import BaseConnectionDB
 from .sql_queries import QuerySets
-from .serializers import KISDataSerializer
+from .models import MainData
+from .serializers import KISDataSerializer, MainDataSerializer
+from datetime import date
 
 kis_conn = BaseConnectionDB(dbname='postgres',
                             host='localhost',
@@ -68,11 +70,6 @@ class KISData:
             yield self.cursor(dataset[0])
         self.db_conn.close_connection()
 
-    # def get_dmk_data(self):
-    #     """Get calculated main values for detail boards on front-end to rather save them into DMK DB."""
-    #
-    #     return
-
     def create_instance(self, target_class):
         """
         Create instances of a target class with data retrieved from the database.
@@ -89,31 +86,64 @@ class KISData:
         return instances_list
 
 
-kis_data_object = KISData(QuerySets().get_ready_queryset())
+# data_object = KISData(QuerySets().queryset_for_kis())
 
 
 class DataForDMK:
 
     @staticmethod
     def get_datasets_generator():
-        generator = kis_data_object.get_data_generator()
-        arrived_dataset = ArrivedDataProcessing(next(generator))
-        yield arrived_dataset
-        signout_dataset = SignOutDataProcessing(next(generator))
-        yield signout_dataset
-        deads_dataset = next(generator)
-        yield deads_dataset
-        reanimation_dataset = next(generator)
-        yield reanimation_dataset
+        # Create connect object and generate queries
+        data_object = KISData(QuerySets().queryset_for_dmk())
+        generator = data_object.get_data_generator()
+        # Get data-set and give it by command
+        first_dataset = DataProcessing(next(generator))
+        yield first_dataset
+        second_dataset = DataProcessing(next(generator))
+        yield second_dataset
+        third_dataset = DataProcessing(next(generator))
+        yield third_dataset
 
-    def collect_data(self):
+    def collect_data(self) -> dict:
+        """
+        Get calculated main values for detail boards on front-end to rather save them into DMK DB.
+
+        We are calculating data from a set of data obtained one by one through iteration of the generator
+        and then concatenate it in one common dict.
+
+        :return: Dict of main data for saving to DMK DB.
+        """
         generator = self.get_datasets_generator()
-        arrived_data = next(generator).data_to_dmk()
-        signout_data = next(generator).data_to_dmk()
-        return arrived_data | signout_data
+        arrived_data = next(generator).arrived_data_to_dmk()
+        signout_data = next(generator).signout_data_to_dmk()
+        reanimation_data = next(generator).reanimation_data_to_dmk()
+        collected_data = arrived_data | signout_data | reanimation_data
+        return collected_data
+
+    def add_data(self):
+        main_data = self.collect_data()
+        today_dict = {'dates': date.today()}
+        ready_data = today_dict | main_data
+        return ready_data
+
+    def save_to_dmk(self):
+        serializer = MainDataSerializer(data=self.add_data())
+
+        serializer.is_valid()
+        print(serializer.validated_data)
+        sr_data = serializer.save()
+        print(sr_data)
+        return
 
 
 class DataProcessing:
+    """
+    Base class for database datasets processing.
+
+    - Attributes:
+    *error* (bool): If true - it means that connection to DB was not established
+
+    """
 
     error = False
     total_amount = 0
@@ -130,18 +160,53 @@ class DataProcessing:
     def filter_dataset(self, ind, value):
         return [row for row in self.dataset if row[ind] == value]
 
+    def reanimation_data_to_dmk(self) -> dict:
+        if self.error:
+            return {'reanimation': None}
+        return {'reanimation': self.total_amount}
+
+    def arrived_data_to_dmk(self) -> dict:
+        if self.error:
+            return {'arrived': None, 'hosp': None, 'refused': None}
+        hosp_data = self.filter_dataset(0, 1)
+        hosp_amount = len(hosp_data)
+        refused_amount = self.total_amount - hosp_amount
+        arrived_set = {'arrived': self.total_amount, 'hosp': hosp_amount, 'refused': refused_amount}
+        return arrived_set
+
+    def signout_data_to_dmk(self) -> dict:
+        if self.error:
+            return {'signout': None, 'deads': None}
+        signout_data = self.filter_dataset(1, 'Другая причина')
+        signout_amount = len(signout_data)
+        deads_amount = self.total_amount - signout_amount
+        signout_set = {'signout': self.total_amount, 'deads': deads_amount}
+        return signout_set
+
 
 class ArrivedDataProcessing(DataProcessing):
 
     def __init__(self, dataset):
         super().__init__(dataset)
 
-    def data_to_dmk(self):
-        hosp_data = self.filter_dataset(0, 1)
-        hosp_amount = len(hosp_data)
-        refused_amount = self.total_amount - hosp_amount
-        arrived_set = {'arrived': self.total_amount, 'hosp': hosp_amount, 'refused': refused_amount}
-        return arrived_set
+    def get_datasets_generator(self):
+        # Create connect object and generate queries
+        data_object = KISData(QuerySets().queryset_for_kis())
+        generator = data_object.get_data_generator()
+        # Get data-set and give it by command
+        first_dataset = DataProcessing(next(generator))
+        yield first_dataset
+        second_dataset = DataProcessing(next(generator))
+        yield second_dataset
+        third_dataset = DataProcessing(next(generator))
+        yield third_dataset
+        fourth_dataset = DataProcessing(next(generator))
+        yield fourth_dataset
+        fifth_dataset = DataProcessing(next(generator))
+        yield fifth_dataset
+        sixth_dataset = DataProcessing(next(generator))
+        yield sixth_dataset
+
 
     # def arrived_process(self):
     #     custom_filter = self.filter_dataset
@@ -159,17 +224,6 @@ class SignOutDataProcessing(ArrivedDataProcessing):
     def __init__(self, dataset):
         super().__init__(dataset)
 
-    def data_to_dmk(self):
-        signout_data = self.filter_dataset(1, 'Другая причина')
-        signout_amount = len(signout_data)
-        deads_amount = self.total_amount - signout_amount
-        signout_set = {'signout': self.total_amount, 'deads': deads_amount}
-        return signout_set
 
-
-q = DataForDMK().collect_data()
-print(q)
-
-sr = KISDataSerializer
 
 

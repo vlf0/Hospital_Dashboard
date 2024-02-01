@@ -12,18 +12,16 @@ class MainData(models.Model):
     # Custom manager
     objects = TwoDaysFilterManager()
 
-    id = models.IntegerField(primary_key=True)
     dates = models.DateField(unique=True)
-    arrived = models.SmallIntegerField()
-    hosp = models.SmallIntegerField()
-    refused = models.SmallIntegerField()
-    signout = models.SmallIntegerField()
-    deads = models.SmallIntegerField()
-    reanimation = models.SmallIntegerField()
+    arrived = models.SmallIntegerField(null=True)
+    hosp = models.SmallIntegerField(null=True)
+    refused = models.SmallIntegerField(null=True)
+    signout = models.SmallIntegerField(null=True)
+    deads = models.SmallIntegerField(null=True)
+    reanimation = models.SmallIntegerField(null=True)
 
     class Meta:
         indexes = [
             models.Index(fields=['dates'])
         ]
-
 

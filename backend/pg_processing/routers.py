@@ -21,5 +21,5 @@ class CustomReadOnlyRouter(routers.SimpleRouter):
 router = CustomReadOnlyRouter()
 # router.register(r'main_data', MainDataReadViewSet)
 router.register(r'main_data', KISDataReadViewSet, basename='KIS')
-print(router.urls)
+
 

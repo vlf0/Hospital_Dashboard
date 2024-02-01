@@ -36,22 +36,27 @@ class QuerySets:
         ['pat_fio', 'ib_num', 'ages', 'dept', 'doc_fio', 'days', 'diag_start']
 
     ]
-    DMK_INSERT_QUERY = "INSERT INTO own.arrived (status, dept, channel, patient_type) VALUES (%s, %s, %s, %s);"
+    DMK_INSERT_QUERY = "INSERT INTO own.arrived (arrived, hosp, refused, signout, deads, reanimation)" \
+                       " VALUES (%s, %s, %s, %s);"
 
-    def get_ready_queryset(self):
+    def queryset_for_dmk(self):
         """
-        Create list of lists queries from class attributes.
+        Create list of lists queries from class attributes needed for data to DMK DB.
 
         :return: List of lists.
         """
-        result = [self.ARRIVED, self.SIGNOUT, self.DEADS,
-                  self.OAR_ARRIVED_QUERY, self.OAR_CURRENT_QUERY, self.OAR_MOVED_QUERY]
+        result = [self.ARRIVED, self.SIGNOUT, self.OAR_ARRIVED_QUERY]
         return result
 
+    def queryset_for_kis(self):
+        """
+        Create list of lists queries from class attributes needed for data to front-end.
 
-
-
-
-
+        :return: List of lists.
+        """
+        dmk_queries = self.queryset_for_dmk()
+        dmk_queries.insert(2, self.DEADS)
+        result = dmk_queries + [self.OAR_CURRENT_QUERY, self.OAR_MOVED_QUERY]
+        return result
 
 

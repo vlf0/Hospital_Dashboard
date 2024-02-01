@@ -115,12 +115,15 @@ class BaseConnectionDB:
                  (None) If insert_data was provided then executing insert query. In this case function returns None
                  because we get nothing from DB, insert only.
         """
-        # Return list of ine tuple containing error text to any sql query if connection was not established
-        if self.error is not None:
-            return [('Error', self.error)]
-        if insert_data is not None:
+        if insert_data:
+            if self.error:
+                self.__execute_insert(query, insert_data)
             self.__execute_insert(query, insert_data)
-            return None
+            return
+        # Return list of ine tuple containing error text to any sql query if connection was not established
+        if self.error:
+            return [('Error', self.error)]
+
         result = self.__execute_get(query)
         if self.auto_close:
             self.close_connection()
