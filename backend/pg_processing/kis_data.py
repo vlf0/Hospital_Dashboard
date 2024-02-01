@@ -1,7 +1,7 @@
 """Responsible for classes defining non-model query-sets from another DB."""
+from rest_framework.exceptions import ValidationError
 from .psycopg_module import BaseConnectionDB
 from .sql_queries import QuerySets
-from .models import MainData
 from .serializers import KISDataSerializer, MainDataSerializer
 from datetime import date
 
@@ -90,9 +90,48 @@ class KISData:
 
 
 class DataForDMK:
+    """
+    Class for getting, preparing, and saving data to DMK DB.
 
+    This class is designed to handle the process of collecting, preparing, and saving data to the DMK database.
+    It uses a generator to retrieve datasets from another database, processes the data, and then saves it to
+    the DMK DB using the MainData model.
+
+    Methods:
+
+    - get_datasets_generator(): Generates datasets from DB queries for DMK processing.
+
+
+    - collect_data(): Retrieves and calculates main values for detail boards on the front-end.
+      The method calculates data from a set of datasets obtained one by one through iteration of the generator
+      and then concatenates it into one common dictionary.
+
+      Returns:
+      dict: Main data for saving to DMK DB.
+
+
+    - add_data(): Prepare data for saving by adding date information to the collected data.
+
+      Returns:
+      dict: Ready data for saving to DMK DB.
+
+
+    - save_to_dmk(): Save the prepared data to the DMK DB using the MainData model.
+
+      Returns:
+      MainData: Saved data.
+
+    """
     @staticmethod
     def get_datasets_generator():
+        """
+        Generate datasets from DB queries for DMK processing.
+
+        The method creates a connection object and generates queries using KISData and QuerySets classes.
+        It then retrieves data through a generator, yielding three datasets.
+
+        :return: *DataProcessing*: Processed dataset for DMK processing getting from KIS one by one.
+        """
         # Create connect object and generate queries
         data_object = KISData(QuerySets().queryset_for_dmk())
         generator = data_object.get_data_generator()
@@ -106,12 +145,12 @@ class DataForDMK:
 
     def collect_data(self) -> dict:
         """
-        Get calculated main values for detail boards on front-end to rather save them into DMK DB.
+        Get calculated main values for detail boards on the front-end for saving to DMK DB.
 
-        We are calculating data from a set of data obtained one by one through iteration of the generator
-        and then concatenate it in one common dict.
+        The method calculates data from a set of datasets obtained one by one through iteration of the generator
+        and then concatenates it into one common dictionary.
 
-        :return: Dict of main data for saving to DMK DB.
+        :return: *dict*: Main data for saving to DMK DB.
         """
         generator = self.get_datasets_generator()
         arrived_data = next(generator).arrived_data_to_dmk()
@@ -120,20 +159,30 @@ class DataForDMK:
         collected_data = arrived_data | signout_data | reanimation_data
         return collected_data
 
-    def add_data(self):
+    def add_date(self) -> dict:
+        """
+        Add key-value pair to collected data dict.
+
+        :return: *dict*: Ready data for saving to DMK DB.
+        """
         main_data = self.collect_data()
         today_dict = {'dates': date.today()}
         ready_data = today_dict | main_data
         return ready_data
 
     def save_to_dmk(self):
-        serializer = MainDataSerializer(data=self.add_data())
+        """
+        Save the prepared data to the DMK DB using the MainData model and its serializer.
 
-        serializer.is_valid()
-        print(serializer.validated_data)
-        sr_data = serializer.save()
-        print(sr_data)
-        return
+        :return: *MainData*: Saved data into model. If error - not save data to DMK and return None.
+        """
+        serializer = MainDataSerializer(data=self.add_date())
+        try:
+            serializer.is_valid(raise_exception=True)
+            return serializer.save()
+        except ValidationError as e:
+#TODO need to implement logger here to write access attempts to DMK twice per one day.
+            return
 
 
 class DataProcessing:
@@ -223,7 +272,5 @@ class SignOutDataProcessing(ArrivedDataProcessing):
 
     def __init__(self, dataset):
         super().__init__(dataset)
-
-
 
 

@@ -1,5 +1,4 @@
 """Responsible for models (tables in DMK BD)."""
-from django.urls import path, include
 from django.db import models
 from .models_managers import TwoDaysFilterManager
 
