@@ -10,7 +10,7 @@ import logging
 
 # Local logger config and call
 formater = '[%(levelname)s:%(asctime)sms] [Module - %(name)s]\n %(message)s'
-logging.basicConfig(filename='pg_logs.log', filemode='w', format=formater)
+logging.basicConfig(filename='pg_processing/pg_logs.log', filemode='w', format=formater)
 pg_loger = logging.getLogger(__name__)
 
 
@@ -136,6 +136,7 @@ class BaseConnectionDB:
         queryset = cursor.fetchall()
         return queryset
 
+    @property
     def get_connection_data(self):
         """
         Get the connection parameters of the database.
@@ -149,6 +150,4 @@ class BaseConnectionDB:
             'user': self.user,
             'password': self.password
         }
-
-
 

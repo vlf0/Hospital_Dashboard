@@ -3,7 +3,13 @@ from rest_framework.exceptions import ValidationError
 from .psycopg_module import BaseConnectionDB
 from .sql_queries import QuerySets
 from .serializers import KISDataSerializer, MainDataSerializer
-from datetime import date
+from datetime import date, datetime
+import logging
+
+# Local logger config and call
+formater = '[%(levelname)s:%(asctime)sms] [Module - %(name)s]\n %(message)s'
+logging.basicConfig(filename='pg_processing/pg_logs.log', filemode='w', format=formater, level='INFO')
+pg_loger = logging.getLogger(__name__)
 
 
 class CleanData:
@@ -48,7 +54,7 @@ class KISData:
         :param query_sets: A list containing the data queries and queries of its columns. Each query pair is a list.
         """
         self.query_sets = query_sets
-        self.db_conn = BaseConnectionDB(dbname='postgres',
+        self.db_conn = BaseConnectionDB(dbname='postges',
                                         host='localhost',
                                         user='postgres',
                                         password='root'
@@ -85,65 +91,121 @@ class KISData:
 
 class DataProcessing:
     """
-    The base class from which other classes are inherited and its functionality is taken.
+    The base class from which other classes are inherited to provide required data
+    by adding specific sets of queries.
 
-    This class provides the required set of data by adding specific sets of queries.
+    Attributes:
+      kis_generator: (generator): A generator for retrieving datasets. Must be a KISData instance.
 
+    Methods:
+      - error_check(dataset): Check if the dataset contains an error.
+      Returns:
+      (bool)
+
+      - filter_dataset(dataset, ind, value): Filter dataset based on index and value. Needed for data sorting.
+      Returns:
+      list): Filtered datasets.
+
+      - count_dataset_total(dataset): Count the total number of rows in the dataset.
+      Returns:
+      (int):
     """
 
     def __init__(self, kis_generator):
+        """
+        Initialize the DataProcessing instance.
+
+        :param kis_generator: (generator): A generator providing datasets.
+        """
         self.kis_generator = kis_generator
 
     @staticmethod
     def error_check(dataset):
+        """
+        Check if the dataset contains an error.
+
+        :param dataset: (list): The dataset to check.
+        :return: bool: True if an error is detected, False otherwise.
+        """
         if dataset[0][0] == 'Error':
             return True
 
     @staticmethod
     def filter_dataset(dataset, ind, value):
+        """
+        Filter passed dataset based on index and value.
+
+        :param dataset: (list): The dataset to filter.
+        :param ind: (int): Index to filter on.
+        :param value: Value to match in the filter.
+        :return: *list*: Filtered dataset.
+        """
         return [row for row in dataset if row[ind] == value]
 
     @staticmethod
     def count_dataset_total(dataset):
+        """
+        Count the total number of rows in the dataset.
+
+        :param dataset: (list): The dataset to count.
+        :return: *int*: Total number of rows.
+
+        """
         return len(dataset)
 
 
 class DataForDMK(DataProcessing):
     """
-    Class for getting, preparing, and saving data to DMK DB.
+    Class for processing, collecting, and saving data to the DMK DB.
 
-    This class is designed to handle the process of collecting, preparing, and saving data to the DMK database.
-    It uses a generator to retrieve datasets from another database, processes the data, and then saves it to
-    the DMK DB using the MainData model.
+    This class extends the functionality of DataProcessing to handle the process
+    of collecting, preparing, and saving data to the DMK database using a generator.
+
+    Attributes:
+      kis_generator: (generator): A generator providing datasets.
 
     Methods:
+      - count_data(dataset, ind, value):
+        Count total, positive, and negative amounts in the dataset.
 
-    - collect_data(): Retrieves and calculates main values for detail boards on the front-end.
-      The method calculates data from a set of datasets obtained one by one through iteration of the generator
-      and then concatenates it into one common dictionary.
+      - get_arrived_data() -> dict:
+        Get data related to arrivals.
 
-      Returns:
-      dict: Main data for saving to DMK DB.
+      - get_signout_data() -> dict:
+        Get data related to signouts and deaths.
 
+      - get_reanimation_data() -> dict:
+        Get data related to reanimation.
 
-    - add_data(): Prepare data for saving by adding date information to the collected data.
+      - __collect_data() -> dict:
+        Get calculated main values for detail boards on the front-end for saving to DMK DB.
 
-      Returns:
-      dict: Ready data for saving to DMK DB.
-
-
-    - save_to_dmk(): Save the prepared data to the DMK DB using the MainData model.
-
-      Returns:
-      MainData: Saved data.
+      - save_to_dmk():
+        Save the prepared data to the DMK DB using the MainData model and its serializer.
 
     """
 
     def __init__(self, kis_generator):
+        """
+        Initialize the DataForDMK instance, it inherited from parent class.
+
+        Parameters:
+          kis_generator (generator): A generator providing datasets.
+
+        """
         super().__init__(kis_generator)
 
     def count_data(self, dataset, ind, value):
+        """
+        Count total, positive, and negative amounts in the dataset.
 
+        Negative means refused and deads, and positive means hospitalized and moved to other clinics.
+
+        :param dataset: (list): The dataset to count.
+        :param ind: (int): Index to count positive and negative amounts.
+        :param value: Value to match in the filter.
+        :return: *list*: List containing total, positive, and negative amounts.
+        """
         data = self.filter_dataset(dataset, ind, value)
         total_amount = self.count_dataset_total(dataset)
         positive_amount = len(data)
@@ -153,6 +215,11 @@ class DataForDMK(DataProcessing):
         return [total_amount, positive_amount, negative_amount]
 
     def get_arrived_data(self) -> dict:
+        """
+        Get data related to arrivals, hosp and refused patients.
+
+        :return: *dict*: Dictionary containing arrived, hospitalized, and refused data.
+        """
         arrived_dataset = next(self.kis_generator)
         result_keys = ['arrived', 'hosp', 'refused']
         if self.error_check(arrived_dataset):
@@ -161,6 +228,11 @@ class DataForDMK(DataProcessing):
         return dict(zip(result_keys, ready_values))
 
     def get_signout_data(self) -> dict:
+        """
+        Get data related to signouts and deaths patients.
+
+        :return: *dict*: Dictionary containing signout and deaths data.
+        """
         arrived_dataset = next(self.kis_generator)
         result_keys = ['signout', 'deads']
         if self.error_check(arrived_dataset):
@@ -169,12 +241,17 @@ class DataForDMK(DataProcessing):
         return dict(zip(result_keys, ready_values))
 
     def get_reanimation_data(self) -> dict:
+        """
+        Get data related to reanimation patients.
+
+        :return: *dict*: Dictionary containing reanimation data.
+        """
         reanimation_dataset = next(self.kis_generator)
         if self.error_check(reanimation_dataset):
             return {'reanimation': None}
         return {'reanimation': self.count_dataset_total(reanimation_dataset)}
 
-    def collect_data(self) -> dict:
+    def __collect_data(self) -> dict:
         """
         Get calculated main values for detail boards on the front-end for saving to DMK DB.
 
@@ -182,27 +259,41 @@ class DataForDMK(DataProcessing):
         and then concatenates it into one common dictionary.
 
         :return: *dict*: Main data for saving to DMK DB.
+        :raises StopIteration: If the generator is already empty. This point also will writen to logs.
         """
-        arrived, signout, deads = self.get_arrived_data(), self.get_signout_data(), self.get_reanimation_data()
-        main_data = arrived | signout | deads
-        # Add dates key-value pair to collected data dict.
-        today_dict = {'dates': date.today()}
-        ready_data = today_dict | main_data
-        return ready_data
+        try:
+            arrived, signout, deads = self.get_arrived_data(), self.get_signout_data(), self.get_reanimation_data()
+            main_data = arrived | signout | deads
+            if None in [value for value in main_data.values()]:
+                pg_loger.warning(f'[WARNING: {datetime.now()}] Error occurred when data access attempt.'
+                                 f' Will writen only NULL values to DMK DB.')
+            # Add dates key-value pair to collected data dict.
+            today_dict = {'dates': date.today()}
+            ready_data = today_dict | main_data
+            return ready_data
+        except StopIteration:
+            pg_loger.error('The generator is already empty. Need re-create KisData object.')
 
     def save_to_dmk(self):
         """
         Save the prepared data to the DMK DB using the MainData model and its serializer.
 
-        :return: *MainData*: Saved data into model. If error - not save data to DMK and return None.
+        :return: *MainData*: Saved data into the model. If on of the exception will raise - returns nothing.
+
+        :raises ValidationError: If the serializer validation fails.
+        :raises SyntaxError: If there is a syntax error in the serializer.
+        :raises AssertionError: If there is an assertion error during saving.
         """
-        serializer = MainDataSerializer(data=self.collect_data())
+        serializer = MainDataSerializer(data=self.__collect_data())
         try:
             serializer.is_valid(raise_exception=True)
-            return serializer.save()
-        except ValidationError as e:
-#TODO need to implement logger here to write access attempts to DMK twice per one day.
-            return
+            print(serializer.validated_data)
+            print([value for value in serializer.validated_data.values()])
+            data_instance = serializer.save()
+            return data_instance
+        except (ValidationError, SyntaxError, AssertionError) as e:
+            pg_loger.error(e)
+            # return e  # Returns original error text if needed while developing
 
 
 o = DataForDMK(KISData(QuerySets().queryset_for_dmk()).get_data_generator())
@@ -218,18 +309,7 @@ class ArrivedDataProcessing(DataProcessing):
         data_object = KISData(QuerySets().queryset_for_kis())
         generator = data_object.get_data_generator()
         # Get data-set and give it by command
-        first_dataset = DataProcessing(next(generator))
-        yield first_dataset
-        second_dataset = DataProcessing(next(generator))
-        yield second_dataset
-        third_dataset = DataProcessing(next(generator))
-        yield third_dataset
-        fourth_dataset = DataProcessing(next(generator))
-        yield fourth_dataset
-        fifth_dataset = DataProcessing(next(generator))
-        yield fifth_dataset
-        sixth_dataset = DataProcessing(next(generator))
-        yield sixth_dataset
+
 
 
     # def arrived_process(self):

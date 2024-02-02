@@ -133,30 +133,30 @@ STATIC_URL = 'static/'
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-
-    'formatters': {
-        'default_formatter': {
-            'format': '[%(levelname)s:%(asctime)sms] %(message)s',
-        },
-    },
-
-    'handlers': {
-        'file': {
-            'class': 'logging.FileHandler',
-            'filename': SITE_ROOT + '\\pg_logs.log',
-            'level': 'DEBUG',
-            # 'mode': 'w'
-            }
-        },
-
-    'loggers': {
-        '': {
-            'level': 'DEBUG',
-            'handlers': ['file']
-        }
-    }
-}
+#
+# LOGGING = {
+#     'version': 1,
+#     'disable_existing_loggers': False,
+#
+#     'formatters': {
+#         'default_formatter': {
+#             'format': '[%(levelname)s:%(asctime)sms] [Module - %(name)s]\n %(message)s',
+#         },
+#     },
+#
+#     'handlers': {
+#         'file': {
+#             'class': 'logging.FileHandler',
+#             'filename': SITE_ROOT + '\\pg_logs.log',
+#             'level': 'DEBUG',
+#             # 'mode': 'w'
+#             }
+#         },
+#
+#     'loggers': {
+#         '': {
+#             'level': 'DEBUG',
+#             'handlers': ['file']
+#         }
+#     }
+# }

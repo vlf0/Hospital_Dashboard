@@ -1,13 +1,14 @@
 """This module provide work of main django functions - views."""
 from django.db.models.query import QuerySet
-from rest_framework import viewsets
+from rest_framework import viewsets, mixins
 from rest_framework.response import Response
 from .models import MainData
 from .serializers import MainDataSerializer, KISDataSerializer
 from .kis_data import DataForDMK
 
 
-class MainDataReadViewSet(viewsets.ReadOnlyModelViewSet):
+class MainDataReadViewSet(viewsets.ReadOnlyModelViewSet,
+                          mixins.CreateModelMixin):
     """Allow access to read main data from DMK DB by using GET method only."""
 
     queryset = MainData.objects.custom_filter()
