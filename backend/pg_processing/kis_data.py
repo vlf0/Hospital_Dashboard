@@ -5,12 +5,6 @@ from .sql_queries import QuerySets
 from .serializers import KISDataSerializer, MainDataSerializer
 from datetime import date
 
-kis_conn = BaseConnectionDB(dbname='postgres',
-                            host='localhost',
-                            user='postgres',
-                            password='root'
-                            )
-
 
 class CleanData:
     """
@@ -47,9 +41,6 @@ class KISData:
     cursor:  The method to execute queries on the PostgreSQL database.
     """
 
-    db_conn = kis_conn
-    cursor = db_conn.execute_query
-
     def __init__(self, query_sets):
         """
         Initialize an instance of KISData.
@@ -57,6 +48,12 @@ class KISData:
         :param query_sets: A list containing the data queries and queries of its columns. Each query pair is a list.
         """
         self.query_sets = query_sets
+        self.db_conn = BaseConnectionDB(dbname='postgres',
+                                        host='localhost',
+                                        user='postgres',
+                                        password='root'
+                                        )
+        self.cursor = self.db_conn.execute_query
 
     def get_data_generator(self):
         """
@@ -70,26 +67,48 @@ class KISData:
             yield self.cursor(dataset[0])
         self.db_conn.close_connection()
 
-    def create_instance(self, target_class):
-        """
-        Create instances of a target class with data retrieved from the database.
-
-        :param target_class: The class to instantiate for each row.
-        :return: List of class instances.
-        """
-        if self.db_conn.error:
-            # List of one class with error text
-            return [CleanData(error=self.db_conn.error)]
-        generator = self.get_data_generator()
-        columns, data = next(generator), next(generator)
-        instances_list = [target_class(**dict(zip(columns, row))) for row in data]
-        return instances_list
-
-
-# data_object = KISData(QuerySets().queryset_for_kis())
+    # def create_instance(self, target_class):
+    #     """
+    #     Create instances of a target class with data retrieved from the database.
+    #
+    #     :param target_class: The class to instantiate for each row.
+    #     :return: List of class instances.
+    #     """
+    #     if self.db_conn.error:
+    #         # List of one class with error text
+    #         return [CleanData(error=self.db_conn.error)]
+    #     generator = self.get_data_generator()
+    #     columns, data = next(generator), next(generator)
+    #     instances_list = [target_class(**dict(zip(columns, row))) for row in data]
+    #     return instances_list
 
 
-class DataForDMK:
+class DataProcessing:
+    """
+    The base class from which other classes are inherited and its functionality is taken.
+
+    This class provides the required set of data by adding specific sets of queries.
+
+    """
+
+    def __init__(self, kis_generator):
+        self.kis_generator = kis_generator
+
+    @staticmethod
+    def error_check(dataset):
+        if dataset[0][0] == 'Error':
+            return True
+
+    @staticmethod
+    def filter_dataset(dataset, ind, value):
+        return [row for row in dataset if row[ind] == value]
+
+    @staticmethod
+    def count_dataset_total(dataset):
+        return len(dataset)
+
+
+class DataForDMK(DataProcessing):
     """
     Class for getting, preparing, and saving data to DMK DB.
 
@@ -98,9 +117,6 @@ class DataForDMK:
     the DMK DB using the MainData model.
 
     Methods:
-
-    - get_datasets_generator(): Generates datasets from DB queries for DMK processing.
-
 
     - collect_data(): Retrieves and calculates main values for detail boards on the front-end.
       The method calculates data from a set of datasets obtained one by one through iteration of the generator
@@ -122,26 +138,41 @@ class DataForDMK:
       MainData: Saved data.
 
     """
-    @staticmethod
-    def get_datasets_generator():
-        """
-        Generate datasets from DB queries for DMK processing.
 
-        The method creates a connection object and generates queries using KISData and QuerySets classes.
-        It then retrieves data through a generator, yielding three datasets.
+    def __init__(self, kis_generator):
+        super().__init__(kis_generator)
 
-        :return: *DataProcessing*: Processed dataset for DMK processing getting from KIS one by one.
-        """
-        # Create connect object and generate queries
-        data_object = KISData(QuerySets().queryset_for_dmk())
-        generator = data_object.get_data_generator()
-        # Get data-set and give it by command
-        first_dataset = DataProcessing(next(generator))
-        yield first_dataset
-        second_dataset = DataProcessing(next(generator))
-        yield second_dataset
-        third_dataset = DataProcessing(next(generator))
-        yield third_dataset
+    def count_data(self, dataset, ind, value):
+
+        data = self.filter_dataset(dataset, ind, value)
+        total_amount = self.count_dataset_total(dataset)
+        positive_amount = len(data)
+        negative_amount = total_amount - positive_amount
+        if ind == 1:
+            return [total_amount, negative_amount]
+        return [total_amount, positive_amount, negative_amount]
+
+    def get_arrived_data(self) -> dict:
+        arrived_dataset = next(self.kis_generator)
+        result_keys = ['arrived', 'hosp', 'refused']
+        if self.error_check(arrived_dataset):
+            return dict(zip(result_keys, [None, None, None]))
+        ready_values = self.count_data(arrived_dataset, 0, 1)
+        return dict(zip(result_keys, ready_values))
+
+    def get_signout_data(self) -> dict:
+        arrived_dataset = next(self.kis_generator)
+        result_keys = ['signout', 'deads']
+        if self.error_check(arrived_dataset):
+            return dict(zip(result_keys, [None, None]))
+        ready_values = self.count_data(arrived_dataset, 1, 'Другая причина')
+        return dict(zip(result_keys, ready_values))
+
+    def get_reanimation_data(self) -> dict:
+        reanimation_dataset = next(self.kis_generator)
+        if self.error_check(reanimation_dataset):
+            return {'reanimation': None}
+        return {'reanimation': self.count_dataset_total(reanimation_dataset)}
 
     def collect_data(self) -> dict:
         """
@@ -152,20 +183,9 @@ class DataForDMK:
 
         :return: *dict*: Main data for saving to DMK DB.
         """
-        generator = self.get_datasets_generator()
-        arrived_data = next(generator).arrived_data_to_dmk()
-        signout_data = next(generator).signout_data_to_dmk()
-        reanimation_data = next(generator).reanimation_data_to_dmk()
-        collected_data = arrived_data | signout_data | reanimation_data
-        return collected_data
-
-    def add_date(self) -> dict:
-        """
-        Add key-value pair to collected data dict.
-
-        :return: *dict*: Ready data for saving to DMK DB.
-        """
-        main_data = self.collect_data()
+        arrived, signout, deads = self.get_arrived_data(), self.get_signout_data(), self.get_reanimation_data()
+        main_data = arrived | signout | deads
+        # Add dates key-value pair to collected data dict.
         today_dict = {'dates': date.today()}
         ready_data = today_dict | main_data
         return ready_data
@@ -176,7 +196,7 @@ class DataForDMK:
 
         :return: *MainData*: Saved data into model. If error - not save data to DMK and return None.
         """
-        serializer = MainDataSerializer(data=self.add_date())
+        serializer = MainDataSerializer(data=self.collect_data())
         try:
             serializer.is_valid(raise_exception=True)
             return serializer.save()
@@ -185,52 +205,7 @@ class DataForDMK:
             return
 
 
-class DataProcessing:
-    """
-    Base class for database datasets processing.
-
-    - Attributes:
-    *error* (bool): If true - it means that connection to DB was not established
-
-    """
-
-    error = False
-    total_amount = 0
-
-    def __init__(self, dataset):
-        self.dataset = dataset
-        self.error = True if self.dataset[0][0] == 'Error' else False
-        self.__define_amounts_attrs()
-
-    def __define_amounts_attrs(self):
-        if not self.error:
-            self.total_amount = len(self.dataset)
-
-    def filter_dataset(self, ind, value):
-        return [row for row in self.dataset if row[ind] == value]
-
-    def reanimation_data_to_dmk(self) -> dict:
-        if self.error:
-            return {'reanimation': None}
-        return {'reanimation': self.total_amount}
-
-    def arrived_data_to_dmk(self) -> dict:
-        if self.error:
-            return {'arrived': None, 'hosp': None, 'refused': None}
-        hosp_data = self.filter_dataset(0, 1)
-        hosp_amount = len(hosp_data)
-        refused_amount = self.total_amount - hosp_amount
-        arrived_set = {'arrived': self.total_amount, 'hosp': hosp_amount, 'refused': refused_amount}
-        return arrived_set
-
-    def signout_data_to_dmk(self) -> dict:
-        if self.error:
-            return {'signout': None, 'deads': None}
-        signout_data = self.filter_dataset(1, 'Другая причина')
-        signout_amount = len(signout_data)
-        deads_amount = self.total_amount - signout_amount
-        signout_set = {'signout': self.total_amount, 'deads': deads_amount}
-        return signout_set
+o = DataForDMK(KISData(QuerySets().queryset_for_dmk()).get_data_generator())
 
 
 class ArrivedDataProcessing(DataProcessing):
@@ -274,3 +249,8 @@ class SignOutDataProcessing(ArrivedDataProcessing):
         super().__init__(dataset)
 
 
+# o = DataProcessing().get_datasets_generator(KISData(QuerySets().queryset_for_dmk()))
+# o = kis_data.DataProcessing().get_datasets_generator(kis_data.KISData(kis_data.QuerySets().queryset_for_dmk()))
+k = KISData(QuerySets().queryset_for_dmk())
+
+s = KISData(QuerySets().queryset_for_kis())

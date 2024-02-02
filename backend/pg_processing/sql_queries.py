@@ -13,6 +13,10 @@ class QuerySets:
         "SELECT * FROM mm.arrived;",
         ['status', 'dept', 'channel', 'patient_type']
     ]
+    DEPT_HOSP = [
+        "SELECT amount, med_profile FROM mm.dept_hosp;",
+        ['amount', 'med_profile']
+    ]
     SIGNOUT = [
         "SELECT dept, status FROM mm.signout;",
         ['dept', 'status']
@@ -56,7 +60,7 @@ class QuerySets:
         """
         dmk_queries = self.queryset_for_dmk()
         dmk_queries.insert(2, self.DEADS)
+        dmk_queries.insert(1, self.DEPT_HOSP)
         result = dmk_queries + [self.OAR_CURRENT_QUERY, self.OAR_MOVED_QUERY]
         return result
-
 

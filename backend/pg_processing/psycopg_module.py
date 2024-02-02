@@ -115,15 +115,9 @@ class BaseConnectionDB:
                  (None) If insert_data was provided then executing insert query. In this case function returns None
                  because we get nothing from DB, insert only.
         """
-        if insert_data:
-            if self.error:
-                self.__execute_insert(query, insert_data)
-            self.__execute_insert(query, insert_data)
-            return
         # Return list of ine tuple containing error text to any sql query if connection was not established
         if self.error:
             return [('Error', self.error)]
-
         result = self.__execute_get(query)
         if self.auto_close:
             self.close_connection()
@@ -141,20 +135,6 @@ class BaseConnectionDB:
         cursor.execute(query)
         queryset = cursor.fetchall()
         return queryset
-
-    def __execute_insert(self, query, insert_data):
-        """
-        Execute a SQL INSERT query.
-
-        Args:
-        :param query: (str): The SQL INSERT query to be executed.
-        :param insert_data: (list): Data to be inserted.
-
-        :return: None
-        """
-        cursor = self.conn.cursor()
-        cursor.executemany(query, insert_data)
-        self.close_connection()
 
     def get_connection_data(self):
         """
