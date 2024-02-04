@@ -41,8 +41,8 @@ const SignOutChart = () => {
         datasets: [
             {
               label: 'total',
-              data: (readyData ? readyData.signOutArray : null),
-              backgroundColor: ['#2d8587', '#2d8587', '#2d8587'],
+              data: [71, 79, 45, 16, 68, 52, 82],
+              backgroundColor: ['#212e93b3'],
               borderColor: '#090b1f',
               borderWidth: 1,
             },
@@ -52,7 +52,7 @@ const SignOutChart = () => {
     const chartOptions = {
         barThickness: 'flex',
         barPercentage: 0.9, 
-        categoryPercentage: 0.8,
+        categoryPercentage: 0.9,
         scales: {
             x: {
                 // stacked: true,
@@ -104,8 +104,8 @@ const SignOutChart = () => {
                     title: {
                         color: 'black',
                         font: {
-                          size: 10,
-                          weight: 'bold',
+                          size: 13,
+                        //   weight: 'bold',
                           },
                         anchor: 'end',
                         align: 'end',
@@ -126,14 +126,14 @@ const SignOutChart = () => {
                             return '\t' + percernts+'%';
                         },
                         font: {
-                          size: 10,
+                          size: 12,
                           weight: 'bold',
                         },
                         color: (context) => {
                           const value = context.dataset.data[context.dataIndex];
                           const percent = ((value / plan) * 100 - 100).toFixed(1);
 
-                          return percent < 0 ? '#980101' : '#049d00';
+                          return percent < 0 ? '#b200ac' : '#049d00';
                         },
                     },
                 },
@@ -158,7 +158,14 @@ const SignOutChart = () => {
                 display: true,
                 text: 'Динамика выписанных за неделю',
                 color: '#090b1f',
+                font: {
+                    size: 13
+                },
+                padding: {
+                    bottom: 30,
+              }
             },
+
         },
     };
 

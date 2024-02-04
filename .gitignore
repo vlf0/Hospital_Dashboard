@@ -13,6 +13,9 @@ settings_prod.py
 
 # My dirs
 KIS_queries/
+pg_data/
+screenshots/
+
 
 
 # Distribution / packaging
@@ -34,8 +37,7 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
-pg_data/
-screenshots/
+
 
 # PyInstaller
 #  Usually these files are written by a python script from a template

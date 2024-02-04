@@ -7,40 +7,13 @@ import SignOutChart from '../charts/SignOutChart';
 import DeadsChart from '../charts/DeadsChart';
 import TopBlock from '../menu/TopBlock';
 import BlockInfo from '../boards/BlockInfo';
-import GetData from '../GetData';
-import DataContext from '../DataContext';
 import "../parent.css" 
 import './dashboard_content.css'
-
-
-// export function GetLocalData() {
-
-//   const storedData = sessionStorage.getItem('data');
-//   if (storedData) {
-//   console.log(storedData);
-//   storedData = (JSON.parse(storedData));
-//   console.log(storedData);
-//   } 
-//   else {
-//   const fetchedData = GetData();
-//   console.log(fetchedData);
-//   if (fetchedData) {
-//     sessionStorage.setItem('data', JSON.stringify(fetchedData))
-//     console.log(JSON.stringify(storedData));
-//   };
-// };
-
-//   return {storedData};
-// };
-
-
 
 
 
 function GetAnalysis() {
 
-
-  const readyData = useContext(DataContext);
 
   const location = useLocation();
   
@@ -57,12 +30,12 @@ function GetAnalysis() {
       <TopBlock textContent={'Оперативная сводка ГКБ Им. Демихова'}/>
       <animated.div className='dashboard' style={props}>
         <div className='board-cards'>
-          <BlockInfo headerText='Поступившие' data={(readyData ? readyData.arrived : null)}/>
-          <BlockInfo headerText='Госпитализировано' data={(readyData ? readyData.hosp : null)}/>
-          <BlockInfo headerText='Отказано' data={(readyData ? readyData.refused : null)}/>
-          <BlockInfo headerText='Выписанные' data={(readyData ? readyData.signout : null)}/>
-          <BlockInfo headerText='Умершие' data={(readyData ? readyData.deads : null)}/>
-          <BlockInfo headerText='ОАР' data={(readyData ? readyData.reanimation : null)}/>
+          <BlockInfo headerText='Поступившие' data={[110, 135, '18,5%']}/>
+          <BlockInfo headerText='Госпитализировано' data={[90, 78, '12%']}/>
+          <BlockInfo headerText='Отказано' data={[20, 60, '66,7%']}/>
+          <BlockInfo headerText='Выписанные' data={[50, 30, '40%']}/>
+          <BlockInfo headerText='Умершие' data={[10, 7, '33,3%']}/>
+          <BlockInfo headerText='ОАР' data={[15, 22, '48%']}/>
         </div>
         <div className='board-charts'>
           <ArrivedChart />

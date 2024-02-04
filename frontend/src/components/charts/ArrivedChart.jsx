@@ -24,7 +24,7 @@ const ArrivedChart = () => {
     const readyData = useContext(DataContext);
 
     const navigate = useNavigate();
-    const plan = 60
+    const plan = 120
 
     const arrived_data = {
         labels: [
@@ -39,7 +39,7 @@ const ArrivedChart = () => {
         datasets: [
             {
               label: 'total',
-              data: (readyData ? readyData.arrivedArray : null),
+              data: [154, 145, 108, 138, 115, 157, 129],
               backgroundColor: ['#212e93b3'],
               borderColor: '#090b1f',
               borderWidth: 1,
@@ -50,7 +50,12 @@ const ArrivedChart = () => {
     const chartOptions = {
         barThickness: 'flex',
         barPercentage: 0.9, 
-        categoryPercentage: 0.8,
+        categoryPercentage: 0.9,
+        // layout: {
+        //     padding: {
+        //       top: 20, // Adjust the top padding as needed
+        //     }
+        //   },
         scales: {
             x: {
                 // stacked: true,
@@ -84,8 +89,8 @@ const ArrivedChart = () => {
                     },
                     callback: (value, index, values) => {
                         // Customize the tick value
-                        if (value === 60) {
-                            return 'план 60'; // Change the tick label for the value 60
+                        if (value === 125) {
+                            return 'план 125'; // Change the tick label for the value 60
                         } else {
                             return value; // Use the default tick label for other values
                         }
@@ -94,6 +99,7 @@ const ArrivedChart = () => {
                 },
             },
         },
+        
 
         plugins: { 
             datalabels: {
@@ -102,8 +108,8 @@ const ArrivedChart = () => {
                     title: {
                         color: 'black',
                         font: {
-                          size: 10,
-                          weight: 'bold',
+                          size: 13,
+                        //   weight: 'bold',
                           },
                         anchor: 'end',
                         align: 'end',
@@ -120,19 +126,19 @@ const ArrivedChart = () => {
                                 return '';
                             }
                             const percernts = ((title / plan  * 100) - 100).toFixed(1);
-                            const color = percernts < 0 ? 'red' : 'blue';
+                            const color = percernts < 0 ? '#b200ac' : 'blue';
 
                             return '\t' + percernts+'%';
                         },
                         font: {
-                          size: 10,
+                          size: 12,
                           weight: 'bold',
                           },
                         color: (context) => {
                           const value = context.dataset.data[context.dataIndex];
                           const percent = ((value / plan) * 100 - 100).toFixed(1);
   
-                          return percent < 0 ? '#980101' : '#00a318';
+                          return percent < 0 ? '#b200ac' : '#00a318';
                         },
                     },
                 },
@@ -143,10 +149,10 @@ const ArrivedChart = () => {
                     annotations: {
                       line1: {
                         type: 'line',
-                        yMin: 60,
-                        yMax: 60,
+                        yMin: 120,
+                        yMax: 120,
                         borderColor: '#ff6384',
-                        borderWidth: 2,
+                        borderWidth: 1.5,
                       },
                     },
               },
@@ -157,6 +163,13 @@ const ArrivedChart = () => {
                 display: true,
                 text: 'Динамика обращений за неделю',
                 color: '#090b1f',
+                font: {
+                    size: 13,
+            },                
+            padding: {
+            //   top: 20, // Adjust the top padding as needed
+              bottom: 30,
+            }
             },
         },
     };

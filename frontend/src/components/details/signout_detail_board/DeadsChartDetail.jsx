@@ -26,8 +26,8 @@ const DeadsChartDetail = ({ profiles }) => {
         datasets: [
             {
               label: 'total',
-              data: [80, 73, 84],//data ? [data.data, data.data, data.data] : [10,20,10],
-              backgroundColor: ['#2d8587', '#2d8587', '#2d8587'],
+              data: [13, 7, 10],//data ? [data.data, data.data, data.data] : [10,20,10],
+              backgroundColor: ['#2d8587'],
               borderColor: '#090b1f',
               borderWidth: 1,
             },
@@ -56,15 +56,17 @@ const DeadsChartDetail = ({ profiles }) => {
             },
             y: {
                 // stacked: true,
-                min: 0, 
-                max: 100, 
+                // min: 0, 
+                // max: 100, 
                 grid: {
                   drawOnChartArea: true,
                   drawTicks: false
                   },
              
                 ticks: {
-                    font: {weight: 'bold'},
+                    font: {
+                      weight: 'bold'
+                    },
                 },
             },
         },
@@ -76,8 +78,8 @@ const DeadsChartDetail = ({ profiles }) => {
                     title: {
                         color: 'black',
                         font: {
-                          size: 10,
-                          weight: 'bold',
+                          size: 13,
+                        //   weight: 'bold',
                           },
                         anchor: 'end',
                         align: 'end',
@@ -103,6 +105,13 @@ const DeadsChartDetail = ({ profiles }) => {
                 display: true,
                 text: 'Выписанные по отделениям',
                 color: '#090b1f',
+                font: {
+                    size: 13,
+            },                
+            padding: {
+            //   top: 20, // Adjust the top padding as needed
+              bottom: 30,
+            }
             },
     
         },
