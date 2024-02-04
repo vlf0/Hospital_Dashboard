@@ -21,8 +21,8 @@ Chart.defaults.color = '#090b1f';
 
 const ArrivedChart = () => {
     
-    // Use data from localStorage
     const readyData = useContext(DataContext);
+
     const navigate = useNavigate();
     const plan = 60
 
@@ -39,7 +39,7 @@ const ArrivedChart = () => {
         datasets: [
             {
               label: 'total',
-              data: readyData.arrivedArray,
+              data: (readyData ? readyData.arrivedArray : null),
               backgroundColor: ['#212e93b3'],
               borderColor: '#090b1f',
               borderWidth: 1,

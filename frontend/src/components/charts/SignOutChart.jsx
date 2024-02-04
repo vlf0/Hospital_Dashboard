@@ -20,13 +20,11 @@ Chart.defaults.font.size = 12;
 Chart.defaults.color = '#090b1f';  
 
 
-const SignOutChart = ({data}) => {
+const SignOutChart = () => {
 
-    // Use data from localStorage
     const readyData = useContext(DataContext);
 
     const navigate = useNavigate();
-
     const plan = 60
 
 
@@ -43,7 +41,7 @@ const SignOutChart = ({data}) => {
         datasets: [
             {
               label: 'total',
-              data: readyData.signOutArray,//data ? [data.data, data.data, data.data] : [10,20,10],
+              data: (readyData ? readyData.signOutArray : null),
               backgroundColor: ['#2d8587', '#2d8587', '#2d8587'],
               borderColor: '#090b1f',
               borderWidth: 1,

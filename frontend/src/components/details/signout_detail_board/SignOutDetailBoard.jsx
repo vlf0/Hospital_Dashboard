@@ -33,10 +33,12 @@ const SignOutDetailBoard = ({ combinedData, profiles }) => {
       <span className='detail_block_header'> Исходы </span>
       <div className='blocks_container'>
         <div className='separated_detail_block_X' onClick={toggleDeadTableVisibility}>
-          Смерть <br /><br /> {readyData.deads[0]}
+          Смерть <br /><br /> { (readyData ? readyData.deads[0] : null) }
         </div>
         <div className='separated_detail_block'> Перевод в другую МО <br /><br /> {moveCount} </div>
-        <div className='separated_detail_block'> Выписка <br /><br /> {readyData.signout[0]} </div>
+        <div className='separated_detail_block'>
+           Выписка <br /><br /> { (readyData ? readyData.signout[0] : null) }
+       </div>
       </div>
       <span className='detail_block_header'> Выписка по отделениям </span>
       <DeadsChartDetail profiles={profiles}/>

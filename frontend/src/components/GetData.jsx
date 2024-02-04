@@ -65,6 +65,7 @@ function GetData() {
       dates, arrived, hosp, refused, signout, deads, reanimation,
       arrivedArray, signOutArray, deadsArray
     };
+
 };
 
 export default GetData;

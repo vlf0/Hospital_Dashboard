@@ -13,23 +13,35 @@ import "../parent.css"
 import './dashboard_content.css'
 
 
-export let storedData = localStorage.getItem('apiData');
-if (storedData) {
-  // If data is in localStorage, use it directly
-  storedData = (JSON.parse(storedData));
-} else {
-  // Otherwise, fetch data from API and store it in localStorage
-  const fetchedData = GetData();
-  
-  localStorage.setItem('apiData', JSON.stringify(fetchedData));
-};
+// export function GetLocalData() {
+
+//   const storedData = sessionStorage.getItem('data');
+//   if (storedData) {
+//   console.log(storedData);
+//   storedData = (JSON.parse(storedData));
+//   console.log(storedData);
+//   } 
+//   else {
+//   const fetchedData = GetData();
+//   console.log(fetchedData);
+//   if (fetchedData) {
+//     sessionStorage.setItem('data', JSON.stringify(fetchedData))
+//     console.log(JSON.stringify(storedData));
+//   };
+// };
+
+//   return {storedData};
+// };
+
+
+
 
 
 function GetAnalysis() {
 
+
   const readyData = useContext(DataContext);
-  console.log(readyData);
-  
+
   const location = useLocation();
   
   const props = useSpring({
@@ -38,7 +50,6 @@ function GetAnalysis() {
     config: { duration: 1000 },
   });
 
-
   return (
     <> 
 
@@ -46,12 +57,12 @@ function GetAnalysis() {
       <TopBlock textContent={'Оперативная сводка ГКБ Им. Демихова'}/>
       <animated.div className='dashboard' style={props}>
         <div className='board-cards'>
-          <BlockInfo headerText='Поступившие' data={readyData.arrived}/>
-          <BlockInfo headerText='Госпитализировано' data={readyData.hosp}/>
-          <BlockInfo headerText='Отказано' data={readyData.refused}/>
-          <BlockInfo headerText='Выписанные' data={readyData.signout}/>
-          <BlockInfo headerText='Умершие' data={readyData.deads}/>
-          <BlockInfo headerText='ОАР' data={readyData.reanimation}/>
+          <BlockInfo headerText='Поступившие' data={(readyData ? readyData.arrived : null)}/>
+          <BlockInfo headerText='Госпитализировано' data={(readyData ? readyData.hosp : null)}/>
+          <BlockInfo headerText='Отказано' data={(readyData ? readyData.refused : null)}/>
+          <BlockInfo headerText='Выписанные' data={(readyData ? readyData.signout : null)}/>
+          <BlockInfo headerText='Умершие' data={(readyData ? readyData.deads : null)}/>
+          <BlockInfo headerText='ОАР' data={(readyData ? readyData.reanimation : null)}/>
         </div>
         <div className='board-charts'>
           <ArrivedChart />

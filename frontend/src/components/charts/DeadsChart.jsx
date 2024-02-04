@@ -17,13 +17,11 @@ Chart.defaults.font.size = 12;
 Chart.defaults.color = '#090b1f';  
 
 
-const DeadsChart = ({data}) => {
+const DeadsChart = () => {
 
-    // Use data from localStorage
     const readyData = useContext(DataContext);
 
     const navigate = useNavigate();
-
     const plan = 8
 
 
@@ -40,7 +38,7 @@ const DeadsChart = ({data}) => {
         datasets: [
             {
               label: 'total',
-              data: readyData.deadsArray,//data ? [data.data, data.data, data.data] : [10,20,10],
+              data: (readyData ? readyData.deadsArray : null),
               backgroundColor: ['#2d8587', '#2d8587', '#2d8587'],
               borderColor: '#090b1f',
               borderWidth: 1,

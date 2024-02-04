@@ -8,14 +8,18 @@ import './signin_table.css';
 
 const SignInDetailBoard = ({ combinedData }) => {
 
-    const readyData = useContext(DataContext);
+    let readyData = useContext(DataContext);
 
     return (
         <div className='detail_block'>
           <span className='detail_block_header'> Обратившиеся </span>
           <div className='blocks_container'>
-            <div className='separated_detail_block'> Отказано <br></br><br></br> {readyData.refused[0]} </div>
-            <div className='separated_detail_block'> Госпитализировано <br></br><br></br> {readyData.hosp[0]} </div>
+            <div className='separated_detail_block'> 
+              Отказано <br></br><br></br> { (readyData ? readyData.refused[0] : null) } 
+            </div>
+            <div className='separated_detail_block'>
+               Госпитализировано <br></br><br></br> { (readyData ? readyData.refused[1] : null) }
+            </div>
           </div>
           <span className='detail_block_header'> Госпитализировано по каналам </span>
           <div className='blocks_container'>
