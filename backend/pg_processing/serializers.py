@@ -3,6 +3,7 @@ from rest_framework import serializers
 from .models import MainData
 
 
+
 class MainDataSerializer(serializers.ModelSerializer):
     """Serialize data of MainData model."""
 
@@ -13,20 +14,22 @@ class MainDataSerializer(serializers.ModelSerializer):
 
 class KISDataSerializer(serializers.Serializer):
 
-    dept = serializers.CharField(required=False)
-    channel = serializers.CharField(required=False)
-    patient_type = serializers.CharField(required=False)
-    status = serializers.CharField(required=False)
+    ch103 = serializers.IntegerField(required=False, allow_null=True)
+    clinic_only = serializers.IntegerField(required=False, allow_null=True)
+    ch103_clinic = serializers.IntegerField(required=False, allow_null=True)
+    singly = serializers.IntegerField(required=False, allow_null=True)
+    ZL = serializers.CharField(required=False, allow_null=True)
+    foreign = serializers.CharField(required=False, allow_null=True)
+    moscow = serializers.CharField(required=False, allow_null=True)
+    undefined = serializers.CharField(required=False, allow_null=True)
+    dept = serializers.CharField(required=False, allow_null=True)
+    amount = serializers.CharField(required=False, allow_null=True)
 
-    pat_fio = serializers.CharField(required=False)
-    ib_num = serializers.CharField(required=False)
-    sex = serializers.CharField(required=False)
-    ages = serializers.CharField(required=False)
-    arriving_dt = serializers.DateTimeField(required=False)
-    state = serializers.CharField(required=False)
-    days = serializers.IntegerField(required=False)
-    diag_arr = serializers.CharField(required=False)
-    diag_dead = serializers.CharField(required=False)
+    therapy = serializers.CharField(required=False, allow_null=True)
+    surgery = serializers.CharField(required=False, allow_null=True)
+    cardiology = serializers.CharField(required=False, allow_null=True)
+    urology = serializers.CharField(required=False, allow_null=True)
+    neurology = serializers.CharField(required=False, allow_null=True)
 
     error = serializers.CharField(required=False)
 
@@ -35,4 +38,3 @@ class KISDataSerializer(serializers.Serializer):
         # Remove all dict pairs with None values
         clean_dict = {key: value for key, value in data.items() if value is not None}
         return clean_dict
-

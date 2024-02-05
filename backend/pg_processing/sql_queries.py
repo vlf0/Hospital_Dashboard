@@ -9,39 +9,38 @@ class QuerySets:
     Also has method for creating common list of these queries.
     """
 
-    ARRIVED = [
-        "SELECT * FROM mm.arrived;",
-        ['status', 'dept', 'channel', 'patient_type']
-    ]
-    DEPT_HOSP = [
-        "SELECT amount, med_profile FROM mm.dept_hosp;",
-        ['amount', 'med_profile']
-    ]
-    SIGNOUT = [
-        "SELECT dept, status FROM mm.signout;",
-        ['dept', 'status']
-    ]
-    DEADS = [
-        "SELECT * FROM mm.deads;",
-        ['pat_fio', 'ib_num', 'sex', 'ages', 'arriving_dt', 'state', 'dept', 'days', 'diag_arr', 'diag_dead']
+    ARRIVED = "SELECT * FROM mm.arrived;",
 
-    ]
-    OAR_ARRIVED_QUERY = [
-        "SELECT pat_fio, ib_num, ages, dept, doc_fio, diag_start FROM mm.oar_arrived;",
-        ['pat_fio', 'ib_num', 'ages', 'dept', 'doc_fio', 'diag_start']
-    ]
+    DEPT_HOSP = "SELECT med_profile, amount FROM mm.dept_hosp;",
 
-    OAR_MOVED_QUERY = [
-        "SELECT pat_fio, ib_num, ages, dept, doc_fio, move_date, from_dept, diag_start FROM mm.oar_moved;",
-        ['pat_fio', 'ib_num', 'ages', 'dept', 'doc_fio', 'move_date', 'from_dept', 'diag_start']
-    ]
-    OAR_CURRENT_QUERY = [
-        "SELECT pat_fio, ib_num, ages, dept, doc_fio, days, diag_start FROM mm.oar_current;",
-        ['pat_fio', 'ib_num', 'ages', 'dept', 'doc_fio', 'days', 'diag_start']
+    SIGNOUT = "SELECT dept, status FROM mm.signout;",
 
-    ]
+    DEADS = "SELECT * FROM mm.deads;",
+
+    OAR_ARRIVED_QUERY = "SELECT pat_fio, ib_num, ages, dept, doc_fio, diag_start FROM mm.oar_arrived;",
+
+    OAR_MOVED_QUERY = "SELECT pat_fio, ib_num, ages, dept, doc_fio, move_date, from_dept, diag_start FROM mm.oar_moved;",
+
+    OAR_CURRENT_QUERY = "SELECT pat_fio, ib_num, ages, dept, doc_fio, days, diag_start FROM mm.oar_current;",
+
     DMK_INSERT_QUERY = "INSERT INTO own.arrived (arrived, hosp, refused, signout, deads, reanimation)" \
                        " VALUES (%s, %s, %s, %s);"
+
+    COLUMNS = {
+        'arrived': ['ch103', 'clinic_only', 'ch103_clinic', 'singly', 'ZL', 'foreign', 'moscow', 'undefined'],
+        # 'dept_hosp': ['amount', 'dept'],
+
+    }
+    channels = ['103', 'Поликлиника', '103 Поликлиника', 'Самотек']
+    statuses = ['ЗЛ', 'Иногородние', 'Москвичи', 'не указано']
+
+    depts_mapping = {
+        'Терапия': 'therapy',
+        'Хирургия': 'surgery',
+        'Кардиология': 'cardiology',
+        'Урология': 'urology',
+        'Неврология': 'neurology'
+    }
 
     def queryset_for_dmk(self):
         """

@@ -4,6 +4,7 @@ from .psycopg_module import BaseConnectionDB
 from .sql_queries import QuerySets
 from .serializers import KISDataSerializer, MainDataSerializer
 from datetime import date, datetime
+from itertools import chain
 import logging
 
 # Local logger config and call
@@ -54,7 +55,7 @@ class KISData:
         :param query_sets: A list containing the data queries and queries of its columns. Each query pair is a list.
         """
         self.query_sets = query_sets
-        self.db_conn = BaseConnectionDB(dbname='postges',
+        self.db_conn = BaseConnectionDB(dbname='postgres',
                                         host='localhost',
                                         user='postgres',
                                         password='root'
@@ -152,6 +153,16 @@ class DataProcessing:
 
         """
         return len(dataset)
+
+    def create_instance(self, columns, dataset):
+        """
+        Create instances of a target class with data retrieved from the database.
+
+        :param target_class: The class to instantiate for each row.
+        :return: List of class instances.
+        """
+        instances_list = [CleanData(**dict(zip(columns, row))) for row in dataset]
+        return instances_list
 
 
 class DataForDMK(DataProcessing):
@@ -296,41 +307,71 @@ class DataForDMK(DataProcessing):
             # return e  # Returns original error text if needed while developing
 
 
-o = DataForDMK(KISData(QuerySets().queryset_for_dmk()).get_data_generator())
+# o = DataForDMK(KISData(QuerySets().queryset_for_dmk()).get_data_generator())
 
 
-class ArrivedDataProcessing(DataProcessing):
+class KISDataProcessing(DataProcessing):
 
-    def __init__(self, dataset):
-        super().__init__(dataset)
+    querysets = QuerySets()
 
-    def get_datasets_generator(self):
-        # Create connect object and generate queries
-        data_object = KISData(QuerySets().queryset_for_kis())
-        generator = data_object.get_data_generator()
-        # Get data-set and give it by command
+    def __init__(self, kis_generator):
+        super().__init__(kis_generator)
+
+    def __count_values(self, dataset, ind, keywords):
+        custom_filter = self.filter_dataset
+        grouped_list = [len(custom_filter(dataset, ind, i)) for i in keywords]
+        return grouped_list
+
+    def __result_for_sr(self, columns, dataset):
+        return self.create_instance(columns, dataset)
+
+    def arrived_process(self):
+        querysets = self.querysets
+        # Defining columns for serializer and values for filtering datasets
+        columns, channels, statuses = querysets.COLUMNS['arrived'], querysets.channels, querysets.statuses
+        # Getting first dataset by generator
+        arrived_dataset = next(self.kis_generator)
+        # Calculating channels numbers
+        hosp_data = self.filter_dataset(arrived_dataset, 0, 1)
+        sorted_channels_datasets = self.__count_values(hosp_data, 2, channels)
+        # Calculating patients statuses
+        sorted_statuses_datasets = self.__count_values(hosp_data, -1, statuses)
+        com = [tuple(sorted_channels_datasets+sorted_statuses_datasets)]
+        return self.__result_for_sr(columns, com)
+
+    def dept_hosp_process(self):
+        # columns = self.querysets.COLUMNS['dept_hosp']
+        querysets = self.querysets
+
+        pre_dataset = next(self.kis_generator)
+
+
+        dept_hosp_dataset = [tuple(chain.from_iterable(map(tuple, pre_dataset)))]
+        # Getting column names from stacked tuple of KIS data
+        ru_columns = list(dept_hosp_dataset[0][::2])
+        # Creating en columns for matching to KIS serializer fields
+        en_columns = [querysets.depts_mapping[column] for column in ru_columns]
+        # Created dataset manually from the same stacked tuple
+        dataset = [dept_hosp_dataset[0][1::2]]
+        print(ru_columns)
+        print(en_columns)
+        # print(dataset)
+        print(self.__result_for_sr(en_columns, dataset))
+        return self.__result_for_sr(en_columns, dataset)
+
+    def create_ready_dataset(self):
+        arrived = self.arrived_process()
+        hosp_dept = self.dept_hosp_process()
+        return [arrived, hosp_dept]
 
 
 
-    # def arrived_process(self):
-    #     custom_filter = self.filter_dataset
-    #     hosp_data = self.filter_dataset(self.dataset, 0, 1)
-    #     singly = custom_filter(hosp_data, 2, 'Самотек')
-    #     clinic_103 = custom_filter(hosp_data, 2, '103 Поликлиника')
-    #     only_clinic = custom_filter(hosp_data, 2, 'Поликлиника')
-    #     only_103 = custom_filter(hosp_data, 2, '103')
-    #     t = list(map(len, (singly, clinic_103, only_clinic, only_103)))
-    #     return t
 
 
-class SignOutDataProcessing(ArrivedDataProcessing):
+o = KISDataProcessing(KISData(QuerySets().queryset_for_kis()).get_data_generator())
+fsr = o.create_ready_dataset()
 
-    def __init__(self, dataset):
-        super().__init__(dataset)
+sr = KISDataSerializer
 
+print(sr(fsr[1], many=True).data)
 
-# o = DataProcessing().get_datasets_generator(KISData(QuerySets().queryset_for_dmk()))
-# o = kis_data.DataProcessing().get_datasets_generator(kis_data.KISData(kis_data.QuerySets().queryset_for_dmk()))
-k = KISData(QuerySets().queryset_for_dmk())
-
-s = KISData(QuerySets().queryset_for_kis())
