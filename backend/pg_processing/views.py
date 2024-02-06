@@ -7,17 +7,9 @@ from .serializers import MainDataSerializer as DMK_Sr
 from .kis_data import KISData, KISDataProcessing, QuerySets
 
 
-class MainDataReadViewSet(viewsets.ReadOnlyModelViewSet,
-                          mixins.CreateModelMixin):
-    """Allow access to read main data from DMK DB by using GET method only."""
-
-    queryset = MainData.objects.custom_filter()
-    serializer_class = DMK_Sr
-
-
 class KISDataReadViewSet(viewsets.ViewSet):
 
     def list(self, request):
-        queryset = KISDataProcessing(KISData(QuerySets().queryset_for_kis()).get_data_generator()).create_ready_dicts()
-        print(queryset)
-        return Response(queryset)
+        dmk = DMK_Sr(MainData.objects.custom_filter(), many=True).data
+        kis = KISDataProcessing(KISData(QuerySets().queryset_for_kis()).get_data_generator()).create_ready_dicts()
+        return Response({'dmk': dmk, 'kis': kis})
