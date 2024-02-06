@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """Describes connection and sql queries to Postgres DB."""
 
-from psycopg2 import OperationalError, ProgrammingError, extensions
+from psycopg2 import OperationalError, ProgrammingError
 from psycopg2.errors import UndefinedTable, SyntaxError
 import psycopg2
 import logging

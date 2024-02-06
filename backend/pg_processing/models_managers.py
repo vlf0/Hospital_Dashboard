@@ -6,7 +6,7 @@ from datetime import date, timedelta
 class TwoDaysFilterManager(models.Manager):
     """Provide using custom filter method.
 
-    - Custom method: custom_filter() gives 2 last rows only filtered by dates.
+    - Custom method: custom_filter() gives 7 last rows from model.
     """
 
     def custom_filter(self):

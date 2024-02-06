@@ -28,9 +28,11 @@ class QuerySets:
 
     COLUMNS = {
         'arrived': ['ch103', 'clinic_only', 'ch103_clinic', 'singly', 'ZL', 'foreign', 'moscow', 'undefined'],
-        # 'dept_hosp': ['amount', 'dept'],
 
     }
+
+    DICT_KEYWORDS = ['arrived', 'dept_hosp']
+
     channels = ['103', 'Поликлиника', '103 Поликлиника', 'Самотек']
     statuses = ['ЗЛ', 'Иногородние', 'Москвичи', 'не указано']
 

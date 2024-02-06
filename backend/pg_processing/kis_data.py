@@ -74,21 +74,6 @@ class KISData:
             yield self.cursor(dataset[0])
         self.db_conn.close_connection()
 
-    # def create_instance(self, target_class):
-    #     """
-    #     Create instances of a target class with data retrieved from the database.
-    #
-    #     :param target_class: The class to instantiate for each row.
-    #     :return: List of class instances.
-    #     """
-    #     if self.db_conn.error:
-    #         # List of one class with error text
-    #         return [CleanData(error=self.db_conn.error)]
-    #     generator = self.get_data_generator()
-    #     columns, data = next(generator), next(generator)
-    #     instances_list = [target_class(**dict(zip(columns, row))) for row in data]
-    #     return instances_list
-
 
 class DataProcessing:
     """
@@ -298,16 +283,11 @@ class DataForDMK(DataProcessing):
         serializer = MainDataSerializer(data=self.__collect_data())
         try:
             serializer.is_valid(raise_exception=True)
-            print(serializer.validated_data)
-            print([value for value in serializer.validated_data.values()])
             data_instance = serializer.save()
             return data_instance
         except (ValidationError, SyntaxError, AssertionError) as e:
             pg_loger.error(e)
             # return e  # Returns original error text if needed while developing
-
-
-# o = DataForDMK(KISData(QuerySets().queryset_for_dmk()).get_data_generator())
 
 
 class KISDataProcessing(DataProcessing):
@@ -325,53 +305,51 @@ class KISDataProcessing(DataProcessing):
     def __result_for_sr(self, columns, dataset):
         return self.create_instance(columns, dataset)
 
-    def arrived_process(self):
+    @staticmethod
+    def __serialize(ready_dataset):
+        sr_data = KISDataSerializer(ready_dataset, many=True).data
+        return sr_data
+
+    def __arrived_process(self):
         querysets = self.querysets
-        # Defining columns for serializer and values for filtering datasets
+        # Defining columns for serializer and values for filtering datasets.
         columns, channels, statuses = querysets.COLUMNS['arrived'], querysets.channels, querysets.statuses
-        # Getting first dataset by generator
+        # Getting first dataset by generator.
         arrived_dataset = next(self.kis_generator)
-        # Calculating channels numbers
+        # Calculating channels numbers.
         hosp_data = self.filter_dataset(arrived_dataset, 0, 1)
         sorted_channels_datasets = self.__count_values(hosp_data, 2, channels)
-        # Calculating patients statuses
+        # Calculating patients statuses.
         sorted_statuses_datasets = self.__count_values(hosp_data, -1, statuses)
+        # Creating 1 row data in dataset.
         com = [tuple(sorted_channels_datasets+sorted_statuses_datasets)]
-        return self.__result_for_sr(columns, com)
+        ready_dataset = self.__result_for_sr(columns, com)
+        return self.__serialize(ready_dataset)
 
-    def dept_hosp_process(self):
-        # columns = self.querysets.COLUMNS['dept_hosp']
+    def __dept_hosp_process(self):
         querysets = self.querysets
-
         pre_dataset = next(self.kis_generator)
-
-
+        # Creating 1 row inside dataset instead many.
         dept_hosp_dataset = [tuple(chain.from_iterable(map(tuple, pre_dataset)))]
-        # Getting column names from stacked tuple of KIS data
+        # Getting column names from stacked tuple of KIS data.
         ru_columns = list(dept_hosp_dataset[0][::2])
-        # Creating en columns for matching to KIS serializer fields
+        # Creating en columns for matching to KIS serializer fields.
         en_columns = [querysets.depts_mapping[column] for column in ru_columns]
-        # Created dataset manually from the same stacked tuple
+        # Created dataset manually from the same stacked tuple.
         dataset = [dept_hosp_dataset[0][1::2]]
-        print(ru_columns)
-        print(en_columns)
-        # print(dataset)
-        print(self.__result_for_sr(en_columns, dataset))
-        return self.__result_for_sr(en_columns, dataset)
+        ready_dataset = self.__result_for_sr(en_columns, dataset)
+        return self.__serialize(ready_dataset)
 
-    def create_ready_dataset(self):
-        arrived = self.arrived_process()
-        hosp_dept = self.dept_hosp_process()
-        return [arrived, hosp_dept]
+    def create_ready_dicts(self):
+        keywords = self.querysets.DICT_KEYWORDS
+        arrived = self.__arrived_process()
+        hosp_dept = self.__dept_hosp_process()
+        # Creating list of ready processed datasets.
+        ready_dataset = [arrived, hosp_dept]
+        # Creating list of dicts where keys takes from query class
+        # and values are ready dataset iterating list of them one by one.
+        result = [{keywords[ready_dataset.index(dataset)]: dataset for dataset in ready_dataset}]
+        return result
 
 
-
-
-
-o = KISDataProcessing(KISData(QuerySets().queryset_for_kis()).get_data_generator())
-fsr = o.create_ready_dataset()
-
-sr = KISDataSerializer
-
-print(sr(fsr[1], many=True).data)
 

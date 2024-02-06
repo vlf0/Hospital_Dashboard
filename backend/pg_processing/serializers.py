@@ -3,7 +3,6 @@ from rest_framework import serializers
 from .models import MainData
 
 
-
 class MainDataSerializer(serializers.ModelSerializer):
     """Serialize data of MainData model."""
 
@@ -18,20 +17,16 @@ class KISDataSerializer(serializers.Serializer):
     clinic_only = serializers.IntegerField(required=False, allow_null=True)
     ch103_clinic = serializers.IntegerField(required=False, allow_null=True)
     singly = serializers.IntegerField(required=False, allow_null=True)
-    ZL = serializers.CharField(required=False, allow_null=True)
-    foreign = serializers.CharField(required=False, allow_null=True)
-    moscow = serializers.CharField(required=False, allow_null=True)
-    undefined = serializers.CharField(required=False, allow_null=True)
-    dept = serializers.CharField(required=False, allow_null=True)
-    amount = serializers.CharField(required=False, allow_null=True)
+    ZL = serializers.IntegerField(required=False, allow_null=True)
+    foreign = serializers.IntegerField(required=False, allow_null=True)
+    moscow = serializers.IntegerField(required=False, allow_null=True)
+    undefined = serializers.IntegerField(required=False, allow_null=True)
 
-    therapy = serializers.CharField(required=False, allow_null=True)
-    surgery = serializers.CharField(required=False, allow_null=True)
-    cardiology = serializers.CharField(required=False, allow_null=True)
-    urology = serializers.CharField(required=False, allow_null=True)
-    neurology = serializers.CharField(required=False, allow_null=True)
-
-    error = serializers.CharField(required=False)
+    therapy = serializers.IntegerField(required=False, allow_null=True)
+    surgery = serializers.IntegerField(required=False, allow_null=True)
+    cardiology = serializers.IntegerField(required=False, allow_null=True)
+    urology = serializers.IntegerField(required=False, allow_null=True)
+    neurology = serializers.IntegerField(required=False, allow_null=True)
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
