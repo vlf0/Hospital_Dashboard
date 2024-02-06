@@ -12,6 +12,12 @@ class MainDataSerializer(serializers.ModelSerializer):
 
 
 class KISDataSerializer(serializers.Serializer):
+    """
+    Serializer for non-model data getting from external DB.
+
+    It contains all the required fields for all datasets
+    since it serializes multiple separate datasets from the same DB.
+    """
 
     ch103 = serializers.IntegerField(required=False, allow_null=True)
     clinic_only = serializers.IntegerField(required=False, allow_null=True)
@@ -28,7 +34,17 @@ class KISDataSerializer(serializers.Serializer):
     urology = serializers.IntegerField(required=False, allow_null=True)
     neurology = serializers.IntegerField(required=False, allow_null=True)
 
+    deads = serializers.IntegerField(required=False, allow_null=True)
+    moved = serializers.IntegerField(required=False, allow_null=True)
+    signout = serializers.IntegerField(required=False, allow_null=True)
+
     def to_representation(self, instance):
+        """
+        Remove all dict pairs with None values for exclude fields with no real values.
+
+        :param instance:
+        :return:
+        """
         data = super().to_representation(instance)
         # Remove all dict pairs with None values
         clean_dict = {key: value for key, value in data.items() if value is not None}

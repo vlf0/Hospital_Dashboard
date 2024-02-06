@@ -291,6 +291,10 @@ class DataForDMK(DataProcessing):
 
 
 class KISDataProcessing(DataProcessing):
+    """
+    Class contains processing methods for KIS data.
+
+    """
 
     querysets = QuerySets()
 
@@ -322,30 +326,39 @@ class KISDataProcessing(DataProcessing):
         # Calculating patients statuses.
         sorted_statuses_datasets = self.__count_values(hosp_data, -1, statuses)
         # Creating 1 row data in dataset.
-        com = [tuple(sorted_channels_datasets+sorted_statuses_datasets)]
-        ready_dataset = self.__result_for_sr(columns, com)
+        summary_dataset = [tuple(sorted_channels_datasets+sorted_statuses_datasets)]
+        ready_dataset = self.__result_for_sr(columns, summary_dataset)
         return self.__serialize(ready_dataset)
 
     def __dept_hosp_process(self):
-        querysets = self.querysets
         pre_dataset = next(self.kis_generator)
         # Creating 1 row inside dataset instead many.
         dept_hosp_dataset = [tuple(chain.from_iterable(map(tuple, pre_dataset)))]
         # Getting column names from stacked tuple of KIS data.
         ru_columns = list(dept_hosp_dataset[0][::2])
         # Creating en columns for matching to KIS serializer fields.
-        en_columns = [querysets.depts_mapping[column] for column in ru_columns]
+        en_columns = [self.querysets.depts_mapping[column] for column in ru_columns]
         # Created dataset manually from the same stacked tuple.
         dataset = [dept_hosp_dataset[0][1::2]]
         ready_dataset = self.__result_for_sr(en_columns, dataset)
+        return self.__serialize(ready_dataset)
+
+    def __signout_process(self):
+        querysets = self.querysets
+        columns, keywords = querysets.COLUMNS['signout'], querysets.signout
+        signout_dataset = next(self.kis_generator)
+        sorted_signout_dataset = self.__count_values(signout_dataset, 1, keywords)
+        summary_dataset = [tuple(sorted_signout_dataset)]
+        ready_dataset = self.__result_for_sr(columns, summary_dataset)
         return self.__serialize(ready_dataset)
 
     def create_ready_dicts(self):
         keywords = self.querysets.DICT_KEYWORDS
         arrived = self.__arrived_process()
         hosp_dept = self.__dept_hosp_process()
+        signout = self.__signout_process()
         # Creating list of ready processed datasets.
-        ready_dataset = [arrived, hosp_dept]
+        ready_dataset = [arrived, hosp_dept, signout]
         # Creating list of dicts where keys takes from query class
         # and values are ready dataset iterating list of them one by one.
         result = [{keywords[ready_dataset.index(dataset)]: dataset for dataset in ready_dataset}]

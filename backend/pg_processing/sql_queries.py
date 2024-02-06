@@ -5,7 +5,8 @@ class QuerySets:
     """
     QuerySets class.
 
-    Contains each specific database query and the columns for that query data in a list as class attributes.
+    Contains each specific database query and the columns for that query data in a list as class attributes,
+    as well as filter words, column sets, and serializer keywords.
     Also has method for creating common list of these queries.
     """
 
@@ -26,15 +27,19 @@ class QuerySets:
     DMK_INSERT_QUERY = "INSERT INTO own.arrived (arrived, hosp, refused, signout, deads, reanimation)" \
                        " VALUES (%s, %s, %s, %s);"
 
+    # Each string of this list is a keyword of dict where value is a serialized data.
+    DICT_KEYWORDS = ['arrived', 'dept_hosp', 'signout']
+
+    # Lists of columns for mapping with values to creating CleanData class instances.
     COLUMNS = {
         'arrived': ['ch103', 'clinic_only', 'ch103_clinic', 'singly', 'ZL', 'foreign', 'moscow', 'undefined'],
-
+        'signout': ['deads', 'moved', 'signout']
     }
 
-    DICT_KEYWORDS = ['arrived', 'dept_hosp']
-
+    # Filter-words for filter_dataset method of DataProcessing class.
     channels = ['103', 'Поликлиника', '103 Поликлиника', 'Самотек']
     statuses = ['ЗЛ', 'Иногородние', 'Москвичи', 'не указано']
+    signout = ['Умер', 'Переведен', 'Выписан']
 
     depts_mapping = {
         'Терапия': 'therapy',
