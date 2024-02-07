@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
+    'django_celery_beat',
     'users',
     'pg_processing',
     'django_filters',
@@ -72,9 +73,6 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.AllowAny',
         # 'rest_framework.permissions.IsAuthenticated',
     ],
-    # 'DEFAULT_FILTER_BACKENDS': [
-    #     'django_filters.rest_framework.DjangoFilterBackend'
-    # ],
 }
 
 TEMPLATES = [
@@ -160,3 +158,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 #         }
 #     }
 # }
+
+# Celery settings
+CELERY_BROKER_URL = env.str('BROKER_URL')
+CELERY_RESULT_BACKEND = env.str('RESULT_URL')
+CELERY_TIMEZONE = 'Europe/Moscow'
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
