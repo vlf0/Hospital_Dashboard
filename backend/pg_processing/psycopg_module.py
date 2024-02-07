@@ -10,7 +10,7 @@ import logging
 
 # Local logger config and call
 formater = '[%(levelname)s:%(asctime)sms] [Module - %(name)s]\n %(message)s'
-logging.basicConfig(filename='pg_processing/pg_logs.log', filemode='w', format=formater)
+logging.basicConfig(filename='pg_logs.log', filemode='w', format=formater)
 pg_loger = logging.getLogger(__name__)
 
 
@@ -102,18 +102,13 @@ class BaseConnectionDB:
             return -2, self.error
         return self.conn.closed
 
-    def execute_query(self, query, insert_data=None):
+    def execute_query(self, query):
         """
         Execute a SQL query.
 
         :param query: (str): The SQL query to be executed.
-        :param insert_data: (list): Data to be inserted if provided for insert query.
-               When is provided will be executed inserting query and simple get query if not. Defaults to None.
 
-        :return: (list) The result of the query execution - list of tuples.
-                 ()
-                 (None) If insert_data was provided then executing insert query. In this case function returns None
-                 because we get nothing from DB, insert only.
+        :return: *list*: The result of the query execution - list of tuples.
         """
         # Return list of ine tuple containing error text to any sql query if connection was not established
         if self.error:
@@ -125,7 +120,7 @@ class BaseConnectionDB:
 
     def __execute_get(self, query):
         """
-        Execute a SQL SELECT query and return the result set.
+        Execute a SQL SELECT query and return the result set getting all rows.
 
         :param query: (str): The SQL SELECT query to be executed.
 
