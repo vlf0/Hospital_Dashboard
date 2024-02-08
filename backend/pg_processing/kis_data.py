@@ -1,4 +1,6 @@
 """Responsible for classes defining non-model query-sets from another DB."""
+from typing import Any, Iterator
+
 from rest_framework.exceptions import ValidationError
 from .psycopg_module import BaseConnectionDB
 from .sql_queries import QuerySets
@@ -22,14 +24,14 @@ class CleanData:
     The attrs of each class object represents column name and its value as a key=value pair
     gotten from KIS DB as a stored info.
 
-    Does not have anything methods..
+    Does not have anything methods.
     """
 
     def __init__(self, **kwargs):
         """
         Initialize an object with attributes based on key-value pairs provided as keyword arguments.
 
-        :param kwargs: (dict): Keyword arguments representing attribute names and values for the object.
+        :param kwargs: *dict*: Keyword arguments representing attribute names and values for the object.
         """
         for key, value in kwargs.items():
             setattr(self, key, value)
@@ -44,15 +46,20 @@ class KISData:
     the data query and its corresponding column queries.
 
     Attributes:
-    db_conn:  The connection module to the PostgreSQL database.
-    cursor:  The method to execute queries on the PostgreSQL database.
+      db_conn:  The connection module to the PostgreSQL database, BaseConnection instance.
+
+      cursor:  The method to execute queries on the PostgreSQL database.
+
+    Methods:
+      - get_data_generator -> iterator: Create a generator-iterator object performing each query from queryset by request.
     """
 
     def __init__(self, query_sets):
         """
         Initialize an instance of KISData.
 
-        :param query_sets: A list containing the data queries and queries of its columns. Each query pair is a list.
+        :param query_sets: *list*: A list containing the data queries
+          and queries of its columns. Each query pair is a list.
         """
         self.query_sets = query_sets
         self.db_conn = BaseConnectionDB(dbname='postgres',
@@ -62,13 +69,13 @@ class KISData:
                                         )
         self.cursor = self.db_conn.execute_query
 
-    def get_data_generator(self):
+    def get_data_generator(self) -> Iterator:
         """
-        Create a generator-iterator object performing each query from queryset by request.
+        Create an iterator object performing each query from queryset by request.
 
         Retrieves data from the database based on the specified query passed as a list into init method as arg.
 
-        :return: List of tuples.
+        :return: *Iterator*.
         """
         for dataset in self.query_sets:
             yield self.cursor(dataset[0])
@@ -77,53 +84,50 @@ class KISData:
 
 class DataProcessing:
     """
-    The base class from which other classes are inherited to provide required data
-    by adding specific sets of queries.
+    The base class from which other classes are inherited to provide required data by adding specific sets of queries.
 
     Attributes:
-      kis_generator: (generator): A generator for retrieving datasets. Must be a KISData instance.
+      kis_generator: (Iterator): A generator for retrieving datasets. Must be a KISData instance.
 
     Methods:
-      - error_check(dataset): Check if the dataset contains an error.
-      Returns:
-      (bool)
+      - error_check(dataset) -> bool: Check if the dataset contains an error.
 
-      - filter_dataset(dataset, ind, value): Filter dataset based on index and value. Needed for data sorting.
-      Returns:
-      list): Filtered datasets.
+      - filter_dataset(dataset, ind, value) -> list: Filter dataset based on index and value. Needed for data sorting.
 
-      - count_dataset_total(dataset): Count the total number of rows in the dataset.
-      Returns:
-      (int):
+      - count_dataset_total(dataset) -> int: Count the total number of rows in the dataset.
     """
 
     def __init__(self, kis_generator):
         """
         Initialize the DataProcessing instance.
 
-        :param kis_generator: (generator): A generator providing datasets.
+        :param kis_generator: *iterator*: A generator providing datasets.
         """
         self.kis_generator = kis_generator
 
     @staticmethod
-    def error_check(dataset):
+    def error_check(dataset) -> bool:
         """
         Check if the dataset contains an error.
 
-        :param dataset: (list): The dataset to check.
-        :return: bool: True if an error is detected, False otherwise.
+        :param dataset: *list*: The dataset to check.
+        :type dataset: list[tuple]
+        :return: *bool*: True if an error is detected, False otherwise.
         """
         if dataset[0][0] == 'Error':
             return True
 
     @staticmethod
-    def filter_dataset(dataset, ind, value):
+    def filter_dataset(dataset, ind, value) -> list:
         """
         Filter passed dataset based on index and value.
 
-        :param dataset: (list): The dataset to filter.
-        :param ind: (int): Index to filter on.
-        :param value: Value to match in the filter.
+        :param dataset: *list*: The dataset to filter.
+        :type dataset: list[tuple]
+        :param ind: *int*: Index to filter on.
+        :type ind: int
+        :param value: *int, str*: Value to match in the filter.
+        :type value: int or str
         :return: *list*: Filtered dataset.
         """
         return [row for row in dataset if row[ind] == value]
@@ -133,18 +137,23 @@ class DataProcessing:
         """
         Count the total number of rows in the dataset.
 
-        :param dataset: (list): The dataset to count.
+        :param dataset: *list*: The dataset to count.
+        :type dataset: list[tuple]
         :return: *int*: Total number of rows.
 
         """
         return len(dataset)
 
-    def create_instance(self, columns, dataset):
+    def create_instance(self, columns, dataset) -> list:
         """
         Create instances of a target class with data retrieved from the database.
 
-        :param target_class: The class to instantiate for each row.
-        :return: List of class instances.
+        :param columns: *list*: A list of column names representing the attributes of the `CleanData` instances.
+        :type columns: list[str]
+        :param dataset: *list*: A list of lists, where each inner list contains
+         data corresponding to a row in the database.
+        :type dataset: list[tuple]
+        :return: *list*: A list of `CleanData` class instances, each instantiated with data from the provided dataset.
         """
         instances_list = [CleanData(**dict(zip(columns, row))) for row in dataset]
         return instances_list
@@ -158,48 +167,40 @@ class DataForDMK(DataProcessing):
     of collecting, preparing, and saving data to the DMK database using a generator.
 
     Attributes:
-      kis_generator: (generator): A generator providing datasets.
+      kis_generator: (iterator): A generator providing datasets.
 
     Methods:
-      - count_data(dataset, ind, value):
-        Count total, positive, and negative amounts in the dataset.
+      - count_data(dataset, ind, value) -> list: Count total, positive, and negative amounts in the dataset.
 
-      - get_arrived_data() -> dict:
-        Get data related to arrivals.
+      - get_arrived_data() -> dict: Get data related to arrivals.
 
-      - get_signout_data() -> dict:
-        Get data related to signouts and deaths.
+      - get_signout_data() -> dict: Get data related to signouts and deaths.
 
-      - get_reanimation_data() -> dict:
-        Get data related to reanimation.
+      - get_reanimation_data() -> dict: Get data related to reanimation.
 
-      - __collect_data() -> dict:
-        Get calculated main values for detail boards on the front-end for saving to DMK DB.
-
-      - save_to_dmk():
-        Save the prepared data to the DMK DB using the MainData model and its serializer.
-
+      - save_to_dmk(): Save the prepared data to the DMK DB using the MainData model and its serializer.
     """
 
     def __init__(self, kis_generator):
         """
         Initialize the DataForDMK instance, it inherited from parent class.
 
-        Parameters:
-          kis_generator (generator): A generator providing datasets.
-
+        :param kis_generator: *iterator*: A generator providing datasets.
         """
         super().__init__(kis_generator)
 
-    def count_data(self, dataset, ind, value):
+    def count_data(self, dataset, ind, value) -> list[int]:
         """
         Count total, positive, and negative amounts in the dataset.
 
         Negative means refused and deads, and positive means hospitalized and moved to other clinics.
 
-        :param dataset: (list): The dataset to count.
-        :param ind: (int): Index to count positive and negative amounts.
-        :param value: Value to match in the filter.
+        :param dataset: *list*: The dataset to count.
+        :type dataset: list[tuple]
+        :param ind: *int*: Index to count positive and negative amounts.
+        :type ind: int
+        :param value: *int, str*: Value to match in the filter.
+        :type value: int or str
         :return: *list*: List containing total, positive, and negative amounts.
         """
         data = self.filter_dataset(dataset, ind, value)
@@ -274,7 +275,8 @@ class DataForDMK(DataProcessing):
         """
         Save the prepared data to the DMK DB using the MainData model and its serializer.
 
-        :return: *MainData*: Saved data into the model. If on of the exception will raise - returns nothing.
+        :return: `MainData`: Saved data into the model. If on of the exception will raise - returns nothing and
+         write to log file.
 
         :raises ValidationError: If the serializer validation fails.
         :raises SyntaxError: If there is a syntax error in the serializer.
