@@ -41,12 +41,20 @@ class QuerySets:
     statuses = ['ЗЛ', 'Иногородние', 'Москвичи', 'не указано']
     signout = ['Умер', 'Переведен', 'Выписан']
 
-    depts_mapping = {
+    profiles_mapping = {
         'Терапия': 'therapy',
         'Хирургия': 'surgery',
         'Кардиология': 'cardiology',
         'Урология': 'urology',
         'Неврология': 'neurology'
+    }
+
+    depts_mapping = {
+        'ОРИТ №1': 'oar1',
+        'ОРИТ №2': 'oar2',
+        'Кардиологическое отделение': 'cardio_d',
+        'Хирургическое отделение': 'surgery_d',
+        'Терапевтическое отделение': 'therapy_d'
     }
 
     def queryset_for_dmk(self):

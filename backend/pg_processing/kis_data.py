@@ -1,13 +1,14 @@
 """Responsible for classes defining non-model query-sets from another DB."""
 from typing import Any, Iterator
-
+from datetime import date, datetime
+from collections import Counter
+from itertools import chain
+import logging
 from rest_framework.exceptions import ValidationError
 from .psycopg_module import BaseConnectionDB
 from .sql_queries import QuerySets
 from .serializers import KISDataSerializer, MainDataSerializer
-from datetime import date, datetime
-from itertools import chain
-import logging
+
 
 # Local logger config and call
 formater = '[%(levelname)s:%(asctime)sms] [Module - %(name)s]\n %(message)s'
@@ -230,11 +231,11 @@ class DataForDMK(DataProcessing):
 
         :return: *dict*: Dictionary containing signout and deaths data.
         """
-        arrived_dataset = next(self.kis_generator)
+        signout_dataset = next(self.kis_generator)
         result_keys = ['signout', 'deads']
-        if self.error_check(arrived_dataset):
+        if self.error_check(signout_dataset):
             return dict(zip(result_keys, [None, None]))
-        ready_values = self.count_data(arrived_dataset, 1, 'Другая причина')
+        ready_values = self.count_data(signout_dataset, 1, 'Другая причина')
         return dict(zip(result_keys, ready_values))
 
     def get_reanimation_data(self) -> dict:
@@ -343,6 +344,18 @@ class KISDataProcessing(DataProcessing):
         grouped_list = [len(custom_filter(dataset, ind, i)) for i in keywords]
         return grouped_list
 
+    @staticmethod
+    def __slice_dataset(dataset, mapping) -> list[list]:
+        # Creating 1 row inside dataset instead many.
+        stacked_tuples_dataset = [tuple(chain.from_iterable(map(tuple, dataset)))]
+        # Getting column names from stacked tuple of KIS data.
+        ru_columns = list(stacked_tuples_dataset[0][::2])
+        # Creating en columns for matching to KIS serializer fields.
+        en_columns = [mapping[column] for column in ru_columns]
+        # Created dataset manually as list.
+        counted_signout_pats = list(stacked_tuples_dataset[0][1::2])
+        return [en_columns, counted_signout_pats]
+
     def __result_for_sr(self, columns, dataset) -> list[CleanData]:
         """
         Create instances of `CleanData` with data from the dataset.
@@ -405,17 +418,12 @@ class KISDataProcessing(DataProcessing):
         """
         pre_dataset = next(self.kis_generator)
         if self.error_check(pre_dataset):
-            en_columns = [column for column in self.querysets.depts_mapping.values()]
+            en_columns = [column for column in self.querysets.profiles_mapping.values()]
             dataset = [tuple([0 for cnt in en_columns])]
         else:
-            # Creating 1 row inside dataset instead many.
-            dept_hosp_dataset = [tuple(chain.from_iterable(map(tuple, pre_dataset)))]
-            # Getting column names from stacked tuple of KIS data.
-            ru_columns = list(dept_hosp_dataset[0][::2])
-            # Creating en columns for matching to KIS serializer fields.
-            en_columns = [self.querysets.depts_mapping[column] for column in ru_columns]
-            # Created dataset manually from the same stacked tuple.
-            dataset = [dept_hosp_dataset[0][1::2]]
+            packed_data = self.__slice_dataset(pre_dataset, self.querysets.profiles_mapping)
+            en_columns, dataset = packed_data[0], packed_data[1]
+            dataset = [tuple(dataset)]
         ready_dataset = self.__result_for_sr(en_columns, dataset)
         return self.__serialize(ready_dataset)
 
@@ -428,12 +436,20 @@ class KISDataProcessing(DataProcessing):
         querysets = self.querysets
         columns, keywords = querysets.COLUMNS['signout'], querysets.signout
         signout_dataset = next(self.kis_generator)
+        # Calculating signout from defined depts
+        signout_only = self.filter_dataset(signout_dataset, 1, 'Выписан')
+        counter = Counter(signout_only)
+        counted_signout_dataset = [(dept[0], cnt) for dept, cnt in counter.items()]
+        # Preparing data for creating processed dataset
+        packed_data = self.__slice_dataset(counted_signout_dataset, querysets.depts_mapping)
+        en_columns, dataset = packed_data[0], packed_data[1]
         if self.error_check(signout_dataset):
             sorted_signout_dataset = [0 for cnt in columns]
         else:
             sorted_signout_dataset = self.__count_values(signout_dataset, 1, keywords)
-        summary_dataset = [tuple(sorted_signout_dataset)]
-        ready_dataset = self.__result_for_sr(columns, summary_dataset)
+        summary_dataset = [tuple(sorted_signout_dataset + dataset)]
+        summary_columns = columns + en_columns
+        ready_dataset = self.__result_for_sr(summary_columns, summary_dataset)
         return self.__serialize(ready_dataset)
 
     def create_ready_dicts(self) -> list[dict]:
@@ -453,6 +469,3 @@ class KISDataProcessing(DataProcessing):
         result = [{keywords[ready_dataset.index(dataset)]: dataset for dataset in ready_dataset}]
         return result
 
-
-o = KISDataProcessing(KISData(QuerySets().queryset_for_kis()).get_data_generator())
-print(o.create_ready_dicts())

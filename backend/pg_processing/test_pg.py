@@ -6,7 +6,6 @@ from .kis_data import QuerySets, DataForDMK, KISDataProcessing
 # Fixture to create a connection for testing
 @pytest.fixture
 def test_conn():
-    qs = QuerySets()
     connection = BaseConnectionDB(dbname='postgres', host='localhost', user='postgres', password='root')
 
     class KISData:
@@ -26,7 +25,7 @@ def test_conn():
         inst.db_conn.close_connection()
 
 
-# Testing psycopg_module, BaseConnectionDB class
+# Testing BaseConnectionDB class
 def test_success_connection(test_conn):
     """Checking attribute of class instance that is connection object."""
     assert test_conn.db_conn.conn is not None
