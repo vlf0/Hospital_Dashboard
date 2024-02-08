@@ -144,7 +144,7 @@ class DataProcessing:
         """
         return len(dataset)
 
-    def create_instance(self, columns, dataset) -> list:
+    def create_instance(self, columns, dataset) -> list[CleanData]:
         """
         Create instances of a target class with data retrieved from the database.
 
@@ -153,7 +153,7 @@ class DataProcessing:
         :param dataset: *list*: A list of lists, where each inner list contains
          data corresponding to a row in the database.
         :type dataset: list[tuple]
-        :return: *list*: A list of `CleanData` class instances, each instantiated with data from the provided dataset.
+        :return: *list[CleanData]*: A list of `CleanData` class instances, each instantiated with data from the provided dataset.
         """
         instances_list = [CleanData(**dict(zip(columns, row))) for row in dataset]
         return instances_list
@@ -258,18 +258,15 @@ class DataForDMK(DataProcessing):
         :return: *dict*: Main data for saving to DMK DB.
         :raises StopIteration: If the generator is already empty. This point also will writen to logs.
         """
-        try:
-            arrived, signout, deads = self.get_arrived_data(), self.get_signout_data(), self.get_reanimation_data()
-            main_data = arrived | signout | deads
-            if None in [value for value in main_data.values()]:
-                pg_loger.warning(f'[WARNING: {datetime.now()}] Error occurred when data access attempt.'
-                                 f' Will writen only NULL values to DMK DB.')
-            # Add dates key-value pair to collected data dict.
-            today_dict = {'dates': date.today()}
-            ready_data = today_dict | main_data
-            return ready_data
-        except StopIteration:
-            pg_loger.error('The generator is already empty. Need re-create KisData object.')
+        arrived, signout, deads = self.get_arrived_data(), self.get_signout_data(), self.get_reanimation_data()
+        main_data = arrived | signout | deads
+        if None in [value for value in main_data.values()]:
+            pg_loger.warning(f'[WARNING: {datetime.now()}] Error occurred when data access attempt.'
+                             f' Will writen only NULL values to DMK DB.')
+        # Add dates key-value pair to collected data dict.
+        today_dict = {'dates': date.today()}
+        ready_data = today_dict | main_data
+        return ready_data
 
     def save_to_dmk(self):
         """
@@ -296,65 +293,155 @@ class KISDataProcessing(DataProcessing):
     """
     Class contains processing methods for KIS data.
 
+    Used for getting and processing KIS DB data directly.
+
+    Class attributes:
+      querysets: QuerySets instance for getting access to its attrs and methods permanent.
+
+    Attributes:
+      kis_generator: Iterator: A generator for retrieving datasets. Must be a KISData instance.
+
+    Methods:
+      - __count_values(dataset, ind, keywords) -> list[int]: Count values in the dataset based on index and keywords.
+
+      - __result_for_sr(columns, dataset) -> list[CleanData]: Create instances of CleanData with data from the dataset.
+
+      - __serialize(ready_dataset) -> dict: Serialize the processed dataset using the KISDataSerializer.
+
+      - __arrived_process() -> dict: Process and serialize data related to arrivals.
+
+      - __dept_hosp_process() -> dict: Process and serialize data related to departmental hospitals.
+
+      - __signout_process() -> dict: Process and serialize data related to signouts.
+
+      - create_ready_dicts() -> list[dict]: Create a list of dictionaries containing processed and serialized datasets.
     """
 
     querysets = QuerySets()
 
     def __init__(self, kis_generator):
+        """
+        Initialize the KISDataProcessing instance.
+
+        :param kis_generator: *iterator*: A generator providing datasets.
+        """
         super().__init__(kis_generator)
 
-    def __count_values(self, dataset, ind, keywords):
+    def __count_values(self, dataset, ind, keywords) -> list[int]:
+        """
+        Count values in the dataset based on index and keywords.
+
+        :param dataset: *list*: The dataset to count.
+        :type dataset: list[tuple]
+        :param ind: *int*: Index to count values.
+        :type ind: int
+        :param keywords: *list*: Keywords to match in the filter.
+        :type keywords: list[str]
+        :return: *list[int]*: List containing counted values.
+        """
         custom_filter = self.filter_dataset
         grouped_list = [len(custom_filter(dataset, ind, i)) for i in keywords]
         return grouped_list
 
-    def __result_for_sr(self, columns, dataset):
+    def __result_for_sr(self, columns, dataset) -> list[CleanData]:
+        """
+        Create instances of `CleanData` with data from the dataset.
+
+        :param columns: *list*: A list of column names representing the attributes of the `CleanData` instances.
+        :type columns: *list[str]*
+        :param dataset: *list*: A list of lists, where each inner list contains
+         data corresponding to a row in the database.
+        :type dataset: *list[tuple]*
+        :return: *list[CleanData]*: A list of `CleanData` class instances, each instantiated with
+         data from the provided dataset.
+        """
         return self.create_instance(columns, dataset)
 
     @staticmethod
-    def __serialize(ready_dataset):
+    def __serialize(ready_dataset) -> dict:
+        """
+        Serialize the processed dataset using the KISDataSerializer.
+
+        :param ready_dataset: *list[CleanData]*: The processed dataset.
+        :type ready_dataset: list[CleanData]
+        :return: *dict*: Serialized data.
+        """
         sr_data = KISDataSerializer(ready_dataset, many=True).data
         return sr_data
 
-    def __arrived_process(self):
+    def __arrived_process(self) -> dict:
+        """
+        Process and serialize data related to arrivals.
+
+        :return: *dict*: Serialized data.
+        """
         querysets = self.querysets
         # Defining columns for serializer and values for filtering datasets.
         columns, channels, statuses = querysets.COLUMNS['arrived'], querysets.channels, querysets.statuses
         # Getting first dataset by generator.
         arrived_dataset = next(self.kis_generator)
-        # Calculating channels numbers.
-        hosp_data = self.filter_dataset(arrived_dataset, 0, 1)
-        sorted_channels_datasets = self.__count_values(hosp_data, 2, channels)
-        # Calculating patients statuses.
-        sorted_statuses_datasets = self.__count_values(hosp_data, -1, statuses)
+        if self.error_check(arrived_dataset):
+            sorted_channels_datasets = [0 for cnt in channels]
+            sorted_statuses_datasets = [0 for cnt in statuses]
+        else:
+            hosp_data = self.filter_dataset(arrived_dataset, 0, 1)
+            # Calculating channels numbers.
+            sorted_channels_datasets = self.__count_values(hosp_data, 2, channels)
+            # Calculating patients statuses.
+            sorted_statuses_datasets = self.__count_values(hosp_data, -1, statuses)
         # Creating 1 row data in dataset.
         summary_dataset = [tuple(sorted_channels_datasets+sorted_statuses_datasets)]
         ready_dataset = self.__result_for_sr(columns, summary_dataset)
         return self.__serialize(ready_dataset)
 
-    def __dept_hosp_process(self):
+    def __dept_hosp_process(self) -> dict:
+        """
+        Process and serialize data related to hospitalized patients.
+
+         If dataset is the one of postgres errors then create columns list and dataset manually
+         that contains all zero to serializer can process it and avoiding errors.
+
+        :return: *dict*: Serialized data.
+        """
         pre_dataset = next(self.kis_generator)
-        # Creating 1 row inside dataset instead many.
-        dept_hosp_dataset = [tuple(chain.from_iterable(map(tuple, pre_dataset)))]
-        # Getting column names from stacked tuple of KIS data.
-        ru_columns = list(dept_hosp_dataset[0][::2])
-        # Creating en columns for matching to KIS serializer fields.
-        en_columns = [self.querysets.depts_mapping[column] for column in ru_columns]
-        # Created dataset manually from the same stacked tuple.
-        dataset = [dept_hosp_dataset[0][1::2]]
+        if self.error_check(pre_dataset):
+            en_columns = [column for column in self.querysets.depts_mapping.values()]
+            dataset = [tuple([0 for cnt in en_columns])]
+        else:
+            # Creating 1 row inside dataset instead many.
+            dept_hosp_dataset = [tuple(chain.from_iterable(map(tuple, pre_dataset)))]
+            # Getting column names from stacked tuple of KIS data.
+            ru_columns = list(dept_hosp_dataset[0][::2])
+            # Creating en columns for matching to KIS serializer fields.
+            en_columns = [self.querysets.depts_mapping[column] for column in ru_columns]
+            # Created dataset manually from the same stacked tuple.
+            dataset = [dept_hosp_dataset[0][1::2]]
         ready_dataset = self.__result_for_sr(en_columns, dataset)
         return self.__serialize(ready_dataset)
 
-    def __signout_process(self):
+    def __signout_process(self) -> dict:
+        """
+        Process and serialize data related to signouts.
+
+        :return: *dict*: Serialized data.
+        """
         querysets = self.querysets
         columns, keywords = querysets.COLUMNS['signout'], querysets.signout
         signout_dataset = next(self.kis_generator)
-        sorted_signout_dataset = self.__count_values(signout_dataset, 1, keywords)
+        if self.error_check(signout_dataset):
+            sorted_signout_dataset = [0 for cnt in columns]
+        else:
+            sorted_signout_dataset = self.__count_values(signout_dataset, 1, keywords)
         summary_dataset = [tuple(sorted_signout_dataset)]
         ready_dataset = self.__result_for_sr(columns, summary_dataset)
         return self.__serialize(ready_dataset)
 
-    def create_ready_dicts(self):
+    def create_ready_dicts(self) -> list[dict]:
+        """
+        Create a list of dictionaries containing processed and serialized datasets.
+
+        :return: *list[dict]*: List of dictionaries containing processed and serialized datasets.
+        """
         keywords = self.querysets.DICT_KEYWORDS
         arrived = self.__arrived_process()
         hosp_dept = self.__dept_hosp_process()
@@ -367,4 +454,5 @@ class KISDataProcessing(DataProcessing):
         return result
 
 
-
+o = KISDataProcessing(KISData(QuerySets().queryset_for_kis()).get_data_generator())
+print(o.create_ready_dicts())
