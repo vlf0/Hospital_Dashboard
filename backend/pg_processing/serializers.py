@@ -41,6 +41,10 @@ class KISDataSerializer(serializers.Serializer):
     surgery_d = serializers.IntegerField(required=False, allow_null=True)
     therapy_d = serializers.IntegerField(required=False, allow_null=True)
 
+    oar1 = serializers.IntegerField(required=False, allow_null=True)
+    oar2 = serializers.IntegerField(required=False, allow_null=True)
+    oar3 = serializers.IntegerField(required=False, allow_null=True)
+
     def to_representation(self, instance):
         """
         Remove all dict pairs with None values for exclude fields with no real values.
@@ -80,9 +84,6 @@ class KISTableSerializer(KISDataSerializer):
     move_date = serializers.DateTimeField(required=False, allow_null=True)
     from_dept = serializers.CharField(required=False, allow_null=True)
 
-    oar1 = serializers.CharField(required=False, allow_null=True)
-    oar2 = serializers.CharField(required=False, allow_null=True)
-    oar3 = serializers.CharField(required=False, allow_null=True)
 
 
 

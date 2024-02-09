@@ -319,8 +319,11 @@ class KISDataProcessing(DataProcessing):
     """
 
     qs = QuerySets()
-    counted_deads = [(None, None, None)]
-    counted_oar = [(None, None, None)]
+    deads_oar = []
+    counted_oar = []
+    # arrived_oar = [(None, None, None)]
+    # moved_oar = [(None, None, None)]
+    # current_oar = [(None, None, None)]
 
     def __init__(self, kis_generator):
         """
@@ -461,13 +464,13 @@ class KISDataProcessing(DataProcessing):
         # Counting deads patients in OARs
         if oars_filtered := [len(self.filter_dataset(deads_dataset, 6, oar))
                              for oar in ['ОРИТ №1', 'ОРИТ №2', 'ОРИТ №3']]:
-            self.counted_deads = [tuple(oars_filtered)]
+            self.deads_oar = [tuple(oars_filtered)]
         # Processing table data for serializing.
         columns = self.qs.COLUMNS['deads_t']
         ready_dataset = self.__result_for_sr(columns, deads_dataset)
         return self.__serialize(ready_dataset, data_serializer=False)
 
-    def __oar_process(self, dataset, columns, include_deads=False) -> dict:
+    def __oar_process(self, dataset, columns) -> dict:
         """
         Process and serialize data related to hospitalized in reanimation.
 
@@ -476,16 +479,15 @@ class KISDataProcessing(DataProcessing):
         :return: *dict*:
         """
         # Creating list of calculating lens of each separated datasets that filtered by oar number
-        oar_cols = self.qs.COLUMNS['oar_amounts']
-        if counted_oar := [len(self.filter_dataset(dataset, 3, oar)) for oar in ['ОРИТ №1', 'ОРИТ №2', 'ОРИТ №3']]:
-            self.counted_oar = [tuple(counted_oar)]
-        oar_amount = self.__result_for_sr(oar_cols, self.counted_oar)
-        ready_dataset = self.__result_for_sr(columns, dataset) + oar_amount
-
-        if include_deads:
-            deads_amount = self.__result_for_sr(oar_cols, self.counted_deads)
-            ready_dataset = ready_dataset + deads_amount
+        if oar_nums := [len(self.filter_dataset(dataset, 3, oar)) for oar in ['ОРИТ №1', 'ОРИТ №2', 'ОРИТ №3']]:
+            self.counted_oar.append([tuple(oar_nums)])
+        ready_dataset = self.__result_for_sr(columns, dataset)
         return self.__serialize(ready_dataset, data_serializer=False)
+
+    def oar_count(self):
+        oar_columns = self.qs.COLUMNS['oar_amounts']
+        ar = self.__result_for_sr(oar_columns, self.counted_oar[0])
+        print(self.__serialize(ar))
 
     def create_ready_dicts(self) -> list[dict]:
         """
@@ -500,7 +502,8 @@ class KISDataProcessing(DataProcessing):
         deads = self.__deads_process(next(self.kis_generator))
         oar_arrived = self.__oar_process(next(self.kis_generator), self.qs.COLUMNS['oar_arrived_t'])
         oar_moved = self.__oar_process(next(self.kis_generator), self.qs.COLUMNS['oar_moved_t'])
-        oar_current = self.__oar_process(next(self.kis_generator), self.qs.COLUMNS['oar_current_t'], include_deads=True)
+        oar_current = self.__oar_process(next(self.kis_generator), self.qs.COLUMNS['oar_current_t'])
+        self.oar_count()
         # Creating list of ready processed datasets.
         ready_dataset = [arrived, hosp_dept, signout, deads, oar_arrived, oar_moved, oar_current]
         # Creating list of dicts where keys takes from query class
