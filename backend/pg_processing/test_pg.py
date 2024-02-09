@@ -58,3 +58,8 @@ def test_creating_sr_kis_data(test_conn):
     """
     class_instance = KISDataProcessing(test_conn.get_data_generator(QuerySets().queryset_for_kis()))
     assert type(class_instance.create_ready_dicts()) is list
+
+
+def test_getting_columns(test_conn):
+    columns = test_conn.db_conn.execute_query(QuerySets().COLUMNS['deads_t'])
+    assert type(columns) is list and len(columns) != 0

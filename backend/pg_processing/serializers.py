@@ -52,3 +52,23 @@ class KISDataSerializer(serializers.Serializer):
         # Remove all dict pairs with None values
         clean_dict = {key: value for key, value in data.items() if value is not None}
         return clean_dict
+
+
+class KISTableSerializer(KISDataSerializer):
+    """
+    Serializer for non-model table-data getting from external DB.
+
+    It contains all the required fields for all table datasets
+    since it serializes multiple separate table datasets from the same DB.
+    """
+    # Fields to deads dataset related
+    pat_fio = serializers.CharField(required=False, allow_null=True)
+    ib_num = serializers.CharField(required=False, allow_null=True)
+    sex = serializers.CharField(required=False, allow_null=True)
+    age = serializers.CharField(required=False, allow_null=True)
+    arriving_dt = serializers.DateTimeField(required=False, allow_null=True)
+    state = serializers.CharField(required=False, allow_null=True)
+    dept = serializers.CharField(required=False, allow_null=True)
+    days = serializers.IntegerField(required=False, allow_null=True)
+    diag_arr = serializers.CharField(required=False, allow_null=True)
+    diag_dead = serializers.CharField(required=False, allow_null=True)

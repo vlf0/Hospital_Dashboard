@@ -28,12 +28,15 @@ class QuerySets:
                        " VALUES (%s, %s, %s, %s);"
 
     # Each string of this list is a keyword of dict where value is a serialized data.
-    DICT_KEYWORDS = ['arrived', 'dept_hosp', 'signout']
+    DICT_KEYWORDS = ['arrived', 'dept_hosp', 'signout', 'deads', 'oar_arrived', 'oar_current', 'oar_moved']
 
     # Lists of columns for mapping with values to creating CleanData class instances.
     COLUMNS = {
         'arrived': ['ch103', 'clinic_only', 'ch103_clinic', 'singly', 'ZL', 'foreign', 'moscow', 'undefined'],
-        'signout': ['deads', 'moved', 'signout']
+        'signout': ['deads', 'moved', 'signout'],
+        'deads_t': "SELECT column_name FROM information_schema.columns"
+                   " WHERE table_name = 'deads'"
+                   " ORDER BY ordinal_position;"
     }
 
     # Filter-words for filter_dataset method of DataProcessing class.
@@ -52,10 +55,12 @@ class QuerySets:
     depts_mapping = {
         'ОРИТ №1': 'oar1',
         'ОРИТ №2': 'oar2',
+        'ОРИТ №3': 'oar3',
         'Кардиологическое отделение': 'cardio_d',
         'Хирургическое отделение': 'surgery_d',
         'Терапевтическое отделение': 'therapy_d'
     }
+
 
     def queryset_for_dmk(self):
         """
@@ -73,8 +78,8 @@ class QuerySets:
         :return: List of lists.
         """
         dmk_queries = self.queryset_for_dmk()
-        dmk_queries.insert(2, self.DEADS)
         dmk_queries.insert(1, self.DEPT_HOSP)
+        dmk_queries.insert(-1, self.DEADS)
         result = dmk_queries + [self.OAR_CURRENT_QUERY, self.OAR_MOVED_QUERY]
         return result
 

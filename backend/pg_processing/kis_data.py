@@ -7,7 +7,7 @@ import logging
 from rest_framework.exceptions import ValidationError
 from .psycopg_module import BaseConnectionDB
 from .sql_queries import QuerySets
-from .serializers import KISDataSerializer, MainDataSerializer
+from .serializers import KISDataSerializer, MainDataSerializer, KISTableSerializer
 
 
 # Local logger config and call
@@ -319,6 +319,7 @@ class KISDataProcessing(DataProcessing):
     """
 
     querysets = QuerySets()
+    oar_deads_dict = {'oar1': 0, 'oar2': 0, 'oar3': 0}
 
     def __init__(self, kis_generator):
         """
@@ -371,7 +372,7 @@ class KISDataProcessing(DataProcessing):
         return self.create_instance(columns, dataset)
 
     @staticmethod
-    def __serialize(ready_dataset) -> dict:
+    def __serialize(ready_dataset, data_serializer=True) -> dict:
         """
         Serialize the processed dataset using the KISDataSerializer.
 
@@ -379,7 +380,10 @@ class KISDataProcessing(DataProcessing):
         :type ready_dataset: list[CleanData]
         :return: *dict*: Serialized data.
         """
-        sr_data = KISDataSerializer(ready_dataset, many=True).data
+        if data_serializer:
+            sr_data = KISDataSerializer(ready_dataset, many=True).data
+        else:
+            sr_data = KISTableSerializer(ready_dataset, many=True).data
         return sr_data
 
     def __arrived_process(self) -> dict:
@@ -451,6 +455,33 @@ class KISDataProcessing(DataProcessing):
         summary_columns = columns + en_columns
         ready_dataset = self.__result_for_sr(summary_columns, summary_dataset)
         return self.__serialize(ready_dataset)
+    
+    def __deads_process(self):
+        """
+        Process and serialize data related to signouts.
+
+        :return:
+        """
+        deads_dataset = next(self.kis_generator)
+        # Counting deads patients in OARs
+        oars_filtered = [row for row in deads_dataset if row[6] in ['ОРИТ №1', 'ОРИТ №2', 'ОРИТ №3']]
+        counter = Counter(oars_filtered)
+        counted_oars_deads = [[oar[6], cnt] for oar, cnt in counter.items()]
+        # Creating dict for updating class attr for further using in OARs table-data processing
+        deads_dict = {self.querysets.depts_mapping[oar[0]]: oar[1] for oar in counted_oars_deads}
+        self.oar_deads_dict.update(deads_dict)
+        print(self.oar_deads_dict)
+        # Processing table data for serializing.
+        columns = BaseConnectionDB(dbname='postgres',
+                                   host='localhost',
+                                   user='postgres',
+                                   password='root',
+                                   auto_close=True
+                                   ).execute_query(self.querysets.COLUMNS['deads_t'])
+        stacked_columns = list(chain.from_iterable(map(tuple, columns)))
+        ready_dataset = self.__result_for_sr(stacked_columns, deads_dataset)
+        return self.__serialize(ready_dataset, data_serializer=False)
+
 
     def create_ready_dicts(self) -> list[dict]:
         """
@@ -462,8 +493,9 @@ class KISDataProcessing(DataProcessing):
         arrived = self.__arrived_process()
         hosp_dept = self.__dept_hosp_process()
         signout = self.__signout_process()
+        deads = self.__deads_process()
         # Creating list of ready processed datasets.
-        ready_dataset = [arrived, hosp_dept, signout]
+        ready_dataset = [arrived, hosp_dept, signout, deads]
         # Creating list of dicts where keys takes from query class
         # and values are ready dataset iterating list of them one by one.
         result = [{keywords[ready_dataset.index(dataset)]: dataset for dataset in ready_dataset}]

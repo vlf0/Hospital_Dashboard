@@ -23,10 +23,10 @@ function App() {
       data = JSON.parse(sessionStorage.getItem('q'))
     };
   }
-
+  console.log(data);
 
   return (
-  <DataContext.Provider value={data}>
+  <DataContext.Provider value={1}>
     <Router>
       <Routes>
         <Route path="/" element={<GetAnalysis />} />
