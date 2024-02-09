@@ -318,8 +318,9 @@ class KISDataProcessing(DataProcessing):
       - create_ready_dicts() -> list[dict]: Create a list of dictionaries containing processed and serialized datasets.
     """
 
-    querysets = QuerySets()
-    oar_deads_dict = {'oar1': 0, 'oar2': 0, 'oar3': 0}
+    qs = QuerySets()
+    counted_deads = [(None, None, None)]
+    counted_oar = [(None, None, None)]
 
     def __init__(self, kis_generator):
         """
@@ -386,17 +387,15 @@ class KISDataProcessing(DataProcessing):
             sr_data = KISTableSerializer(ready_dataset, many=True).data
         return sr_data
 
-    def __arrived_process(self) -> dict:
+    def __arrived_process(self, arrived_dataset) -> dict:
         """
         Process and serialize data related to arrivals.
 
         :return: *dict*: Serialized data.
         """
-        querysets = self.querysets
         # Defining columns for serializer and values for filtering datasets.
-        columns, channels, statuses = querysets.COLUMNS['arrived'], querysets.channels, querysets.statuses
+        columns, channels, statuses = self.qs.COLUMNS['arrived'], self.qs.channels, self.qs.statuses
         # Getting first dataset by generator.
-        arrived_dataset = next(self.kis_generator)
         if self.error_check(arrived_dataset):
             sorted_channels_datasets = [0 for cnt in channels]
             sorted_statuses_datasets = [0 for cnt in statuses]
@@ -411,7 +410,7 @@ class KISDataProcessing(DataProcessing):
         ready_dataset = self.__result_for_sr(columns, summary_dataset)
         return self.__serialize(ready_dataset)
 
-    def __dept_hosp_process(self) -> dict:
+    def __dept_hosp_process(self, pre_dataset) -> dict:
         """
         Process and serialize data related to hospitalized patients.
 
@@ -420,32 +419,29 @@ class KISDataProcessing(DataProcessing):
 
         :return: *dict*: Serialized data.
         """
-        pre_dataset = next(self.kis_generator)
         if self.error_check(pre_dataset):
-            en_columns = [column for column in self.querysets.profiles_mapping.values()]
+            en_columns = [column for column in self.qs.profiles_mapping.values()]
             dataset = [tuple([0 for cnt in en_columns])]
         else:
-            packed_data = self.__slice_dataset(pre_dataset, self.querysets.profiles_mapping)
+            packed_data = self.__slice_dataset(pre_dataset, self.qs.profiles_mapping)
             en_columns, dataset = packed_data[0], packed_data[1]
             dataset = [tuple(dataset)]
         ready_dataset = self.__result_for_sr(en_columns, dataset)
         return self.__serialize(ready_dataset)
 
-    def __signout_process(self) -> dict:
+    def __signout_process(self, signout_dataset) -> dict:
         """
         Process and serialize data related to signouts.
 
         :return: *dict*: Serialized data.
         """
-        querysets = self.querysets
-        columns, keywords = querysets.COLUMNS['signout'], querysets.signout
-        signout_dataset = next(self.kis_generator)
+        columns, keywords = self.qs.COLUMNS['signout'], self.qs.signout
         # Calculating signout from defined depts
         signout_only = self.filter_dataset(signout_dataset, 1, 'Выписан')
         counter = Counter(signout_only)
         counted_signout_dataset = [(dept[0], cnt) for dept, cnt in counter.items()]
         # Preparing data for creating processed dataset
-        packed_data = self.__slice_dataset(counted_signout_dataset, querysets.depts_mapping)
+        packed_data = self.__slice_dataset(counted_signout_dataset, self.qs.depts_mapping)
         en_columns, dataset = packed_data[0], packed_data[1]
         if self.error_check(signout_dataset):
             sorted_signout_dataset = [0 for cnt in columns]
@@ -456,32 +452,40 @@ class KISDataProcessing(DataProcessing):
         ready_dataset = self.__result_for_sr(summary_columns, summary_dataset)
         return self.__serialize(ready_dataset)
     
-    def __deads_process(self):
+    def __deads_process(self, deads_dataset) -> dict:
         """
         Process and serialize data related to signouts.
 
-        :return:
+        :return: *dict*: Serialized data.
         """
-        deads_dataset = next(self.kis_generator)
         # Counting deads patients in OARs
-        oars_filtered = [row for row in deads_dataset if row[6] in ['ОРИТ №1', 'ОРИТ №2', 'ОРИТ №3']]
-        counter = Counter(oars_filtered)
-        counted_oars_deads = [[oar[6], cnt] for oar, cnt in counter.items()]
-        # Creating dict for updating class attr for further using in OARs table-data processing
-        deads_dict = {self.querysets.depts_mapping[oar[0]]: oar[1] for oar in counted_oars_deads}
-        self.oar_deads_dict.update(deads_dict)
-        print(self.oar_deads_dict)
+        if oars_filtered := [len(self.filter_dataset(deads_dataset, 6, oar))
+                             for oar in ['ОРИТ №1', 'ОРИТ №2', 'ОРИТ №3']]:
+            self.counted_deads = [tuple(oars_filtered)]
         # Processing table data for serializing.
-        columns = BaseConnectionDB(dbname='postgres',
-                                   host='localhost',
-                                   user='postgres',
-                                   password='root',
-                                   auto_close=True
-                                   ).execute_query(self.querysets.COLUMNS['deads_t'])
-        stacked_columns = list(chain.from_iterable(map(tuple, columns)))
-        ready_dataset = self.__result_for_sr(stacked_columns, deads_dataset)
+        columns = self.qs.COLUMNS['deads_t']
+        ready_dataset = self.__result_for_sr(columns, deads_dataset)
         return self.__serialize(ready_dataset, data_serializer=False)
 
+    def __oar_process(self, dataset, columns, include_deads=False) -> dict:
+        """
+        Process and serialize data related to hospitalized in reanimation.
+
+        :param dataset: *list*
+        :param self_dict: *dict*
+        :return: *dict*:
+        """
+        # Creating list of calculating lens of each separated datasets that filtered by oar number
+        oar_cols = self.qs.COLUMNS['oar_amounts']
+        if counted_oar := [len(self.filter_dataset(dataset, 3, oar)) for oar in ['ОРИТ №1', 'ОРИТ №2', 'ОРИТ №3']]:
+            self.counted_oar = [tuple(counted_oar)]
+        oar_amount = self.__result_for_sr(oar_cols, self.counted_oar)
+        ready_dataset = self.__result_for_sr(columns, dataset) + oar_amount
+
+        if include_deads:
+            deads_amount = self.__result_for_sr(oar_cols, self.counted_deads)
+            ready_dataset = ready_dataset + deads_amount
+        return self.__serialize(ready_dataset, data_serializer=False)
 
     def create_ready_dicts(self) -> list[dict]:
         """
@@ -489,15 +493,21 @@ class KISDataProcessing(DataProcessing):
 
         :return: *list[dict]*: List of dictionaries containing processed and serialized datasets.
         """
-        keywords = self.querysets.DICT_KEYWORDS
-        arrived = self.__arrived_process()
-        hosp_dept = self.__dept_hosp_process()
-        signout = self.__signout_process()
-        deads = self.__deads_process()
+        keywords = self.qs.DICT_KEYWORDS
+        arrived = self.__arrived_process(next(self.kis_generator))
+        hosp_dept = self.__dept_hosp_process(next(self.kis_generator))
+        signout = self.__signout_process(next(self.kis_generator))
+        deads = self.__deads_process(next(self.kis_generator))
+        oar_arrived = self.__oar_process(next(self.kis_generator), self.qs.COLUMNS['oar_arrived_t'])
+        oar_moved = self.__oar_process(next(self.kis_generator), self.qs.COLUMNS['oar_moved_t'])
+        oar_current = self.__oar_process(next(self.kis_generator), self.qs.COLUMNS['oar_current_t'], include_deads=True)
         # Creating list of ready processed datasets.
-        ready_dataset = [arrived, hosp_dept, signout, deads]
+        ready_dataset = [arrived, hosp_dept, signout, deads, oar_arrived, oar_moved, oar_current]
         # Creating list of dicts where keys takes from query class
         # and values are ready dataset iterating list of them one by one.
         result = [{keywords[ready_dataset.index(dataset)]: dataset for dataset in ready_dataset}]
         return result
 
+
+o = KISDataProcessing(KISData(QuerySets().queryset_for_kis()).get_data_generator())
+o.create_ready_dicts()

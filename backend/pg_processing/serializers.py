@@ -65,10 +65,25 @@ class KISTableSerializer(KISDataSerializer):
     pat_fio = serializers.CharField(required=False, allow_null=True)
     ib_num = serializers.CharField(required=False, allow_null=True)
     sex = serializers.CharField(required=False, allow_null=True)
-    age = serializers.CharField(required=False, allow_null=True)
+    age = serializers.IntegerField(required=False, allow_null=True)
     arriving_dt = serializers.DateTimeField(required=False, allow_null=True)
     state = serializers.CharField(required=False, allow_null=True)
     dept = serializers.CharField(required=False, allow_null=True)
     days = serializers.IntegerField(required=False, allow_null=True)
     diag_arr = serializers.CharField(required=False, allow_null=True)
     diag_dead = serializers.CharField(required=False, allow_null=True)
+    # Fields to hospitalized in reanimation dataset related
+    # ages = serializers.IntegerField(required=False, allow_null=True)
+    doc_fio = serializers.CharField(required=False, allow_null=True)
+    diag_start = serializers.CharField(required=False, allow_null=True)
+    # Fields to moved to reanimation dataset related
+    move_date = serializers.DateTimeField(required=False, allow_null=True)
+    from_dept = serializers.CharField(required=False, allow_null=True)
+
+    oar1 = serializers.CharField(required=False, allow_null=True)
+    oar2 = serializers.CharField(required=False, allow_null=True)
+    oar3 = serializers.CharField(required=False, allow_null=True)
+
+
+
+

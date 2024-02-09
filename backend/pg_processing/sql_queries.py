@@ -16,7 +16,7 @@ class QuerySets:
 
     SIGNOUT = "SELECT dept, status FROM mm.signout;",
 
-    DEADS = "SELECT * FROM mm.deads;",
+    DEADS = "SELECT pat_fio, ib_num, sex, agee, arriving_dt, state, dept, days, diag_arr, diag_dead FROM mm.deads;",
 
     OAR_ARRIVED_QUERY = "SELECT pat_fio, ib_num, ages, dept, doc_fio, diag_start FROM mm.oar_arrived;",
 
@@ -28,15 +28,17 @@ class QuerySets:
                        " VALUES (%s, %s, %s, %s);"
 
     # Each string of this list is a keyword of dict where value is a serialized data.
-    DICT_KEYWORDS = ['arrived', 'dept_hosp', 'signout', 'deads', 'oar_arrived', 'oar_current', 'oar_moved']
+    DICT_KEYWORDS = ['arrived', 'dept_hosp', 'signout', 'deads', 'oar_arrived', 'oar_moved', 'oar_current']
 
     # Lists of columns for mapping with values to creating CleanData class instances.
     COLUMNS = {
         'arrived': ['ch103', 'clinic_only', 'ch103_clinic', 'singly', 'ZL', 'foreign', 'moscow', 'undefined'],
         'signout': ['deads', 'moved', 'signout'],
-        'deads_t': "SELECT column_name FROM information_schema.columns"
-                   " WHERE table_name = 'deads'"
-                   " ORDER BY ordinal_position;"
+        'deads_t': ['pat_fio', 'ib_num', 'sex', 'age', 'arriving_dt', 'state', 'dept', 'days', 'diag_arr', 'diag_dead'],
+        'oar_arrived_t': ['pat_fio', 'ib_num', 'age', 'dept', 'doc_fio', 'diag_start'],
+        'oar_moved_t': ['pat_fio', 'ib_num', 'age', 'dept', 'doc_fio', 'move_date', 'from_dept', 'diag_start'],
+        'oar_current_t': ['pat_fio', 'ib_num', 'age', 'dept', 'doc_fio', 'days', 'diag_start'],
+        'oar_amounts': ['oar1', 'oar2', 'oar3']
     }
 
     # Filter-words for filter_dataset method of DataProcessing class.
@@ -80,6 +82,6 @@ class QuerySets:
         dmk_queries = self.queryset_for_dmk()
         dmk_queries.insert(1, self.DEPT_HOSP)
         dmk_queries.insert(-1, self.DEADS)
-        result = dmk_queries + [self.OAR_CURRENT_QUERY, self.OAR_MOVED_QUERY]
+        result = dmk_queries + [self.OAR_MOVED_QUERY, self.OAR_CURRENT_QUERY]
         return result
 
