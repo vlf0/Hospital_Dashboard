@@ -1,17 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Describes connection and sql queries to Postgres DB."""
-
+import logging
+from typing import Any, NoReturn
 from psycopg2 import OperationalError, ProgrammingError
 from psycopg2.errors import UndefinedTable, SyntaxError
 import psycopg2
-import logging
 
-
-# Local logger config and call
-formater = '[%(levelname)s:%(asctime)sms] [Module - %(name)s]\n %(message)s'
-logging.basicConfig(filename='pg_logs.log', filemode='w', format=formater)
-pg_loger = logging.getLogger(__name__)
+pg_logger = logging.getLogger('pg_processing.psycopg_module')
 
 
 class BaseConnectionDB:
@@ -29,12 +25,12 @@ class BaseConnectionDB:
     2. Use methods like execute_query, and get_connection_data for database operations.
 
     Args:
-    - user (str): The username for the database connection.
-    - password (str): The password for the database connection.
-    - dbname (str): The name of the database.
-    - host (str): The host address of the database.
-    - port (int): The port number for the database connection. Defaults to 5432.
-    - auto_close (bool): Define whether the connection closes after each transaction.
+    - user(str): The username for the database connection.
+    - password(str): The password for the database connection.
+    - dbname(str): The name of the database.
+    - host(str): The host address of the database.
+    - port(int): The port number for the database connection. Defaults to 5432.
+    - auto_close(bool): Define whether the connection closes after each transaction.
       If True, all cursors and connection will be closed automatically; no need to call close_connection() method.
       By default, False is configured.
     """
@@ -62,22 +58,23 @@ class BaseConnectionDB:
         self.error = None
         self.__connect()
 
-    def __str__(self):
+    def __str__(self) -> str:
         """
         Represent connection object as a string.
 
-        If obj is None - it means that connection is not established and was got error.
-        Otherwise, represents connection object.
+         If obj is None - it means that connection is not established and was got error.
+         Otherwise, represents connection object.
+
+        :return: *str*
         """
         return f'{self.conn}'
 
-    def __connect(self):
+    def __connect(self) -> NoReturn:
         """
         Private method to establish a database connection.
 
-        :return: (psycopg2.extensions.connection) A valid psycopg2 connection object if the connection is successful.
-                 If an error occurs during connection, the method returns the specific exception instance
-                 (OperationalError or UnicodeDecodeError).
+         A valid psycopg2 connection object sets as a class attribute "conn" if the connection is successful.
+         If an error occurs during connection, error instance sets as an "error" class attribute.
         """
         try:
             self.conn = psycopg2.connect(user=self.user, password=self.password,
@@ -85,25 +82,21 @@ class BaseConnectionDB:
         except (OperationalError, UnicodeDecodeError, UndefinedTable,
                 SyntaxError, ProgrammingError) as connection_error:
             self.error = connection_error
-            pg_loger.error(self.error)
+            pg_logger.error(str(self.error).rstrip('\n'))
 
-    def close_connection(self):
-        """
-        Save commits and close the database connection and all its cursors.
-
-        :return: None
-        """
+    def close_connection(self) -> NoReturn:
+        """Save commits and close the database connection and all its cursors."""
         if self.conn is not None:
             self.conn.commit()
             self.conn.close()
 
     @property
-    def connection_status(self):
+    def connection_status(self) -> Any:
         """
         Read-only property represent boll status in integer format.
 
-        :return: (int): Connection status. If return "0" - connection is opened now.
-        If "1" - connection is already closed. If "-2" - connection is already closed.
+        :return: *int*: Connection status. If return "0" - connection is opened now.
+         If "1" - connection is already closed. If "-2" - connection is already closed.
         """
         if self.error is not None:
             return -2, self.error
@@ -113,7 +106,8 @@ class BaseConnectionDB:
         """
         Execute a SQL query.
 
-        :param query: (str): The SQL query to be executed.
+        :param query: *str*: The SQL query to be executed.
+        :type query: str
 
         :return: *list*: The result of the query execution - list of tuples.
         """
@@ -128,9 +122,10 @@ class BaseConnectionDB:
         """
         Execute a SQL SELECT query and return the result set getting all rows.
 
-        :param query: (str): The SQL SELECT query to be executed.
+        :param query: *str*: The SQL SELECT query to be executed.
+        :type query: str
 
-        :return: (list) Result set as a list of tuples.
+        :return: *list*: Result set as a list of tuples.
         """
         cursor = self.conn.cursor()
         cursor.execute(query)
@@ -142,7 +137,7 @@ class BaseConnectionDB:
         """
         Get the connection parameters of the database.
 
-        :return: (dict) Dictionary containing database connection parameters.
+        :return: *dict*: Dictionary containing database connection parameters.
         """
         return {
             'dbname': self.dbname,

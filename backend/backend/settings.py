@@ -1,4 +1,5 @@
 import environ
+from django.utils.translation import gettext_lazy as _
 
 # Get root dir of the project
 root = environ.Path(__file__) - 3
@@ -118,6 +119,15 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 LANGUAGE_CODE = 'ru-RU'
 
+LANGUAGES = [
+    ('en', _('English')),
+]
+
+LOCALE_PATHS = [
+    SITE_ROOT + r'\backend\locales'
+]
+print(LOCALE_PATHS)
+
 TIME_ZONE = 'Europe/Moscow'
 
 USE_I18N = True
@@ -131,33 +141,49 @@ STATIC_URL = 'static/'
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-#
-# LOGGING = {
-#     'version': 1,
-#     'disable_existing_loggers': False,
-#
-#     'formatters': {
-#         'default_formatter': {
-#             'format': '[%(levelname)s:%(asctime)sms] [Module - %(name)s]\n %(message)s',
-#         },
-#     },
-#
-#     'handlers': {
-#         'file': {
-#             'class': 'logging.FileHandler',
-#             'filename': SITE_ROOT + '\\pg_logs.log',
-#             'level': 'DEBUG',
-#             # 'mode': 'w'
-#             }
-#         },
-#
-#     'loggers': {
-#         '': {
-#             'level': 'DEBUG',
-#             'handlers': ['file']
-#         }
-#     }
-# }
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+
+    'handlers': {
+        'pg_errs': {
+            'class': 'logging.FileHandler',
+            'filename': SITE_ROOT + r'\backend\pg_processing\pg_logs.log',
+            'formatter': 'pg_errs',
+            'level': 'ERROR',
+            # 'mode': 'w'
+            },
+        'test': {
+            'class': 'logging.FileHandler',
+            'filename': SITE_ROOT + r'\pg_logs.log',
+            'formatter': 'test',
+            'level': 'INFO',
+            # 'mode': 'w'
+        },
+    },
+    'formatters': {
+        'pg_errs': {
+            'format': '[%(levelname)s: %(asctime)sms] [Module - %(name)s]\n %(message)s\n',
+        },
+        'test': {
+            'format': '[%(levelname)s\n %(message)s]\n',
+        },
+    },
+
+    'loggers': {
+        'pg_processing.psycopg_module': {
+            'level': 'ERROR',
+            'handlers': ['pg_errs'],
+            'propagate': False
+        },
+        'test': {
+            'level': 'INFO',
+            'handlers': ['test'],
+            'propagate': False
+        }
+    }
+}
 
 # Celery settings
 CELERY_BROKER_URL = env.str('BROKER_URL')

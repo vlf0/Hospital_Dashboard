@@ -47,7 +47,8 @@ class QuerySets:
     statuses = ['ЗЛ', 'Иногородние', 'Москвичи', 'не указано']
     signout = ['Умер', 'Переведен', 'Выписан']
 
-    # Dict for mapping with serializer fields (relates to "выписанные по отделениям" table)
+    # Dict for mapping with serializer fields (relates to "план/факт по профилям" table).
+    # All english names is fields of serializer.
     profiles_mapping = {
         'Терапия': 'therapy',
         'Хирургия': 'surgery',
@@ -56,6 +57,8 @@ class QuerySets:
         'Неврология': 'neurology'
     }
 
+    # Dict for mapping columns on russian language with serializer fields (relates to "выписанные по отделениям" table).
+    # All english names is fields of serializer.
     depts_mapping = {
         'ОРИТ №1': 'oar1',
         'ОРИТ №2': 'oar2',

@@ -1,19 +1,16 @@
 """Responsible for classes defining non-model query-sets from another DB."""
-from typing import Generator
+import logging
+from typing import Generator, NoReturn, Any
 from datetime import date, datetime
 from collections import Counter
 from itertools import chain
-import logging
 from rest_framework.exceptions import ValidationError
-from .psycopg_module import BaseConnectionDB
+from .psycopg_module import BaseConnectionDB, pg_logger
 from .sql_queries import QuerySets
 from .serializers import KISDataSerializer, MainDataSerializer, KISTableSerializer
+from django.utils.translation import gettext_lazy as _
 
-
-# Local logger config and call
-formater = '[%(levelname)s:%(asctime)sms] [Module - %(name)s]\n %(message)s'
-logging.basicConfig(filename='pg_processing/pg_logs.log', filemode='w', format=formater, level='INFO')
-pg_loger = logging.getLogger(__name__)
+logger = logging.getLogger('test')
 
 
 class CleanData:
@@ -65,7 +62,7 @@ class KISData:
         self.query_sets = query_sets
         self.db_conn = BaseConnectionDB(dbname='postgres',
                                         host='localhost',
-                                        user='postgres',
+                                        user='postgrs',
                                         password='root'
                                         )
         self.cursor = self.db_conn.execute_query
@@ -261,15 +258,15 @@ class DataForDMK(DataProcessing):
         """
         arrived, signout, deads = self.get_arrived_data(), self.get_signout_data(), self.get_reanimation_data()
         main_data = arrived | signout | deads
-        if None in [value for value in main_data.values()]:
-            pg_loger.warning(f'[WARNING: {datetime.now()}] Error occurred when data access attempt.'
-                             f' Will writen only NULL values to DMK DB.')
+        # # if None in [value for value in main_data.values()]:
+        # #     pg_logger.warning(f'[WARNING: {datetime.now()}] Error occurred when data access attempt.'
+        # #                      f' Will writen only NULL values to DMK DB.')
         # Add dates key-value pair to collected data dict.
         today_dict = {'dates': date.today()}
         ready_data = today_dict | main_data
         return ready_data
 
-    def save_to_dmk(self):
+    def save_to_dmk(self) -> Any:
         """
         Save the prepared data to the DMK DB using the MainData model and its serializer.
 
@@ -286,7 +283,7 @@ class DataForDMK(DataProcessing):
             data_instance = serializer.save()
             return data_instance
         except (ValidationError, SyntaxError, AssertionError) as e:
-            pg_loger.error(e)
+            pg_logger.error(e)  # Need to add translation ru text of error to en
             # return e  # Returns original error text if needed while developing
 
 
@@ -321,9 +318,6 @@ class KISDataProcessing(DataProcessing):
     qs = QuerySets()
     deads_oar = []
     counted_oar = []
-    # arrived_oar = [(None, None, None)]
-    # moved_oar = [(None, None, None)]
-    # current_oar = [(None, None, None)]
 
     def __init__(self, kis_generator):
         """
@@ -351,6 +345,15 @@ class KISDataProcessing(DataProcessing):
 
     @staticmethod
     def __slice_dataset(dataset, mapping) -> list[list]:
+        """
+        Gather all the split lines into one to separate it into data and fields.
+
+        :param dataset: *list*: Dataset for processing.
+        :type dataset: list[tuple]
+        :param mapping: *dict*: Dictionary for matching Russian column names and English ones.
+        :type mapping: dict[str, str]
+        :return: *list*: List of list - first it is column names, second is calculated amount of patients.
+        """
         # Creating 1 row inside dataset instead many.
         stacked_tuples_dataset = [tuple(chain.from_iterable(map(tuple, dataset)))]
         # Getting column names from stacked tuple of KIS data.
@@ -358,8 +361,8 @@ class KISDataProcessing(DataProcessing):
         # Creating en columns for matching to KIS serializer fields.
         en_columns = [mapping[column] for column in ru_columns]
         # Created dataset manually as list.
-        counted_signout_pats = list(stacked_tuples_dataset[0][1::2])
-        return [en_columns, counted_signout_pats]
+        counted_pats = list(stacked_tuples_dataset[0][1::2])
+        return [en_columns, counted_pats]
 
     def __result_for_sr(self, columns, dataset) -> list[CleanData]:
         """
@@ -473,7 +476,6 @@ class KISDataProcessing(DataProcessing):
         if oars_filtered := [len(self.filter_dataset(deads_dataset, 6, oar))
                              for oar in ['ОРИТ №1', 'ОРИТ №2', 'ОРИТ №3']]:
             self.deads_oar = [tuple(oars_filtered)]
-            print(self.deads_oar)
         # Processing table data for serializing.
         columns = self.qs.COLUMNS['deads_t']
         ready_dataset = self.__result_for_sr(columns, deads_dataset)
@@ -535,5 +537,4 @@ class KISDataProcessing(DataProcessing):
         # and values are ready dataset iterating list of them one by one.
         result = [{keywords[ready_dataset.index(dataset)]: dataset for dataset in ready_dataset}]
         return result
-
 
