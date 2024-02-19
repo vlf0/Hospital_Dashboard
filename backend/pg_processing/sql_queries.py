@@ -5,8 +5,8 @@ class QuerySets:
     """
     QuerySets class.
 
-    Contains each specific database query and the columns for that query data in a list as class attributes,
-    as well as filter words, column sets, and serializer keywords.
+    Contains specific database queries and columns for receiving data from that queries as class attributes,
+    as well as filter words, column sets as dicts for mapping, and serializer keywords.
     Also has method for creating common list of these queries.
     """
 
@@ -28,7 +28,8 @@ class QuerySets:
                        " VALUES (%s, %s, %s, %s);"
 
     # Each string of this list is a keyword of dict where value is a serialized data.
-    DICT_KEYWORDS = ['arrived', 'dept_hosp', 'signout', 'deads', 'oar_arrived', 'oar_moved', 'oar_current']
+    DICT_KEYWORDS = ['arrived', 'dept_hosp', 'signout', 'deads',
+                     'oar_arrived', 'oar_moved', 'oar_current', 'oar_numbers']
 
     # Lists of columns for mapping with values to creating CleanData class instances.
     COLUMNS = {
@@ -46,6 +47,7 @@ class QuerySets:
     statuses = ['ЗЛ', 'Иногородние', 'Москвичи', 'не указано']
     signout = ['Умер', 'Переведен', 'Выписан']
 
+    # Dict for mapping with serializer fields (relates to "выписанные по отделениям" table)
     profiles_mapping = {
         'Терапия': 'therapy',
         'Хирургия': 'surgery',
@@ -62,7 +64,6 @@ class QuerySets:
         'Хирургическое отделение': 'surgery_d',
         'Терапевтическое отделение': 'therapy_d'
     }
-
 
     def queryset_for_dmk(self):
         """

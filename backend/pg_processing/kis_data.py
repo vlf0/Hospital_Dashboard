@@ -1,5 +1,5 @@
 """Responsible for classes defining non-model query-sets from another DB."""
-from typing import Any, Iterator
+from typing import Generator
 from datetime import date, datetime
 from collections import Counter
 from itertools import chain
@@ -42,7 +42,7 @@ class KISData:
     """
     KISData class.
 
-    This class facilitates the creation of a generator-iterator object for retrieving data from the PostgreSQL database
+    This class facilitates the creation of a generator object for retrieving data from the PostgreSQL database
     using a series of queries specified in the query_sets attribute. Each query pair in query_sets is a list containing
     the data query and its corresponding column queries.
 
@@ -52,7 +52,7 @@ class KISData:
       cursor:  The method to execute queries on the PostgreSQL database.
 
     Methods:
-      - get_data_generator -> iterator: Create a generator-iterator object performing each query from queryset by request.
+      - get_data_generator -> Generator: Create a generator object performing each query from queryset by request.
     """
 
     def __init__(self, query_sets):
@@ -70,13 +70,13 @@ class KISData:
                                         )
         self.cursor = self.db_conn.execute_query
 
-    def get_data_generator(self) -> Iterator:
+    def get_data_generator(self) -> Generator:
         """
-        Create an iterator object performing each query from queryset by request.
+        Create a generator object performing each query from queryset by request.
 
         Retrieves data from the database based on the specified query passed as a list into init method as arg.
 
-        :return: *Iterator*.
+        :return: *Generator*.
         """
         for dataset in self.query_sets:
             yield self.cursor(dataset[0])
@@ -88,7 +88,7 @@ class DataProcessing:
     The base class from which other classes are inherited to provide required data by adding specific sets of queries.
 
     Attributes:
-      kis_generator: (Iterator): A generator for retrieving datasets. Must be a KISData instance.
+      kis_generator: (Generator): A generator for retrieving datasets. Must be a KISData instance.
 
     Methods:
       - error_check(dataset) -> bool: Check if the dataset contains an error.
@@ -102,7 +102,7 @@ class DataProcessing:
         """
         Initialize the DataProcessing instance.
 
-        :param kis_generator: *iterator*: A generator providing datasets.
+        :param kis_generator: *Generator*: A generator providing datasets.
         """
         self.kis_generator = kis_generator
 
@@ -168,7 +168,7 @@ class DataForDMK(DataProcessing):
     of collecting, preparing, and saving data to the DMK database using a generator.
 
     Attributes:
-      kis_generator: (iterator): A generator providing datasets.
+      kis_generator: (Generator): A generator providing datasets.
 
     Methods:
       - count_data(dataset, ind, value) -> list: Count total, positive, and negative amounts in the dataset.
@@ -186,7 +186,7 @@ class DataForDMK(DataProcessing):
         """
         Initialize the DataForDMK instance, it inherited from parent class.
 
-        :param kis_generator: *iterator*: A generator providing datasets.
+        :param kis_generator: *Generator*: A generator providing datasets.
         """
         super().__init__(kis_generator)
 
@@ -300,7 +300,7 @@ class KISDataProcessing(DataProcessing):
       querysets: QuerySets instance for getting access to its attrs and methods permanent.
 
     Attributes:
-      kis_generator: Iterator: A generator for retrieving datasets. Must be a KISData instance.
+      kis_generator: Generator: A generator for retrieving datasets. Must be a KISData instance.
 
     Methods:
       - __count_values(dataset, ind, keywords) -> list[int]: Count values in the dataset based on index and keywords.
@@ -329,7 +329,7 @@ class KISDataProcessing(DataProcessing):
         """
         Initialize the KISDataProcessing instance.
 
-        :param kis_generator: *iterator*: A generator providing datasets.
+        :param kis_generator: *Generator*: A generator providing datasets.
         """
         super().__init__(kis_generator)
 
@@ -366,10 +366,10 @@ class KISDataProcessing(DataProcessing):
         Create instances of `CleanData` with data from the dataset.
 
         :param columns: *list*: A list of column names representing the attributes of the `CleanData` instances.
-        :type columns: *list[str]*
+        :type columns: list[str]
         :param dataset: *list*: A list of lists, where each inner list contains
          data corresponding to a row in the database.
-        :type dataset: *list[tuple]*
+        :type dataset: list[tuple]
         :return: *list[CleanData]*: A list of `CleanData` class instances, each instantiated with
          data from the provided dataset.
         """
@@ -394,6 +394,8 @@ class KISDataProcessing(DataProcessing):
         """
         Process and serialize data related to arrivals.
 
+        :param arrived_dataset: *list*: Dataset from DB as a list of tuples.
+        :type arrived_dataset: list[tuple]
         :return: *dict*: Serialized data.
         """
         # Defining columns for serializer and values for filtering datasets.
@@ -420,6 +422,8 @@ class KISDataProcessing(DataProcessing):
          If dataset is the one of postgres errors then create columns list and dataset manually
          that contains all zero to serializer can process it and avoiding errors.
 
+        :param pre_dataset: *list*: Dataset from DB as a list of tuples.
+        :type pre_dataset: list[tuple]
         :return: *dict*: Serialized data.
         """
         if self.error_check(pre_dataset):
@@ -436,6 +440,8 @@ class KISDataProcessing(DataProcessing):
         """
         Process and serialize data related to signouts.
 
+        :param signout_dataset: *list*: Dataset from DB as a list of tuples.
+        :type signout_dataset: list[tuple]
         :return: *dict*: Serialized data.
         """
         columns, keywords = self.qs.COLUMNS['signout'], self.qs.signout
@@ -459,12 +465,15 @@ class KISDataProcessing(DataProcessing):
         """
         Process and serialize data related to signouts.
 
+        :param deads_dataset: *list*: Dataset from DB as a list of tuples.
+        :type deads_dataset: list[tuple]
         :return: *dict*: Serialized data.
         """
         # Counting deads patients in OARs
         if oars_filtered := [len(self.filter_dataset(deads_dataset, 6, oar))
                              for oar in ['ОРИТ №1', 'ОРИТ №2', 'ОРИТ №3']]:
             self.deads_oar = [tuple(oars_filtered)]
+            print(self.deads_oar)
         # Processing table data for serializing.
         columns = self.qs.COLUMNS['deads_t']
         ready_dataset = self.__result_for_sr(columns, deads_dataset)
@@ -474,8 +483,10 @@ class KISDataProcessing(DataProcessing):
         """
         Process and serialize data related to hospitalized in reanimation.
 
-        :param dataset: *list*
-        :param self_dict: *dict*
+        :param dataset: *list*: Dataset from DB as a list of tuples.
+        :type dataset: list[tuple]
+        :param columns: *list*: List of column names for mapping with data.
+        :type columns: list[str]
         :return: *dict*:
         """
         # Creating list of calculating lens of each separated datasets that filtered by oar number
@@ -484,14 +495,28 @@ class KISDataProcessing(DataProcessing):
         ready_dataset = self.__result_for_sr(columns, dataset)
         return self.__serialize(ready_dataset, data_serializer=False)
 
-    def oar_count(self):
+    def oar_count(self) -> list[dict]:
+        """
+        Count amount of needed patients related to reanimates.
+
+        In process of processing data we are first saving calculated numbers in class attributes,
+        then using it for serializing and including into summary answer list.
+
+        :return: *list[dict]*: List of serialized data with keywords as a dict.
+        """
         oar_columns = self.qs.COLUMNS['oar_amounts']
-        ar = self.__result_for_sr(oar_columns, self.counted_oar[0])
-        print(self.__serialize(ar))
+        living_list = [(self.__result_for_sr(oar_columns, i)) for i in self.counted_oar]
+        deads_list = self.__result_for_sr(oar_columns, self.deads_oar)
+        result = [{'arrived_nums': self.__serialize(living_list[0])},
+                  {'moved_nums': self.__serialize(living_list[1])},
+                  {'current_nums': self.__serialize(living_list[2])},
+                  {'deads_nums': self.__serialize(deads_list)}
+                  ]
+        return result
 
     def create_ready_dicts(self) -> list[dict]:
         """
-        Create a list of dictionaries containing processed and serialized datasets.
+        Create an ordered list of dictionaries containing processed and serialized datasets.
 
         :return: *list[dict]*: List of dictionaries containing processed and serialized datasets.
         """
@@ -503,14 +528,12 @@ class KISDataProcessing(DataProcessing):
         oar_arrived = self.__oar_process(next(self.kis_generator), self.qs.COLUMNS['oar_arrived_t'])
         oar_moved = self.__oar_process(next(self.kis_generator), self.qs.COLUMNS['oar_moved_t'])
         oar_current = self.__oar_process(next(self.kis_generator), self.qs.COLUMNS['oar_current_t'])
-        self.oar_count()
+        oar_numbers = self.oar_count()
         # Creating list of ready processed datasets.
-        ready_dataset = [arrived, hosp_dept, signout, deads, oar_arrived, oar_moved, oar_current]
+        ready_dataset = [arrived, hosp_dept, signout, deads, oar_arrived, oar_moved, oar_current, oar_numbers]
         # Creating list of dicts where keys takes from query class
         # and values are ready dataset iterating list of them one by one.
         result = [{keywords[ready_dataset.index(dataset)]: dataset for dataset in ready_dataset}]
         return result
 
 
-o = KISDataProcessing(KISData(QuerySets().queryset_for_kis()).get_data_generator())
-o.create_ready_dicts()

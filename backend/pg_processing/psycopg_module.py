@@ -62,7 +62,15 @@ class BaseConnectionDB:
         self.error = None
         self.__connect()
 
-    # Private method that trying to establish connection and set result in class attribute.
+    def __str__(self):
+        """
+        Represent connection object as a string.
+
+        If obj is None - it means that connection is not established and was got error.
+        Otherwise, represents connection object.
+        """
+        return f'{self.conn}'
+
     def __connect(self):
         """
         Private method to establish a database connection.
@@ -98,7 +106,6 @@ class BaseConnectionDB:
         If "1" - connection is already closed. If "-2" - connection is already closed.
         """
         if self.error is not None:
-            # -2 - custom error code telling about connection was not established
             return -2, self.error
         return self.conn.closed
 
@@ -110,7 +117,6 @@ class BaseConnectionDB:
 
         :return: *list*: The result of the query execution - list of tuples.
         """
-        # Return list of ine tuple containing error text to any sql query if connection was not established
         if self.error:
             return [('Error', self.error)]
         result = self.__execute_get(query)
