@@ -1,14 +1,16 @@
 """Responsible for classes defining non-model query-sets from another DB."""
 import logging
+import redis
 from typing import Generator, Never, Any
 from datetime import date, datetime
 from collections import Counter
 from itertools import chain
+from django.core.cache import cache
 from rest_framework.exceptions import ValidationError
 from .psycopg_module import BaseConnectionDB
 from .sql_queries import QuerySets
 from .serializers import KISDataSerializer, MainDataSerializer, KISTableSerializer
-from django.utils.translation import gettext_lazy as _
+from .models import MainData
 
 logger = logging.getLogger('pg_processing.kis_data.DataForDMK')
 
@@ -301,9 +303,8 @@ class DataForDMK(DataProcessing):
         :return: `MainData`: Saved data into the model. If on of the exception will raise - returns nothing and
          write to log file.
         """
-
         data_for_sr = self.__collect_data()
-
+        cache.set(':1:dmk', data_for_sr)
         serializer = MainDataSerializer(data=data_for_sr)
         try:
             serializer.is_valid(raise_exception=True)
@@ -481,7 +482,7 @@ class KISDataProcessing(DataProcessing):
         summary_columns = columns + en_columns
         ready_dataset = self.__result_for_sr(summary_columns, summary_dataset)
         return self.__serialize(ready_dataset)
-    
+
     def __deads_process(self, deads_dataset) -> dict:
         """
         Process and serialize data related to signouts.
@@ -565,3 +566,16 @@ class KISDataProcessing(DataProcessing):
         result = [{keywords[ready_dataset.index(dataset)]: dataset for dataset in ready_dataset}]
         return result
 
+
+def ensure_cashing() -> Never:
+    """
+    Check redis cash and write data into if storage is empty.
+
+     We are calling this func in the main view to avoid unnecessary calls to the database.
+    """
+    if cache.get(':1:dmk') is None:
+        p_dmk = MainDataSerializer(MainData.objects.custom_filter(), many=True).data
+        cache.set(':1:dmk', p_dmk)
+    if cache.get(':1:kis') is None:
+        p_kis = KISDataProcessing(KISData(QuerySets().queryset_for_kis())).create_ready_dicts()
+        cache.set(':1:kis', p_kis)
