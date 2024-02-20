@@ -10,22 +10,19 @@ class QuerySets:
     Also has method for creating common list of these queries.
     """
 
-    ARRIVED = "SELECT * FROM mm.arrived;",
+    ARRIVED = "SELECT * FROM mm.arrived;"
 
-    DEPT_HOSP = "SELECT med_profile, amount FROM mm.dept_hosp;",
+    DEPT_HOSP = "SELECT med_profile, amount FROM mm.dept_hosp;"
 
-    SIGNOUT = "SELECT dept, status FROM mm.signout;",
+    SIGNOUT = "SELECT dept, status FROM mm.signout;"
 
-    DEADS = "SELECT pat_fio, ib_num, sex, agee, arriving_dt, state, dept, days, diag_arr, diag_dead FROM mm.deads;",
+    DEADS = "SELECT pat_fio, ib_num, sex, agee, arriving_dt, state, dept, days, diag_arr, diag_dead FROM mm.deads;"
 
-    OAR_ARRIVED_QUERY = "SELECT pat_fio, ib_num, ages, dept, doc_fio, diag_start FROM mm.oar_arrived;",
+    OAR_ARRIVED_QUERY = "SELECT pat_fio, ib_num, ages, dept, doc_fio, diag_start FROM mm.oar_arrived;"
 
-    OAR_MOVED_QUERY = "SELECT pat_fio, ib_num, ages, dept, doc_fio, move_date, from_dept, diag_start FROM mm.oar_moved;",
+    OAR_MOVED_QUERY = "SELECT pat_fio, ib_num, ages, dept, doc_fio, move_date, from_dept, diag_start FROM mm.oar_moved;"
 
-    OAR_CURRENT_QUERY = "SELECT pat_fio, ib_num, ages, dept, doc_fio, days, diag_start FROM mm.oar_current;",
-
-    DMK_INSERT_QUERY = "INSERT INTO own.arrived (arrived, hosp, refused, signout, deads, reanimation)" \
-                       " VALUES (%s, %s, %s, %s);"
+    OAR_CURRENT_QUERY = "SELECT pat_fio, ib_num, ages, dept, doc_fio, days, diag_start FROM mm.oar_current;"
 
     # Each string of this list is a keyword of dict where value is a serialized data.
     DICT_KEYWORDS = ['arrived', 'dept_hosp', 'signout', 'deads',
@@ -41,6 +38,8 @@ class QuerySets:
         'oar_current_t': ['pat_fio', 'ib_num', 'age', 'dept', 'doc_fio', 'days', 'diag_start'],
         'oar_amounts': ['oar1', 'oar2', 'oar3']
     }
+
+    DMK_COLUMNS = ['arrived', 'hosp', 'refused', 'signout', 'deads', 'reanimation']
 
     # Filter-words for filter_dataset method of DataProcessing class.
     channels = ['103', 'Поликлиника', '103 Поликлиника', 'Самотек']

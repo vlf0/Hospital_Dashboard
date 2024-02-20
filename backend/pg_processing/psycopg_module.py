@@ -2,12 +2,12 @@
 # -*- coding: utf-8 -*-
 """Describes connection and sql queries to Postgres DB."""
 import logging
-from typing import Any, NoReturn
+from typing import Any, Never
 from psycopg2 import OperationalError, ProgrammingError
 from psycopg2.errors import UndefinedTable, SyntaxError
 import psycopg2
 
-pg_logger = logging.getLogger('pg_processing.psycopg_module')
+logger = logging.getLogger('pg_processing.psycopg_module.BaseConnectionDB')
 
 
 class BaseConnectionDB:
@@ -69,7 +69,7 @@ class BaseConnectionDB:
         """
         return f'{self.conn}'
 
-    def __connect(self) -> NoReturn:
+    def __connect(self) -> Never:
         """
         Private method to establish a database connection.
 
@@ -82,9 +82,9 @@ class BaseConnectionDB:
         except (OperationalError, UnicodeDecodeError, UndefinedTable,
                 SyntaxError, ProgrammingError) as connection_error:
             self.error = connection_error
-            pg_logger.error(str(self.error).rstrip('\n'))
+            logger.error(str(self.error).rstrip('\n'))
 
-    def close_connection(self) -> NoReturn:
+    def close_connection(self) -> Never:
         """Save commits and close the database connection and all its cursors."""
         if self.conn is not None:
             self.conn.commit()

@@ -1,16 +1,16 @@
 """Responsible for classes defining non-model query-sets from another DB."""
 import logging
-from typing import Generator, NoReturn, Any
+from typing import Generator, Never, Any
 from datetime import date, datetime
 from collections import Counter
 from itertools import chain
 from rest_framework.exceptions import ValidationError
-from .psycopg_module import BaseConnectionDB, pg_logger
+from .psycopg_module import BaseConnectionDB
 from .sql_queries import QuerySets
 from .serializers import KISDataSerializer, MainDataSerializer, KISTableSerializer
 from django.utils.translation import gettext_lazy as _
 
-logger = logging.getLogger('test')
+logger = logging.getLogger('pg_processing.kis_data.DataForDMK')
 
 
 class CleanData:
@@ -62,7 +62,7 @@ class KISData:
         self.query_sets = query_sets
         self.db_conn = BaseConnectionDB(dbname='postgres',
                                         host='localhost',
-                                        user='postgrs',
+                                        user='postgres',
                                         password='root'
                                         )
         self.cursor = self.db_conn.execute_query
@@ -76,7 +76,7 @@ class KISData:
         :return: *Generator*.
         """
         for dataset in self.query_sets:
-            yield self.cursor(dataset[0])
+            yield self.cursor(dataset)
         self.db_conn.close_connection()
 
 
@@ -85,7 +85,8 @@ class DataProcessing:
     The base class from which other classes are inherited to provide required data by adding specific sets of queries.
 
     Attributes:
-      kis_generator: (Generator): A generator for retrieving datasets. Must be a KISData instance.
+      kisdata_obj: (KISData): The KISData instance.
+      Its method giving us generator. Needed for connection status checking.
 
     Methods:
       - error_check(dataset) -> bool: Check if the dataset contains an error.
@@ -95,25 +96,15 @@ class DataProcessing:
       - count_dataset_total(dataset) -> int: Count the total number of rows in the dataset.
     """
 
-    def __init__(self, kis_generator):
+    qs = QuerySets
+
+    def __init__(self, kisdata_obj):
         """
         Initialize the DataProcessing instance.
 
-        :param kis_generator: *Generator*: A generator providing datasets.
+        :param kisdata_obj: *KISData*: A generator providing datasets.
         """
-        self.kis_generator = kis_generator
-
-    @staticmethod
-    def error_check(dataset) -> bool:
-        """
-        Check if the dataset contains an error.
-
-        :param dataset: *list*: The dataset to check.
-        :type dataset: list[tuple]
-        :return: *bool*: True if an error is detected, False otherwise.
-        """
-        if dataset[0][0] == 'Error':
-            return True
+        self.kisdata_obj = kisdata_obj
 
     @staticmethod
     def filter_dataset(dataset, ind, value) -> list:
@@ -142,7 +133,8 @@ class DataProcessing:
         """
         return len(dataset)
 
-    def create_instance(self, columns, dataset) -> list[CleanData]:
+    @staticmethod
+    def create_instance(columns, dataset) -> list[CleanData]:
         """
         Create instances of a target class with data retrieved from the database.
 
@@ -165,7 +157,8 @@ class DataForDMK(DataProcessing):
     of collecting, preparing, and saving data to the DMK database using a generator.
 
     Attributes:
-      kis_generator: (Generator): A generator providing datasets.
+      kisdata_obj: (KISData): The KISData instance.
+      Its method giving us generator. Needed for connection status checking.
 
     Methods:
       - count_data(dataset, ind, value) -> list: Count total, positive, and negative amounts in the dataset.
@@ -179,13 +172,15 @@ class DataForDMK(DataProcessing):
       - save_to_dmk(): Save the prepared data to the DMK DB using the MainData model and its serializer.
     """
 
-    def __init__(self, kis_generator):
+    qs = QuerySets.DMK_COLUMNS
+
+    def __init__(self, kisdata_obj):
         """
         Initialize the DataForDMK instance, it inherited from parent class.
 
-        :param kis_generator: *Generator*: A generator providing datasets.
+        :param kisdata_obj: *KISData*: A generator providing datasets.
         """
-        super().__init__(kis_generator)
+        super().__init__(kisdata_obj)
 
     def count_data(self, dataset, ind, value) -> list[int]:
         """
@@ -215,10 +210,8 @@ class DataForDMK(DataProcessing):
 
         :return: *dict*: Dictionary containing arrived, hospitalized, and refused data.
         """
-        arrived_dataset = next(self.kis_generator)
-        result_keys = ['arrived', 'hosp', 'refused']
-        if self.error_check(arrived_dataset):
-            return dict(zip(result_keys, [None, None, None]))
+        arrived_dataset = next(self.kisdata_obj.get_data_generator())
+        result_keys = self.qs[0:3]
         ready_values = self.count_data(arrived_dataset, 0, 1)
         return dict(zip(result_keys, ready_values))
 
@@ -228,10 +221,8 @@ class DataForDMK(DataProcessing):
 
         :return: *dict*: Dictionary containing signout and deaths data.
         """
-        signout_dataset = next(self.kis_generator)
-        result_keys = ['signout', 'deads']
-        if self.error_check(signout_dataset):
-            return dict(zip(result_keys, [None, None]))
+        signout_dataset = next(self.kisdata_obj.get_data_generator())
+        result_keys = self.qs[3:5]
         ready_values = self.count_data(signout_dataset, 1, 'Другая причина')
         return dict(zip(result_keys, ready_values))
 
@@ -241,10 +232,8 @@ class DataForDMK(DataProcessing):
 
         :return: *dict*: Dictionary containing reanimation data.
         """
-        reanimation_dataset = next(self.kis_generator)
-        if self.error_check(reanimation_dataset):
-            return {'reanimation': None}
-        return {'reanimation': self.count_dataset_total(reanimation_dataset)}
+        reanimation_dataset = next(self.kisdata_obj.get_data_generator())
+        return {self.qs[-1]: self.count_dataset_total(reanimation_dataset)}
 
     def __collect_data(self) -> dict:
         """
@@ -256,35 +245,75 @@ class DataForDMK(DataProcessing):
         :return: *dict*: Main data for saving to DMK DB.
         :raises StopIteration: If the generator is already empty. This point also will writen to logs.
         """
-        arrived, signout, deads = self.get_arrived_data(), self.get_signout_data(), self.get_reanimation_data()
-        main_data = arrived | signout | deads
-        # # if None in [value for value in main_data.values()]:
-        # #     pg_logger.warning(f'[WARNING: {datetime.now()}] Error occurred when data access attempt.'
-        # #                      f' Will writen only NULL values to DMK DB.')
+        if self.kisdata_obj.db_conn.conn is None:
+            main_data = {i: None for i in self.qs}
+        else:
+            arrived, signout, deads = self.get_arrived_data(), self.get_signout_data(), self.get_reanimation_data()
+            main_data = arrived | signout | deads
         # Add dates key-value pair to collected data dict.
         today_dict = {'dates': date.today()}
         ready_data = today_dict | main_data
         return ready_data
 
+    @staticmethod
+    def __check_data(data) -> Never:
+        """
+        Check ready collected data and write log info depending on checking result.
+
+         If they are contains None values, log warning about this.
+         Otherwise, log info about successfully data inserting.
+
+        :param data: *dict*:
+        :type data: dict[str, Any]
+        """
+        if None in [value for value in data.values()]:
+            logger.warning('Data contains NULLs')
+        else:
+            logger.info('Data recorded successfully.')
+
+    @staticmethod
+    def __translate(err):
+        """
+        Replace original text error to english lang and return ready en string.
+
+         It needed for correct symbols displaying in log file
+
+        :param err: Error string as a some exception class instance.
+        :return: *str*: Ready changed error text.
+        """
+        err_text = str(err)
+        if err_text[2:7] == 'dates':
+            err_text = err_text.replace("{'dates': [ErrorDetail(string='main data с таким dates"
+                                        " уже существует.', code='unique')]}",
+                                        "Can not write data to row with existing 'dates' value."
+                                        " The 'date' column has a field constraint that the value is unique."
+                                        )
+        return err_text
+
     def save_to_dmk(self) -> Any:
         """
         Save the prepared data to the DMK DB using the MainData model and its serializer.
 
-        :return: `MainData`: Saved data into the model. If on of the exception will raise - returns nothing and
-         write to log file.
-
         :raises ValidationError: If the serializer validation fails.
         :raises SyntaxError: If there is a syntax error in the serializer.
         :raises AssertionError: If there is an assertion error during saving.
+
+        :return: `MainData`: Saved data into the model. If on of the exception will raise - returns nothing and
+         write to log file.
         """
-        serializer = MainDataSerializer(data=self.__collect_data())
+
+        data_for_sr = self.__collect_data()
+
+        serializer = MainDataSerializer(data=data_for_sr)
         try:
             serializer.is_valid(raise_exception=True)
             data_instance = serializer.save()
+            self.__check_data(data_for_sr)
             return data_instance
         except (ValidationError, SyntaxError, AssertionError) as e:
-            pg_logger.error(e)  # Need to add translation ru text of error to en
-            # return e  # Returns original error text if needed while developing
+            en_err_text = self.__translate(e)
+            logger.error(en_err_text)
+            # return e  # Returns original error object if needed while debugging
 
 
 class KISDataProcessing(DataProcessing):
@@ -297,7 +326,8 @@ class KISDataProcessing(DataProcessing):
       querysets: QuerySets instance for getting access to its attrs and methods permanent.
 
     Attributes:
-      kis_generator: Generator: A generator for retrieving datasets. Must be a KISData instance.
+      kisdata_obj: (KISData): The KISData instance.
+      Its method giving us generator. Needed for connection status checking.
 
     Methods:
       - __count_values(dataset, ind, keywords) -> list[int]: Count values in the dataset based on index and keywords.
@@ -315,17 +345,16 @@ class KISDataProcessing(DataProcessing):
       - create_ready_dicts() -> list[dict]: Create a list of dictionaries containing processed and serialized datasets.
     """
 
-    qs = QuerySets()
     deads_oar = []
     counted_oar = []
 
-    def __init__(self, kis_generator):
+    def __init__(self, kisdata_obj):
         """
         Initialize the KISDataProcessing instance.
 
-        :param kis_generator: *Generator*: A generator providing datasets.
+        :param kisdata_obj: *Generator*: A generator providing datasets.
         """
-        super().__init__(kis_generator)
+        super().__init__(kisdata_obj)
 
     def __count_values(self, dataset, ind, keywords) -> list[int]:
         """
@@ -404,15 +433,11 @@ class KISDataProcessing(DataProcessing):
         # Defining columns for serializer and values for filtering datasets.
         columns, channels, statuses = self.qs.COLUMNS['arrived'], self.qs.channels, self.qs.statuses
         # Getting first dataset by generator.
-        if self.error_check(arrived_dataset):
-            sorted_channels_datasets = [0 for cnt in channels]
-            sorted_statuses_datasets = [0 for cnt in statuses]
-        else:
-            hosp_data = self.filter_dataset(arrived_dataset, 0, 1)
-            # Calculating channels numbers.
-            sorted_channels_datasets = self.__count_values(hosp_data, 2, channels)
-            # Calculating patients statuses.
-            sorted_statuses_datasets = self.__count_values(hosp_data, -1, statuses)
+        hosp_data = self.filter_dataset(arrived_dataset, 0, 1)
+        # Calculating channels numbers.
+        sorted_channels_datasets = self.__count_values(hosp_data, 2, channels)
+        # Calculating patients statuses.
+        sorted_statuses_datasets = self.__count_values(hosp_data, -1, statuses)
         # Creating 1 row data in dataset.
         summary_dataset = [tuple(sorted_channels_datasets+sorted_statuses_datasets)]
         ready_dataset = self.__result_for_sr(columns, summary_dataset)
@@ -429,13 +454,9 @@ class KISDataProcessing(DataProcessing):
         :type pre_dataset: list[tuple]
         :return: *dict*: Serialized data.
         """
-        if self.error_check(pre_dataset):
-            en_columns = [column for column in self.qs.profiles_mapping.values()]
-            dataset = [tuple([0 for cnt in en_columns])]
-        else:
-            packed_data = self.__slice_dataset(pre_dataset, self.qs.profiles_mapping)
-            en_columns, dataset = packed_data[0], packed_data[1]
-            dataset = [tuple(dataset)]
+        packed_data = self.__slice_dataset(pre_dataset, self.qs.profiles_mapping)
+        en_columns, dataset = packed_data[0], packed_data[1]
+        dataset = [tuple(dataset)]
         ready_dataset = self.__result_for_sr(en_columns, dataset)
         return self.__serialize(ready_dataset)
 
@@ -455,10 +476,7 @@ class KISDataProcessing(DataProcessing):
         # Preparing data for creating processed dataset
         packed_data = self.__slice_dataset(counted_signout_dataset, self.qs.depts_mapping)
         en_columns, dataset = packed_data[0], packed_data[1]
-        if self.error_check(signout_dataset):
-            sorted_signout_dataset = [0 for cnt in columns]
-        else:
-            sorted_signout_dataset = self.__count_values(signout_dataset, 1, keywords)
+        sorted_signout_dataset = self.__count_values(signout_dataset, 1, keywords)
         summary_dataset = [tuple(sorted_signout_dataset + dataset)]
         summary_columns = columns + en_columns
         ready_dataset = self.__result_for_sr(summary_columns, summary_dataset)
@@ -520,16 +538,25 @@ class KISDataProcessing(DataProcessing):
         """
         Create an ordered list of dictionaries containing processed and serialized datasets.
 
+         Checking for connection failure, if so, then manually creating dictations with None values
+         and returning them as serialized data for the response.
+
         :return: *list[dict]*: List of dictionaries containing processed and serialized datasets.
         """
         keywords = self.qs.DICT_KEYWORDS
-        arrived = self.__arrived_process(next(self.kis_generator))
-        hosp_dept = self.__dept_hosp_process(next(self.kis_generator))
-        signout = self.__signout_process(next(self.kis_generator))
-        deads = self.__deads_process(next(self.kis_generator))
-        oar_arrived = self.__oar_process(next(self.kis_generator), self.qs.COLUMNS['oar_arrived_t'])
-        oar_moved = self.__oar_process(next(self.kis_generator), self.qs.COLUMNS['oar_moved_t'])
-        oar_current = self.__oar_process(next(self.kis_generator), self.qs.COLUMNS['oar_current_t'])
+        if self.kisdata_obj.db_conn.conn is None:
+            ready_dataset = [None for i in range(8)]
+            result = [dict(zip(keywords, ready_dataset))]
+            return result
+        # If connection successfully getting and processing data.
+        gen = self.kisdata_obj.get_data_generator()
+        arrived = self.__arrived_process(next(gen))
+        hosp_dept = self.__dept_hosp_process(next(gen))
+        signout = self.__signout_process(next(gen))
+        deads = self.__deads_process(next(gen))
+        oar_arrived = self.__oar_process(next(gen), self.qs.COLUMNS['oar_arrived_t'])
+        oar_moved = self.__oar_process(next(gen), self.qs.COLUMNS['oar_moved_t'])
+        oar_current = self.__oar_process(next(gen), self.qs.COLUMNS['oar_current_t'])
         oar_numbers = self.oar_count()
         # Creating list of ready processed datasets.
         ready_dataset = [arrived, hosp_dept, signout, deads, oar_arrived, oar_moved, oar_current, oar_numbers]

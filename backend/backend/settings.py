@@ -1,5 +1,4 @@
 import environ
-from django.utils.translation import gettext_lazy as _
 
 # Get root dir of the project
 root = environ.Path(__file__) - 3
@@ -119,14 +118,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 LANGUAGE_CODE = 'ru-RU'
 
-LANGUAGES = [
-    ('en', _('English')),
-]
-
 LOCALE_PATHS = [
     SITE_ROOT + r'\backend\locales'
 ]
-print(LOCALE_PATHS)
 
 TIME_ZONE = 'Europe/Moscow'
 
@@ -147,39 +141,40 @@ LOGGING = {
     'disable_existing_loggers': False,
 
     'handlers': {
-        'pg_errs': {
+        'conn_errs': {
             'class': 'logging.FileHandler',
             'filename': SITE_ROOT + r'\backend\pg_processing\pg_logs.log',
-            'formatter': 'pg_errs',
+            'formatter': 'conn_errs',
             'level': 'ERROR',
             # 'mode': 'w'
             },
-        'test': {
+        'dmk': {
             'class': 'logging.FileHandler',
-            'filename': SITE_ROOT + r'\pg_logs.log',
-            'formatter': 'test',
+            'filename': SITE_ROOT + r'\backend\pg_processing\pg_logs.log',
+            'formatter': 'dmk',
             'level': 'INFO',
             # 'mode': 'w'
         },
     },
     'formatters': {
-        'pg_errs': {
-            'format': '[%(levelname)s: %(asctime)sms] [Module - %(name)s]\n %(message)s\n',
+        'conn_errs': {
+            'format': '[%(levelname)s: %(asctime)sms] [Class - %(name)s]\n %(message)s\n',
         },
-        'test': {
-            'format': '[%(levelname)s\n %(message)s]\n',
+        'dmk': {
+            'format': '[%(levelname)s: %(asctime)s] [Class - %(name)s]\n %(message)s\n',
+            # 'datefmt': '%Y-%m-%d',
         },
     },
 
     'loggers': {
-        'pg_processing.psycopg_module': {
+        'pg_processing.psycopg_module.BaseConnectionDB': {
             'level': 'ERROR',
-            'handlers': ['pg_errs'],
+            'handlers': ['conn_errs'],
             'propagate': False
         },
-        'test': {
+        'pg_processing.kis_data.DataForDMK': {
             'level': 'INFO',
-            'handlers': ['test'],
+            'handlers': ['dmk'],
             'propagate': False
         }
     }
@@ -190,3 +185,10 @@ CELERY_BROKER_URL = env.str('BROKER_URL')
 CELERY_RESULT_BACKEND = env.str('RESULT_URL')
 CELERY_TIMEZONE = 'Europe/Moscow'
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/2",
+    }
+}
