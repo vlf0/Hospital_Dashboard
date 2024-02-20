@@ -1,11 +1,12 @@
-from backend.celery import app
+from typing import Never
+from celery import shared_task
 from django_celery_beat.models import PeriodicTask, CrontabSchedule
-from .kis_data import DataForDMK
+from .kis_data import DataForDMK, KISData, QuerySets
 
 
 schedule, _ = CrontabSchedule.objects.get_or_create(
-    minute='*',
-    hour='*',
+    minute='0',
+    hour='7',
     day_of_week='*',
     day_of_month='*',
     month_of_year='*',
@@ -14,16 +15,18 @@ schedule, _ = CrontabSchedule.objects.get_or_create(
 PeriodicTask.objects.get_or_create(
     crontab=schedule,
     name='Saving data to DMK',
-    task='pg_processing.tasks.update_data'
+    task='pg_processing.tasks.insert_data'
 )
 
 
-@app.task
-def update_data():
+@shared_task
+def insert_data() -> Never:
     """
-    Updates the MainData model with the collected data.
+    Update the MainData model with the collected data.
 
-    :return: *None*
+     Do this everyday at 7:00 AM by schedule.
     """
-    print('yes')
+    ready_data = DataForDMK(KISData(QuerySets().queryset_for_dmk()))
+    ready_data.save_to_dmk()
+
 
