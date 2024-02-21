@@ -7,6 +7,7 @@ import AnnotationPlugin from 'chartjs-plugin-annotation';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import current_date from '../dates/DatesFormat';
 import DataContext from '../DataContext';
+import { extractProperty } from '../Feauters';
 import "./arrived_chart.css";
 
 
@@ -22,7 +23,8 @@ Chart.defaults.color = '#090b1f';
 
 const SignOutChart = () => {
 
-    const readyData = useContext(DataContext);
+    const dmk_charts = useContext(DataContext).dmk;
+    console.log(dmk_charts)
 
     const navigate = useNavigate();
     const plan = 60
@@ -41,8 +43,8 @@ const SignOutChart = () => {
         datasets: [
             {
               label: 'total',
-              data: (readyData ? readyData.signOutArray : null),
-              backgroundColor: ['#2d8587', '#2d8587', '#2d8587'],
+              data: extractProperty(dmk_charts, 'signout'),
+              backgroundColor: ['#212e93b3'],
               borderColor: '#090b1f',
               borderWidth: 1,
             },
@@ -52,7 +54,7 @@ const SignOutChart = () => {
     const chartOptions = {
         barThickness: 'flex',
         barPercentage: 0.9, 
-        categoryPercentage: 0.8,
+        categoryPercentage: 0.9,
         scales: {
             x: {
                 // stacked: true,
@@ -104,8 +106,8 @@ const SignOutChart = () => {
                     title: {
                         color: 'black',
                         font: {
-                          size: 10,
-                          weight: 'bold',
+                          size: 13,
+                        //   weight: 'bold',
                           },
                         anchor: 'end',
                         align: 'end',
@@ -126,14 +128,14 @@ const SignOutChart = () => {
                             return '\t' + percernts+'%';
                         },
                         font: {
-                          size: 10,
+                          size: 12,
                           weight: 'bold',
                         },
                         color: (context) => {
                           const value = context.dataset.data[context.dataIndex];
                           const percent = ((value / plan) * 100 - 100).toFixed(1);
 
-                          return percent < 0 ? '#980101' : '#049d00';
+                          return percent < 0 ? '#b200ac' : '#049d00';
                         },
                     },
                 },
@@ -158,7 +160,14 @@ const SignOutChart = () => {
                 display: true,
                 text: 'Динамика выписанных за неделю',
                 color: '#090b1f',
+                font: {
+                    size: 13
+                },
+                padding: {
+                    bottom: 30,
+              }
             },
+
         },
     };
 

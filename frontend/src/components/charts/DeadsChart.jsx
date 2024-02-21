@@ -7,6 +7,7 @@ import AnnotationPlugin from 'chartjs-plugin-annotation';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import DataContext from '../DataContext';
 import current_date from '../dates/DatesFormat';
+import { extractProperty } from '../Feauters';
 import "./arrived_chart.css";
 
 Chart.register(AnnotationPlugin);
@@ -19,10 +20,10 @@ Chart.defaults.color = '#090b1f';
 
 const DeadsChart = () => {
 
-    const readyData = useContext(DataContext);
+    const dmk_charts = useContext(DataContext).dmk;
 
     const navigate = useNavigate();
-    const plan = 8
+    const plan = 10
 
 
     const arrived_data = {
@@ -38,8 +39,8 @@ const DeadsChart = () => {
         datasets: [
             {
               label: 'total',
-              data: (readyData ? readyData.deadsArray : null),
-              backgroundColor: ['#2d8587', '#2d8587', '#2d8587'],
+              data: extractProperty(dmk_charts, 'deads'),
+              backgroundColor: ['#212e93b3'],
               borderColor: '#090b1f',
               borderWidth: 1,
             },
@@ -49,7 +50,7 @@ const DeadsChart = () => {
     const chartOptions = {
         barThickness: 'flex',
         barPercentage: 0.9, 
-        categoryPercentage: 0.8,
+        categoryPercentage: 0.9,
         scales: {
             x: {
                 // stacked: true,
@@ -86,8 +87,8 @@ const DeadsChart = () => {
                     },
                     callback: (value, index, values) => {
                         // Customize the tick value
-                        if (value === 8) {
-                            return 'план 8'; // Change the tick label for the value 60
+                        if (value === 10) {
+                            return 'план 10'; // Change the tick label for the value 60
                         } else {
                             return value; // Use the default tick label for other values
                         }
@@ -104,8 +105,8 @@ const DeadsChart = () => {
                     title: {
                         color: 'black',
                         font: {
-                          size: 10,
-                          weight: 'bold',
+                          size: 13,
+                        //   weight: 'bold',
                           },
                         anchor: 'end',
                         align: 'end',
@@ -126,14 +127,14 @@ const DeadsChart = () => {
                             return '\t' + percernts+'%';
                         },
                         font: {
-                          size: 10,
+                          size: 12,
                           weight: 'bold',
                         },
                         color: (context) => {
                           const value = context.dataset.data[context.dataIndex];
                           const percent = ((value / plan) * 100 - 100).toFixed(1);
   
-                          return percent < 0 ? '#980101' : '#049d00';
+                          return percent < 0 ? '#b200ac' : '#049d00';
                         },
                     },
                 },
@@ -144,8 +145,8 @@ const DeadsChart = () => {
                     annotations: {
                       line1: {
                         type: 'line',
-                        yMin: 8,
-                        yMax: 8,
+                        yMin: 10,
+                        yMax: 10,
                         borderColor: '#ff6384',
                         borderWidth: 2,
                       },
@@ -158,6 +159,12 @@ const DeadsChart = () => {
                 display: true,
                 text: 'Динамика умерших за неделю',
                 color: '#090b1f',
+                font: {
+                    size: 13
+                },
+                padding: {
+                    bottom: 30,
+              }
             },
         },
     };
