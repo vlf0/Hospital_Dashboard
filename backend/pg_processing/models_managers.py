@@ -10,6 +10,10 @@ class TwoDaysFilterManager(models.Manager):
     """
 
     def custom_filter(self):
-        """Filter last 7 rows from queryset using __in filter method and list comprehension."""
+        """
+        Get 7 last model objects and return as a queryset.
+
+        :return: *list[tuple]* Filtered queryset.
+        """
         week_days = [(date.today() - timedelta(days=day)) for day in range(7)]
         return self.filter(dates__in=week_days)

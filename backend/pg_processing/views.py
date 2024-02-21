@@ -9,6 +9,6 @@ class KISDataReadViewSet(viewsets.ViewSet):
 
     def list(self, request):
         ensure_cashing()
-        kis = cache.get(':1:kis')
-        dmk = cache.get(':1:dmk')
+        kis = cache.get('kis')
+        dmk = cache.get('dmk')
         return Response({'dmk': dmk, 'kis': kis})

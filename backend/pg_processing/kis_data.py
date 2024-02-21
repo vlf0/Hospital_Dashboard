@@ -1,17 +1,18 @@
 """Responsible for classes defining non-model query-sets from another DB."""
 import logging
-import redis
 from typing import Generator, Never, Any
-from datetime import date, datetime
+from datetime import date
 from collections import Counter
 from itertools import chain
 from django.core.cache import cache
 from rest_framework.exceptions import ValidationError
+from django.conf import settings
 from .psycopg_module import BaseConnectionDB
 from .sql_queries import QuerySets
 from .serializers import KISDataSerializer, MainDataSerializer, KISTableSerializer
 from .models import MainData
 
+creds = settings.DB_CREDS
 logger = logging.getLogger('pg_processing.kis_data.DataForDMK')
 
 
@@ -62,10 +63,10 @@ class KISData:
           and queries of its columns. Each query pair is a list.
         """
         self.query_sets = query_sets
-        self.db_conn = BaseConnectionDB(dbname='postgres',
-                                        host='localhost',
-                                        user='postgres',
-                                        password='root'
+        self.db_conn = BaseConnectionDB(dbname=creds['dbname'],
+                                        host=creds['host'],
+                                        user=creds['user'],
+                                        password=creds['password']
                                         )
         self.cursor = self.db_conn.execute_query
 
@@ -304,7 +305,6 @@ class DataForDMK(DataProcessing):
          write to log file.
         """
         data_for_sr = self.__collect_data()
-        cache.set(':1:dmk', data_for_sr)
         serializer = MainDataSerializer(data=data_for_sr)
         try:
             serializer.is_valid(raise_exception=True)
@@ -572,10 +572,12 @@ def ensure_cashing() -> Never:
     Check redis cash and write data into if storage is empty.
 
      We are calling this func in the main view to avoid unnecessary calls to the database.
+     First call of the day provides writing data into cache and use
+     the cache during the day new call to db instead.
     """
-    if cache.get(':1:dmk') is None:
+    if cache.get('dmk') is None:
         p_dmk = MainDataSerializer(MainData.objects.custom_filter(), many=True).data
-        cache.set(':1:dmk', p_dmk)
-    if cache.get(':1:kis') is None:
+        cache.set('dmk', p_dmk)
+    if cache.get('kis') is None:
         p_kis = KISDataProcessing(KISData(QuerySets().queryset_for_kis())).create_ready_dicts()
-        cache.set(':1:kis', p_kis)
+        cache.set('kis', p_kis)

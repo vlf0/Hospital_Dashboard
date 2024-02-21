@@ -96,6 +96,15 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # Get the DB creds from .env file
 DATABASES = {'default': env.db('DATABASE_URL')}
 
+# External DB data
+DB_CREDS = {
+    'host': env.str('HOST'),
+    'port': env.str('PORT'),
+    'dbname': env.str('DBNAME'),
+    'user': env.str('USER'),
+    'password': env.str('PASSWORD'),
+}
+
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
@@ -188,8 +197,9 @@ CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 
 CACHES = {
     'default': {
-        # 'BACKEND': 'django_redis.cache.RedisCache',
         'BACKEND': 'django.core.cache.backends.redis.RedisCache',
         'LOCATION': 'redis://127.0.0.1:6379/2',
     }
 }
+
+KEY_PREFIX = ''
