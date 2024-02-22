@@ -1,3 +1,21 @@
+import { format, subHours } from 'date-fns';
+
+
+function DateFormatting(date) {
+  // const dateString = "2024-01-10T00:40:15+03:00";
+  const dateTimeObject = new Date(date);
+  
+  // Subtract 3 hours
+  const subtractedDate = subHours(dateTimeObject, 3);
+  
+  // Format the result
+  const formattedSubtractedDate = format(subtractedDate, 'dd.MM.yyyy HH:mm:ss');
+  
+  return formattedSubtractedDate
+};
+
+
+
 export function CustomMap(currentDay, yesterday) {
     const result = [currentDay, yesterday, Persents(currentDay, yesterday)]
     return result
@@ -25,29 +43,22 @@ export function ensureArrayLength(array, desiredLength) {
   }
 };
 
+export function Process(dataset) {
+  // Using map to transform each item in the dataset
+  const modifiedObjects = dataset.map(item => {
+    return {
+      'ФИО': item.pat_fio,
+      '№ ИБ': item.ib_num,
+      'Пол': item.sex,
+      'Возраст': item.age,
+      'Дата поступления': DateFormatting(item.arriving_dt),
+      'Состояние при поступлении': item.state,
+      'Кол-во койко дней': item.days,
+      'Дигноз при поступлении': item.diag_arr,
+      'Дигноз при выписке': item.diag_dead
+    };
+  });
 
-
-     // Accessing specific properties of the first object
-    // const currentDay = data[data.length - 1];
-    // const yesterday = data[data.length - 2];
-
-    // const arrivedArray = data.map(obj => obj.arrived);
-    // const signOutArray = data.map(obj => obj.signout);
-    // const deadsArray = data.map(obj => obj.deads);
-    // ensureArrayLength(arrivedArray, 7);
-    // ensureArrayLength(signOutArray, 7);
-    // ensureArrayLength(deadsArray, 7);
-
-    // const dates = [currentDay.dates, yesterday.dates];
-    // const arrived = [currentDay.arrived, yesterday.arrived, Persents(currentDay.arrived, yesterday.arrived)];
-    // const hosp = [currentDay.hosp, yesterday.hosp, Persents(currentDay.hosp, yesterday.hosp)];
-    // const refused = [currentDay.refused, yesterday.refused, Persents(currentDay.refused, yesterday.refused)];
-    // const signout = [currentDay.signout, yesterday.signout, Persents(currentDay.signout, yesterday.signout)];
-    // const deads = [currentDay.deads, yesterday.deads, Persents(currentDay.deads, yesterday.deads)];
-    // const reanimation = [currentDay.reanimation, yesterday.reanimation, Persents(currentDay.reanimation, yesterday.reanimation)];
-
-    
-    // return {
-    //   dates, arrived, hosp, refused, signout, deads, reanimation,
-    //   arrivedArray, signOutArray, deadsArray
-    // };
+  // Returning the array of modified objects
+  return modifiedObjects;
+};

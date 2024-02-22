@@ -14,20 +14,37 @@ Chart.register(ChartDataLabels);
 Chart.defaults.font.size = 12;
 Chart.defaults.color = '#090b1f';  
 
+// Depts map
+const chartMap = {
+    'cardio_d': 'Кардиологическое',
+    'surgery_d': 'Хирургическое',
+    'therapy_d': 'Терапевтическое'
+}
 
-const DeadsChartDetail = ({ profiles }) => {
+const DeadsChartDetail = ({ data }) => {
 
     const navigate = useNavigate();
+
+
+    const deptsOut = Object.fromEntries(
+        Object.entries(data)
+          .filter(([key, value]) => key.endsWith('_d'))
+      );
+
+    const endDepts = Object.keys(deptsOut)
+    const rudDepts = endDepts.map(index => chartMap[index])
+    const nums = Object.values(deptsOut) 
+
 
     const plan = 60
 
     const arrived_data = {
-        labels: profiles,
+        labels: rudDepts,
         datasets: [
             {
               label: 'total',
-              data: [80, 73, 84],//data ? [data.data, data.data, data.data] : [10,20,10],
-              backgroundColor: ['#2d8587', '#2d8587', '#2d8587'],
+              data: nums,//data ? [data.data, data.data, data.data] : [10,20,10],
+              backgroundColor: ['#2d8587'],
               borderColor: '#090b1f',
               borderWidth: 1,
             },
@@ -56,15 +73,17 @@ const DeadsChartDetail = ({ profiles }) => {
             },
             y: {
                 // stacked: true,
-                min: 0, 
-                max: 100, 
+                // min: 0, 
+                // max: 100, 
                 grid: {
                   drawOnChartArea: true,
                   drawTicks: false
                   },
              
                 ticks: {
-                    font: {weight: 'bold'},
+                    font: {
+                      weight: 'bold'
+                    },
                 },
             },
         },
@@ -76,8 +95,8 @@ const DeadsChartDetail = ({ profiles }) => {
                     title: {
                         color: 'black',
                         font: {
-                          size: 10,
-                          weight: 'bold',
+                          size: 13,
+                        //   weight: 'bold',
                           },
                         anchor: 'end',
                         align: 'end',
@@ -103,13 +122,23 @@ const DeadsChartDetail = ({ profiles }) => {
                 display: true,
                 text: 'Выписанные по отделениям',
                 color: '#090b1f',
+                font: {
+                    size: 13,
+            },                
+            padding: {
+            //   top: 20, // Adjust the top padding as needed
+              bottom: 30,
+            }
             },
     
         },
-        onClick: function () {
-                var link = '/deads'; 
-                navigate(link); // Changes the current page's URL
-        }
+
+        /* This code makes bars on chart clickable  */
+
+        // onClick: function () {
+        //         var link = '/deads'; 
+        //         navigate(link); // Changes the current page's URL
+        // }
     };
 
     // Chart component

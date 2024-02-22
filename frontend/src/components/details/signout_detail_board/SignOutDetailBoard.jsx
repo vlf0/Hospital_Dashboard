@@ -5,13 +5,16 @@ import SignOutDetailTable from "./SignOutDetailTable";
 import DataContext from "../../DataContext";
 import '../signIn_detail_board/detail_blocks.css';
 
-const signOutCount = 63;
-const deadCount = 9;
-const moveCount = 18;
 
-const SignOutDetailBoard = ({ combinedData, profiles }) => {
 
-  const readyData = useContext(DataContext);
+const SignOutDetailBoard = () => {
+
+  const data = useContext(DataContext);
+  let dmk_current = data.dmk
+  dmk_current = dmk_current[dmk_current.length - 1]
+  let kis = data.kis
+  kis = kis[0].signout[0]
+
 
   const [isDeadTableVisible, setIsDeadTableVisible] = useState(false);
   const toggleDeadTableVisibility = () => {
@@ -33,15 +36,15 @@ const SignOutDetailBoard = ({ combinedData, profiles }) => {
       <span className='detail_block_header'> Исходы </span>
       <div className='blocks_container'>
         <div className='separated_detail_block_X' onClick={toggleDeadTableVisibility}>
-          Смерть <br /><br /> { (readyData ? readyData.deads[0] : null) }
+          Смерть <br /><br /> { kis.deads }
         </div>
-        <div className='separated_detail_block'> Перевод в другую МО <br /><br /> {moveCount} </div>
+        <div className='separated_detail_block'> Перевод в другую МО <br /><br /> { kis.moved } </div>
         <div className='separated_detail_block'>
-           Выписка <br /><br /> { (readyData ? readyData.signout[0] : null) }
+           Выписка <br /><br /> { kis.signout }
        </div>
       </div>
       <span className='detail_block_header'> Выписка по отделениям </span>
-      <DeadsChartDetail profiles={profiles}/>
+      <DeadsChartDetail data={kis}/>
       <animated.div style={springProps}>
           {isDeadTableVisible && <SignOutDetailTable />}
       </animated.div>
