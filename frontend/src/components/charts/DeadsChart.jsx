@@ -6,8 +6,9 @@ import Chart from 'chart.js/auto';
 import AnnotationPlugin from 'chartjs-plugin-annotation';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import DataContext from '../DataContext';
-import current_date from '../dates/DatesFormat';
+import GetWeekDays from '../dates/DatesFormat';
 import { extractProperty } from '../Feauters';
+import { ensureArrayLength } from '../Feauters';
 import "./arrived_chart.css";
 
 Chart.register(AnnotationPlugin);
@@ -20,26 +21,21 @@ Chart.defaults.color = '#090b1f';
 
 const DeadsChart = () => {
 
-    const dmk_charts = useContext(DataContext).dmk;
-
     const navigate = useNavigate();
     const plan = 10
 
+    const dmk_charts = useContext(DataContext).dmk;
+    const mappedData = extractProperty(dmk_charts, 'deads')
+    ensureArrayLength(mappedData, 7)
+
+    const mappedWeek = GetWeekDays()
 
     const arrived_data = {
-        labels: [
-            `${current_date.day-6}.${current_date.month}`,
-            `${current_date.day-5}.${current_date.month}`,
-            `${current_date.day-4}.${current_date.month}`,
-            `${current_date.day-3}.${current_date.month}`,
-            `${current_date.day-2}.${current_date.month}`,
-            `${current_date.day-1}.${current_date.month}`,
-            `${current_date.day}.${current_date.month}`,
-        ],
+        labels: mappedWeek,
         datasets: [
             {
               label: 'total',
-              data: extractProperty(dmk_charts, 'deads'),
+              data: mappedData,
               backgroundColor: ['#212e93b3'],
               borderColor: '#090b1f',
               borderWidth: 1,

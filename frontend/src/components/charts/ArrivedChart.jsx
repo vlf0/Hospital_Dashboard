@@ -7,7 +7,9 @@ import AnnotationPlugin from 'chartjs-plugin-annotation';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import current_date from '../dates/DatesFormat';
 import DataContext from '../DataContext';
+import GetWeekDays from '../dates/DatesFormat';
 import { extractProperty } from '../Feauters';
+import { ensureArrayLength } from '../Feauters';
 import "./arrived_chart.css";
 
 Chart.register(AnnotationPlugin);
@@ -22,25 +24,21 @@ Chart.defaults.color = '#090b1f';
 
 const ArrivedChart = () => {
     
-    const dmk_charts = useContext(DataContext).dmk;
-
     const navigate = useNavigate();
     const plan = 120
 
+    const dmk_charts = useContext(DataContext).dmk;
+    const mappedData = extractProperty(dmk_charts, 'arrived')
+    ensureArrayLength(mappedData, 7)
+
+    const mappedWeek = GetWeekDays()
+
     const arrived_data = {
-        labels: [
-            `${current_date.day-6}.${current_date.month}`,
-            `${current_date.day-5}.${current_date.month}`,
-            `${current_date.day-4}.${current_date.month}`,
-            `${current_date.day-3}.${current_date.month}`,
-            `${current_date.day-2}.${current_date.month}`,
-            `${current_date.day-1}.${current_date.month}`,
-            `${current_date.day}.${current_date.month}`,
-        ],
+        labels: mappedWeek,
         datasets: [
             {
               label: 'total',
-              data: extractProperty(dmk_charts, 'arrived'),
+              data: mappedData,
               backgroundColor: ['#212e93b3'],
               borderColor: '#090b1f',
               borderWidth: 1,

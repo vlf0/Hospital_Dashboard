@@ -38,7 +38,7 @@ function DetailBoard({ sign }) {
     topBlockHeader = 'Детализация выписанных';
   } else if (sign === 'oar') {
     content = <div className='detail_block'>
-              <OARDetailBoard dept={'ОРИТ №1'} values={[readyData.reanimation[0],15,20]} /> 
+              <OARDetailBoard dept={'ОРИТ №1'} values={[0,15,20]} /> 
               <OARDetailBoard dept={'ОРИТ №2'} values={[33,19,24]} />
               <OARDetailBoard dept={'ОРИТ №3'} values={[33,19,24]} />              
               </div>;
