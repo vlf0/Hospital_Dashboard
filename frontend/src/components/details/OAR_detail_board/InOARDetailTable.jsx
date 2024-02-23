@@ -1,54 +1,32 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { useTable } from 'react-table';
+import { ArrivedOarTable } from '../../Feauters';
+import DataContext from '../../DataContext';
 import '../signout_detail_board/signout_table.css';
 
-
-const oarDetail = [
-                      ['Иван', 126, 43, 'ОРИТ №1', 'Климов А.Е.', 'J06.9'],
-                      ['Ольга', 126, 43, 'ОРИТ №2', 'Молунова В.В.', 'G80.3'],
-                      ['Олег', 126, 43, 'ОРИТ №3', 'Красиков Е.Н.', 'E80.0'],
-                      ['Ольга', 126, 43, 'ОРИТ №1', 'Быков А.И.', 'K76.2'],
-                    ];
-
-const columnAccessorMap = {
-  'ФИО': 0,
-  '№ ИБ': 1,
-  'возраст': 2,
-  'отделение': 3,
-  'лечащий врач': 4,
-  'дигноз при поступлении': 5,
-};
-
-
 const InOARDetailTable = ({ departament }) => {
+  const oars = useContext(DataContext).kis[0];
 
-  // Sample data
-  const filteredData = oarDetail.filter(tuple => tuple[columnAccessorMap['отделение']] === departament);
+  let arrived = oars.oar_arrived;
+  arrived = ArrivedOarTable(arrived);
 
-  // Map filtered data to table data format
-  const data = filteredData.map(tuple => {
-    return {
-      'ФИО': tuple[columnAccessorMap['ФИО']],
-      '№ ИБ': tuple[columnAccessorMap['№ ИБ']],
-      'возраст': tuple[columnAccessorMap['возраст']],
-      // 'отделение': tuple[columnAccessorMap['отделение']],
-      'лечащий врач': tuple[columnAccessorMap['лечащий врач']],
-      'дигноз при поступлении': tuple[columnAccessorMap['дигноз при поступлении']],
-    };
-  });
+  const filteredData = arrived
+  .filter(dict => dict['Отделение'] === departament)
+  .map(({ Отделение, ...rest }) => rest);
+  console.log(filteredData)
 
-  // Define columns
-  const columns = [
-    { Header: 'ФИО', accessor: 'ФИО' },
-    { Header: '№ ИБ', accessor: '№ ИБ' },
-    { Header: 'Возраст', accessor: 'возраст' },
-    // { Header: 'Отделение', accessor: 'отделение' },
-    { Header: 'Лечащий врач', accessor: 'лечащий врач' },
-    { Header: 'Дигноз при поступлении', accessor: 'дигноз при поступлении' },
-  ];
+  const columns = Object.keys(arrived[0])
+  .filter(key => key !== 'Отделение')
+  .map(key => ({
+    Header: key,
+    accessor: key,
+  }));
 
   // Create a table instance
-  const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } = useTable({ columns, data });
+  const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } = useTable({
+    columns,
+    data: filteredData, // Use filteredData directly
+  });
 
   return (
     <div className='deads-table-container'>

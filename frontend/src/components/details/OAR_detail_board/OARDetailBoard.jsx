@@ -1,13 +1,13 @@
-import React, { useState, useContext } from "react";
+import React, { useState } from "react";
 import { useSpring, animated } from "react-spring";
 import InOARDetailTable from "./InOARDetailTable";
 import MoveOARDetailTable from "./MoveOARDetailTable";
 import OnTreatmentOARDetailTable from "./OnTreatmentOARDetailTable";
-import DataContext from "../../DataContext";
+
 
 const OARDetailBoard = ({ dept, values }) => {
 
-  const readyData = useContext(DataContext);
+  // const readyData = useContext(DataContext).kis;
   
   const [isOARTableVisible, setIsOARTableVisible] = useState(false);
   const [tableType, setTableType] = useState(null);

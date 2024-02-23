@@ -1,23 +1,21 @@
 import React, { useContext } from 'react';
 import { useTable } from 'react-table';
 import DataContext from "../../DataContext";
-import { Process } from '../../Feauters';
+import { DeadTableProcess } from '../../Feauters';
 import './signout_table.css';
 
 const SignOutDetailTable = () => {
   let kisDeads = useContext(DataContext).kis;
   kisDeads = (kisDeads[0].deads);
-  console.log(kisDeads);
 
-  const readyRuData = Process(kisDeads);
-  console.log(readyRuData)
+  const readyRuData = DeadTableProcess(kisDeads);
+
 
   // Define columns
   const columns = Object.keys(readyRuData[0]).map(key => ({
     Header: key,
     accessor: key,
   }));
-  console.log(columns)
 
   // Create a table instance
   const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } = useTable({

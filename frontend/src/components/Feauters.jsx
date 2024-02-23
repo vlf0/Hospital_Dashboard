@@ -1,7 +1,7 @@
 import { format, subHours } from 'date-fns';
 
 
-function DateFormatting(date) {
+export function DateFormatting(date) {
   // const dateString = "2024-01-10T00:40:15+03:00";
   const dateTimeObject = new Date(date);
   
@@ -13,7 +13,6 @@ function DateFormatting(date) {
   
   return formattedSubtractedDate
 };
-
 
 
 export function CustomMap(currentDay, yesterday) {
@@ -43,7 +42,7 @@ export function ensureArrayLength(array, desiredLength) {
   }
 };
 
-export function Process(dataset) {
+export function DeadTableProcess(dataset) {
   // Using map to transform each item in the dataset
   const modifiedObjects = dataset.map(item => {
     return {
@@ -60,5 +59,58 @@ export function Process(dataset) {
   });
 
   // Returning the array of modified objects
+  return modifiedObjects;
+};
+
+export function ArrivedOarTable(dataset) {
+
+  const modifiedObjects = dataset.map(item => {
+    return {
+      'ФИО': item.pat_fio,
+      '№ ИБ': item.ib_num,
+      'Возраст': item.age,
+      'Отделение': item.dept,
+      'Лечащий врач': item.doc_fio,
+      'Дигноз при поступлении': item.diag_start,
+
+    };
+  });
+
+  return modifiedObjects;
+};
+
+
+export function MovedOarTable(dataset) {
+
+  const modifiedObjects = dataset.map(item => {
+    return {
+      'ФИО': item.pat_fio,
+      '№ ИБ': item.ib_num,
+      'Возраст': item.age,
+      'Отделение': item.dept,
+      'Лечащий врач': item.doc_fio,
+      'Дигноз при поступлении': item.diag_start,
+      'Дата перевода': item.move_date,
+      'Переведен из': item.from_dept
+    };
+  });
+
+  return modifiedObjects;
+};
+
+export function CurrentOarTable(dataset) {
+
+  const modifiedObjects = dataset.map(item => {
+    return {
+      'ФИО': item.pat_fio,
+      '№ ИБ': item.ib_num,
+      'Возраст': item.age,
+      'Отделение': item.dept,
+      'Койко дней': item.days,
+      'Лечащий врач': item.doc_fio,
+      'Дигноз при поступлении': item.diag_start
+    };
+  });
+
   return modifiedObjects;
 };
