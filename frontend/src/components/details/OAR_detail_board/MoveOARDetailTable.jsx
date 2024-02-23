@@ -20,7 +20,6 @@ const InOARDetailTable = ({ departament }) => {
     ...item,
     'Дата перевода': DateFormatting(item['Дата перевода']),
   }));
-  console.log(formattedArray);
 
   const columns = Object.keys(moved[0])
   .filter(key => key !== 'Отделение')

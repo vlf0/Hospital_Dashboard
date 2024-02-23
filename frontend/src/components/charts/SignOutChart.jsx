@@ -22,13 +22,13 @@ Chart.defaults.color = '#090b1f';
 const SignOutChart = () => {
 
     const navigate = useNavigate();
-    const plan = 60
+    const plan = 60;
 
     const dmk_charts = useContext(DataContext).dmk;
-    const mappedData = extractProperty(dmk_charts, 'signout')
-    ensureArrayLength(mappedData, 7)
+    const mappedData = extractProperty(dmk_charts, 'signout');
+    ensureArrayLength(mappedData, 7);
 
-    const mappedWeek = GetWeekDays()
+    const mappedWeek = GetWeekDays();
 
     const arrived_data = {
         labels: mappedWeek,

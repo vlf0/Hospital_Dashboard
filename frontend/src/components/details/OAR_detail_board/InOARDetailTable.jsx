@@ -13,7 +13,6 @@ const InOARDetailTable = ({ departament }) => {
   const filteredData = arrived
   .filter(dict => dict['Отделение'] === departament)
   .map(({ Отделение, ...rest }) => rest);
-  console.log(filteredData)
 
   const columns = Object.keys(arrived[0])
   .filter(key => key !== 'Отделение')

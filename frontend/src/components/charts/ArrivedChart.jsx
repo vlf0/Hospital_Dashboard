@@ -5,7 +5,6 @@ import {Bar} from 'react-chartjs-2';
 import Chart from 'chart.js/auto';
 import AnnotationPlugin from 'chartjs-plugin-annotation';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
-import current_date from '../dates/DatesFormat';
 import DataContext from '../DataContext';
 import GetWeekDays from '../dates/DatesFormat';
 import { extractProperty } from '../Feauters';
@@ -20,18 +19,16 @@ Chart.defaults.font.size = 12;
 Chart.defaults.color = '#090b1f';  
 
 
-
-
 const ArrivedChart = () => {
     
     const navigate = useNavigate();
-    const plan = 120
+    const plan = 120;
 
     const dmk_charts = useContext(DataContext).dmk;
-    const mappedData = extractProperty(dmk_charts, 'arrived')
-    ensureArrayLength(mappedData, 7)
+    const mappedData = extractProperty(dmk_charts, 'arrived');
+    ensureArrayLength(mappedData, 7);
 
-    const mappedWeek = GetWeekDays()
+    const mappedWeek = GetWeekDays();
 
     const arrived_data = {
         labels: mappedWeek,

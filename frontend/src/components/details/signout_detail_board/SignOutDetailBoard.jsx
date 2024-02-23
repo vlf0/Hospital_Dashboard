@@ -36,11 +36,12 @@ const SignOutDetailBoard = () => {
       <span className='detail_block_header'> Исходы </span>
       <div className='blocks_container'>
         <div className='separated_detail_block_X' onClick={toggleDeadTableVisibility}>
-          Смерть <br /><br /> { kis.deads }
+          <p> Смерть </p> { kis.deads }
         </div>
-        <div className='separated_detail_block'> Перевод в другую МО <br /><br /> { kis.moved } </div>
+        <div className='separated_detail_block'> 
+          <p> Перевод в другую МО </p> { kis.moved } </div>
         <div className='separated_detail_block'>
-           Выписка <br /><br /> { kis.signout }
+           <p> Выписка </p> { kis.signout }
        </div>
       </div>
       <span className='detail_block_header'> Выписка по отделениям </span>

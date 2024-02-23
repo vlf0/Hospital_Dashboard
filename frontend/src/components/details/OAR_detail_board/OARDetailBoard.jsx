@@ -5,10 +5,8 @@ import MoveOARDetailTable from "./MoveOARDetailTable";
 import OnTreatmentOARDetailTable from "./OnTreatmentOARDetailTable";
 
 
-const OARDetailBoard = ({ dept, values }) => {
+const OARDetailBoard = ({ dept, values, deads }) => {
 
-  // const readyData = useContext(DataContext).kis;
-  
   const [isOARTableVisible, setIsOARTableVisible] = useState(false);
   const [tableType, setTableType] = useState(null);
   const [selectedValue, setSelectedValue] = useState(null);
@@ -42,8 +40,7 @@ const OARDetailBoard = ({ dept, values }) => {
           onClick={(event) => toggleDeadTableVisibility("in", event)}
           orit-name={dept}
         >
-          Поступило новых пациентов <br />
-          <br /> {values[0]}
+          <p> Поступило новых пациентов </p> {values[0]}
         </div>
           
         <div
@@ -51,8 +48,7 @@ const OARDetailBoard = ({ dept, values }) => {
           onClick={(event) => toggleDeadTableVisibility("move", event)}
           orit-name={dept}
         >
-          Переводы из отделений <br />
-          <br /> {values[1]}
+          <p> Переводы из отделений </p> {values[1]}
         </div>
           
         <div
@@ -60,8 +56,15 @@ const OARDetailBoard = ({ dept, values }) => {
           onClick={(event) => toggleDeadTableVisibility("onTreatment", event)}
           orit-name={dept}
         >
-          Находятся на лечении <br />
-          <br /> {values[2]}
+          <p> Находятся на лечении </p> {values[2]}
+        </div>
+
+        <div
+          className="separated_detail_block"
+          // onClick={(event) => toggleDeadTableVisibility("move", event)}
+          orit-name={dept}
+        >
+          <p> Умерли в отделении </p> {deads}
         </div>
       </div>
       <animated.div style={springProps}>

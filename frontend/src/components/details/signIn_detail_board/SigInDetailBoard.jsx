@@ -1,7 +1,6 @@
 import React, { useContext } from "react";
 import SignInDetailTable from "./SignInDetailTable";
 import DataContext from "../../DataContext";
-import ScaleX from "../ScaleX";
 import './detail_blocks.css';
 import './signin_table.css';
 
@@ -23,25 +22,34 @@ const SignInDetailBoard = () => {
           <span className='detail_block_header'> Обратившиеся </span>
           <div className='blocks_container'>
             <div className='separated_detail_block'> 
-              Отказано <br></br><br></br> {dmk.refused} 
+              <p> Отказано </p> {dmk.refused} 
             </div>
             <div className='separated_detail_block'>
-               Госпитализировано <br></br><br></br> {dmk.hosp}
+            <p> Госпитализировано </p> {dmk.hosp}
             </div>
           </div>
           <span className='detail_block_header'> Госпитализировано по каналам </span>
           <div className='blocks_container'>
-            <div className='separated_detail_block'> 103 <br></br><br></br> {kis.ch103} </div>
-            <div className='separated_detail_block'> Поликлиника <br></br><br></br> {kis.clinic_only} </div>
-            <div className='separated_detail_block'> 103 Поликлиника <br></br><br></br> {kis.ch103_clinic} </div>
-            <div className='separated_detail_block'> Самотёк <br></br><br></br> {kis.singly} </div>
+            <div className='separated_detail_block'> 
+              <p> 103 </p> {kis.ch103} </div>
+            <div className='separated_detail_block'>
+               <p> Поликлиника </p> {kis.clinic_only} </div>
+            <div className='separated_detail_block'>
+               <p> 103 Поликлиника </p> {kis.ch103_clinic} </div>
+            <div className='separated_detail_block'>
+               <p> Самотёк </p> {kis.singly} </div>
+
           </div>
           <span className='detail_block_header'> Госпитализировано в статусе </span>
           <div className='blocks_container'>
-            <div className='separated_detail_block'> ЗЛ <br></br><br></br> {kis.ZL} </div>
-            <div className='separated_detail_block'> Иногородние <br></br><br></br> {kis.foreign} </div>
-            <div className='separated_detail_block'> Москвичи <br></br><br></br> {kis.moscow} </div>
-            <div className='separated_detail_block'> Не указано <br></br><br></br> {kis.undefined} </div>
+            <div className='separated_detail_block'>
+              <p> ЗЛ </p> {kis.ZL} </div>
+            <div className='separated_detail_block'>
+              <p> Иногородние </p> {kis.foreign} </div>
+            <div className='separated_detail_block'> 
+              <p> Москвичи </p> {kis.moscow} </div>
+            <div className='separated_detail_block'>  
+              <p> Не указано </p> {kis.undefined} </div>
           </div>
           <SignInDetailTable data={dept_hosp}/>
         </div>

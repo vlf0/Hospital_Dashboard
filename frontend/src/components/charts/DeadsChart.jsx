@@ -22,13 +22,13 @@ Chart.defaults.color = '#090b1f';
 const DeadsChart = () => {
 
     const navigate = useNavigate();
-    const plan = 10
+    const plan = 10;
 
     const dmk_charts = useContext(DataContext).dmk;
-    const mappedData = extractProperty(dmk_charts, 'deads')
-    ensureArrayLength(mappedData, 7)
+    const mappedData = extractProperty(dmk_charts, 'deads');
+    ensureArrayLength(mappedData, 7);
 
-    const mappedWeek = GetWeekDays()
+    const mappedWeek = GetWeekDays();
 
     const arrived_data = {
         labels: mappedWeek,
