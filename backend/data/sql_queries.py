@@ -25,7 +25,7 @@ class QuerySets:
     OAR_CURRENT_QUERY = "SELECT pat_fio, ib_num, ages, dept, doc_fio, days, diag_start FROM mm.oar_current;"
 
     # Each string of this list is a keyword of dict where value is a serialized data.
-    DICT_KEYWORDS = ['arrived', 'dept_hosp', 'signout', 'deads',
+    DICT_KEYWORDS = ['arrived', 'signout', 'deads',
                      'oar_arrived', 'oar_moved', 'oar_current', 'oar_numbers']
 
     # Lists of columns for mapping with values to creating CleanData class instances.
@@ -73,7 +73,7 @@ class QuerySets:
 
         :return: List of lists.
         """
-        result = [self.ARRIVED, self.SIGNOUT, self.OAR_ARRIVED_QUERY]
+        result = [self.ARRIVED, self.SIGNOUT, self.OAR_ARRIVED_QUERY, self.DEPT_HOSP]
         return result
 
     def queryset_for_kis(self):
@@ -82,8 +82,7 @@ class QuerySets:
 
         :return: List of lists.
         """
-        dmk_queries = self.queryset_for_dmk()
-        dmk_queries.insert(1, self.DEPT_HOSP)
+        dmk_queries = self.queryset_for_dmk()[:-1]
         dmk_queries.insert(-1, self.DEADS)
         result = dmk_queries + [self.OAR_MOVED_QUERY, self.OAR_CURRENT_QUERY]
         return result

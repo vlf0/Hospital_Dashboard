@@ -1,6 +1,6 @@
 """Responsible for serializers."""
 from rest_framework import serializers
-from .models import MainData
+from .models import MainData, AccumulationOfIncoming
 
 
 class MainDataSerializer(serializers.ModelSerializer):
@@ -9,6 +9,13 @@ class MainDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = MainData
         fields = ['dates', 'arrived', 'hosp', 'refused', 'signout', 'deads', 'reanimation']
+
+
+class AccumulativeDataSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = AccumulationOfIncoming
+        fields = ['dates', 'therapy', 'surgery', 'cardiology', 'urology', 'neurology']
 
 
 class KISDataSerializer(serializers.Serializer):

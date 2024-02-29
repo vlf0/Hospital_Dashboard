@@ -9,11 +9,11 @@ from rest_framework.exceptions import ValidationError
 from django.conf import settings
 from .psycopg_module import BaseConnectionDB
 from .sql_queries import QuerySets
-from .serializers import KISDataSerializer, MainDataSerializer, KISTableSerializer
+from .serializers import KISDataSerializer, KISTableSerializer, MainDataSerializer, AccumulativeDataSerializer
 from .models import MainData
 
 creds = settings.DB_CREDS
-logger = logging.getLogger('pg_processing.kis_data.DataForDMK')
+logger = logging.getLogger('data.kis_data.DataForDMK')
 
 
 class CleanData:
@@ -137,6 +137,27 @@ class DataProcessing:
         return len(dataset)
 
     @staticmethod
+    def slice_dataset(dataset, mapping) -> list[list]:
+        """
+        Gather all the split lines into one to separate it into data and fields.
+
+        :param dataset: *list*: Dataset for processing.
+        :type dataset: list[tuple]
+        :param mapping: *dict*: Dictionary for matching Russian column names and English ones.
+        :type mapping: dict[str, str]
+        :return: *list*: List of list - first it is column names, second is calculated amount of patients.
+        """
+        # Creating 1 row inside dataset instead many.
+        stacked_tuples_dataset = [tuple(chain.from_iterable(map(tuple, dataset)))]
+        # Getting column names from stacked tuple of KIS data.
+        ru_columns = list(stacked_tuples_dataset[0][::2])
+        # Creating en columns for matching to KIS serializer fields.
+        en_columns = [mapping[column] for column in ru_columns]
+        # Created dataset manually as list.
+        counted_pats = list(stacked_tuples_dataset[0][1::2])
+        return [en_columns, counted_pats]
+
+    @staticmethod
     def create_instance(columns, dataset) -> list[CleanData]:
         """
         Create instances of a target class with data retrieved from the database.
@@ -175,7 +196,8 @@ class DataForDMK(DataProcessing):
       - save_to_dmk(): Save the prepared data to the DMK DB using the MainData model and its serializer.
     """
 
-    qs = QuerySets.DMK_COLUMNS
+    qs = QuerySets
+    dmk_cols = qs.DMK_COLUMNS
 
     def __init__(self, kisdata_obj):
         """
@@ -207,36 +229,38 @@ class DataForDMK(DataProcessing):
             return [total_amount, negative_amount]
         return [total_amount, positive_amount, negative_amount]
 
-    def get_arrived_data(self) -> dict:
+    def get_arrived_data(self, arrived_dataset) -> dict:
         """
         Get data related to arrivals, hosp and refused patients.
 
         :return: *dict*: Dictionary containing arrived, hospitalized, and refused data.
         """
-        arrived_dataset = next(self.kisdata_obj.get_data_generator())
-        result_keys = self.qs[0:3]
+        result_keys = self.dmk_cols[0:3]
         ready_values = self.count_data(arrived_dataset, 0, 1)
         return dict(zip(result_keys, ready_values))
 
-    def get_signout_data(self) -> dict:
+    def get_signout_data(self, signout_dataset) -> dict:
         """
         Get data related to signouts and deaths patients.
 
         :return: *dict*: Dictionary containing signout and deaths data.
         """
-        signout_dataset = next(self.kisdata_obj.get_data_generator())
-        result_keys = self.qs[3:5]
+        result_keys = self.dmk_cols[3:5]
         ready_values = self.count_data(signout_dataset, 1, 'Другая причина')
         return dict(zip(result_keys, ready_values))
 
-    def get_reanimation_data(self) -> dict:
+    def get_reanimation_data(self, reanimation_dataset) -> dict:
         """
         Get data related to reanimation patients.
 
         :return: *dict*: Dictionary containing reanimation data.
         """
-        reanimation_dataset = next(self.kisdata_obj.get_data_generator())
-        return {self.qs[-1]: self.count_dataset_total(reanimation_dataset)}
+        return {self.dmk_cols[-1]: self.count_dataset_total(reanimation_dataset)}
+
+    def get_dept_hosps(self, dh_dataset) -> dict:
+        packed_data = self.slice_dataset(dh_dataset, self.qs.profiles_mapping)
+        en_columns, data = packed_data[0], packed_data[1]
+        return dict(zip(en_columns, data))
 
     def __collect_data(self) -> dict:
         """
@@ -249,30 +273,36 @@ class DataForDMK(DataProcessing):
         :raises StopIteration: If the generator is already empty. This point also will writen to logs.
         """
         if self.kisdata_obj.db_conn.conn is None:
-            main_data = {i: None for i in self.qs}
+            main_data = {i: None for i in self.dmk_cols}
         else:
-            arrived, signout, deads = self.get_arrived_data(), self.get_signout_data(), self.get_reanimation_data()
+            gen = self.kisdata_obj.get_data_generator()
+            arrived = self.get_arrived_data(next(gen))
+            signout = self.get_signout_data(next(gen))
+            deads = self.get_reanimation_data(next(gen))
+            dh_dataset = self.get_dept_hosps(next(gen))
             main_data = arrived | signout | deads
         # Add dates key-value pair to collected data dict.
         today_dict = {'dates': date.today()}
-        ready_data = today_dict | main_data
-        return ready_data
+        ready_main_data = today_dict | main_data
+        ready_accum_data = today_dict | dh_dataset
+        return {'main_data': ready_main_data, 'accum_data': ready_accum_data}
 
     @staticmethod
-    def __check_data(data) -> Never:
+    def __check_data(data):
         """
         Check ready collected data and write log info depending on checking result.
 
          If they are contains None values, log warning about this.
          Otherwise, log info about successfully data inserting.
 
-        :param data: *dict*:
-        :type data: dict[str, Any]
+        :param data: *list*:
+        :type data: list[dict]
         """
-        if None in [value for value in data.values()]:
-            logger.warning('Data contains NULLs')
-        else:
-            logger.info('Data recorded successfully.')
+        for result in data:
+            if None in [value for value in result.values()]:
+                logger.warning('Data contains NULLs')
+            else:
+                logger.info('Data recorded successfully.')
 
     @staticmethod
     def __translate(err):
@@ -304,13 +334,18 @@ class DataForDMK(DataProcessing):
         :return: `MainData`: Saved data into the model. If on of the exception will raise - returns nothing and
          write to log file.
         """
-        data_for_sr = self.__collect_data()
-        serializer = MainDataSerializer(data=data_for_sr)
+        common_dict = self.__collect_data()
+        main = common_dict['main_data']
+        accum = common_dict['accum_data']
+        main_sr = MainDataSerializer(data=main)
+        accum_sr = AccumulativeDataSerializer(data=accum)
         try:
-            serializer.is_valid(raise_exception=True)
-            data_instance = serializer.save()
-            self.__check_data(data_for_sr)
-            return data_instance
+            main_sr.is_valid(raise_exception=True)
+            accum_sr.is_valid(raise_exception=True)
+            main_instance = main_sr.save()
+            accum_instance = accum_sr.save()
+            self.__check_data([main_sr.data, accum_sr.data])
+            return [main_instance, accum_instance]
         except (ValidationError, SyntaxError, AssertionError) as e:
             en_err_text = self.__translate(e)
             logger.error(en_err_text)
@@ -373,27 +408,6 @@ class KISDataProcessing(DataProcessing):
         grouped_list = [len(custom_filter(dataset, ind, i)) for i in keywords]
         return grouped_list
 
-    @staticmethod
-    def __slice_dataset(dataset, mapping) -> list[list]:
-        """
-        Gather all the split lines into one to separate it into data and fields.
-
-        :param dataset: *list*: Dataset for processing.
-        :type dataset: list[tuple]
-        :param mapping: *dict*: Dictionary for matching Russian column names and English ones.
-        :type mapping: dict[str, str]
-        :return: *list*: List of list - first it is column names, second is calculated amount of patients.
-        """
-        # Creating 1 row inside dataset instead many.
-        stacked_tuples_dataset = [tuple(chain.from_iterable(map(tuple, dataset)))]
-        # Getting column names from stacked tuple of KIS data.
-        ru_columns = list(stacked_tuples_dataset[0][::2])
-        # Creating en columns for matching to KIS serializer fields.
-        en_columns = [mapping[column] for column in ru_columns]
-        # Created dataset manually as list.
-        counted_pats = list(stacked_tuples_dataset[0][1::2])
-        return [en_columns, counted_pats]
-
     def __result_for_sr(self, columns, dataset) -> list[CleanData]:
         """
         Create instances of `CleanData` with data from the dataset.
@@ -444,22 +458,22 @@ class KISDataProcessing(DataProcessing):
         ready_dataset = self.__result_for_sr(columns, summary_dataset)
         return self.__serialize(ready_dataset)
 
-    def __dept_hosp_process(self, pre_dataset) -> dict:
-        """
-        Process and serialize data related to hospitalized patients.
-
-         If dataset is the one of postgres errors then create columns list and dataset manually
-         that contains all zero to serializer can process it and avoiding errors.
-
-        :param pre_dataset: *list*: Dataset from DB as a list of tuples.
-        :type pre_dataset: list[tuple]
-        :return: *dict*: Serialized data.
-        """
-        packed_data = self.__slice_dataset(pre_dataset, self.qs.profiles_mapping)
-        en_columns, dataset = packed_data[0], packed_data[1]
-        dataset = [tuple(dataset)]
-        ready_dataset = self.__result_for_sr(en_columns, dataset)
-        return self.__serialize(ready_dataset)
+    # def __dept_hosp_process(self, pre_dataset) -> dict:
+    #     """
+    #     Process and serialize data related to hospitalized patients.
+    #
+    #      If dataset is the one of postgres errors then create columns list and dataset manually
+    #      that contains all zero to serializer can process it and avoiding errors.
+    #
+    #     :param pre_dataset: *list*: Dataset from DB as a list of tuples.
+    #     :type pre_dataset: list[tuple]
+    #     :return: *dict*: Serialized data.
+    #     """
+    #     packed_data = self.__slice_dataset(pre_dataset, self.qs.profiles_mapping)
+    #     en_columns, dataset = packed_data[0], packed_data[1]
+    #     dataset = [tuple(dataset)]
+    #     ready_dataset = self.__result_for_sr(en_columns, dataset)
+    #     return self.__serialize(ready_dataset)
 
     def __signout_process(self, signout_dataset) -> dict:
         """
@@ -475,7 +489,7 @@ class KISDataProcessing(DataProcessing):
         counter = Counter(signout_only)
         counted_signout_dataset = [(dept[0], cnt) for dept, cnt in counter.items()]
         # Preparing data for creating processed dataset
-        packed_data = self.__slice_dataset(counted_signout_dataset, self.qs.depts_mapping)
+        packed_data = self.slice_dataset(counted_signout_dataset, self.qs.depts_mapping)
         en_columns, dataset = packed_data[0], packed_data[1]
         sorted_signout_dataset = self.__count_values(signout_dataset, 1, keywords)
         summary_dataset = [tuple(sorted_signout_dataset + dataset)]
@@ -552,7 +566,7 @@ class KISDataProcessing(DataProcessing):
         # If connection successfully getting and processing data.
         gen = self.kisdata_obj.get_data_generator()
         arrived = self.__arrived_process(next(gen))
-        hosp_dept = self.__dept_hosp_process(next(gen))
+        # hosp_dept = self.__dept_hosp_process(next(gen))
         signout = self.__signout_process(next(gen))
         deads = self.__deads_process(next(gen))
         oar_arrived = self.__oar_process(next(gen), self.qs.COLUMNS['oar_arrived_t'])
@@ -560,7 +574,7 @@ class KISDataProcessing(DataProcessing):
         oar_current = self.__oar_process(next(gen), self.qs.COLUMNS['oar_current_t'])
         oar_numbers = self.oar_count()
         # Creating list of ready processed datasets.
-        ready_dataset = [arrived, hosp_dept, signout, deads, oar_arrived, oar_moved, oar_current, oar_numbers]
+        ready_dataset = [arrived, signout, deads, oar_arrived, oar_moved, oar_current, oar_numbers]
         # Creating list of dicts where keys takes from query class
         # and values are ready dataset iterating list of them one by one.
         result = [{keywords[ready_dataset.index(dataset)]: dataset for dataset in ready_dataset}]
@@ -581,3 +595,4 @@ def ensure_cashing() -> Never:
     if cache.get('kis') is None:
         p_kis = KISDataProcessing(KISData(QuerySets().queryset_for_kis())).create_ready_dicts()
         cache.set('kis', p_kis)
+

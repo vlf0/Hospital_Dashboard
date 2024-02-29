@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'django_celery_beat',
     'users',
-    'pg_processing',
+    'data',
     'django_filters',
 ]
 
@@ -94,7 +94,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'backend.wsgi.application'
 
 # Get the DB creds from .env file
-DATABASES = {'default': env.db('DATABASE_URL')}
+DATABASES = {'default': env.db('DMK_URL')}
 
 # External DB data
 DB_CREDS = {
@@ -152,14 +152,14 @@ LOGGING = {
     'handlers': {
         'conn_errs': {
             'class': 'logging.FileHandler',
-            'filename': SITE_ROOT + r'\backend\pg_processing\pg_logs.log',
+            'filename': SITE_ROOT + r'\backend\data\pg_logs.log',
             'formatter': 'conn_errs',
             'level': 'ERROR',
             # 'mode': 'w'
             },
         'dmk': {
             'class': 'logging.FileHandler',
-            'filename': SITE_ROOT + r'\backend\pg_processing\pg_logs.log',
+            'filename': SITE_ROOT + r'\backend\data\pg_logs.log',
             'formatter': 'dmk',
             'level': 'INFO',
             # 'mode': 'w'
@@ -176,12 +176,12 @@ LOGGING = {
     },
 
     'loggers': {
-        'pg_processing.psycopg_module.BaseConnectionDB': {
+        'data.psycopg_module.BaseConnectionDB': {
             'level': 'ERROR',
             'handlers': ['conn_errs'],
             'propagate': False
         },
-        'pg_processing.kis_data.DataForDMK': {
+        'data.kis_data.DataForDMK': {
             'level': 'INFO',
             'handlers': ['dmk'],
             'propagate': False

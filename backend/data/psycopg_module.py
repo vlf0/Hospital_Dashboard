@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """Describes connection and sql queries to Postgres DB."""
 import logging
 from typing import Any, Never
@@ -7,7 +5,7 @@ from psycopg2 import OperationalError, ProgrammingError
 from psycopg2.errors import UndefinedTable, SyntaxError
 import psycopg2
 
-logger = logging.getLogger('pg_processing.psycopg_module.BaseConnectionDB')
+logger = logging.getLogger('data.psycopg_module.BaseConnectionDB')
 
 
 class BaseConnectionDB:
