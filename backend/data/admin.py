@@ -44,6 +44,7 @@ class PlanNumbersAdmin(admin.ModelAdmin):
         ensure_cashing()
 
     def add_view(self, request, form_url="", extra_context=None):
+        """Call custom function and make you stay on the same page."""
         self.update_plan_model()
         return redirect('/admin/data/plannumbers/')
 
@@ -51,9 +52,9 @@ class PlanNumbersAdmin(admin.ModelAdmin):
         """
         Clean all data from accum model and create new set of row.
 
-        Each New row is creating according each matched row from Profiles model.
-        It allows maintained actuality of data, so you don't need thinking about this,
-        because it is doing automatically.
+         Each New row is creating according each matched row from Profiles model.
+         It allows maintained actuality of data, so you don't need thinking about this,
+         because it is doing automatically.
         """
         PlanNumbers.objects.truncate_data()
         main_instances = Profiles.objects.all()

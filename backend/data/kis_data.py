@@ -7,10 +7,11 @@ from itertools import chain
 from django.core.cache import cache
 from rest_framework.exceptions import ValidationError
 from django.conf import settings
+from django.db.utils import IntegrityError
 from .psycopg_module import BaseConnectionDB
 from .sql_queries import QuerySets
 from .serializers import KISDataSerializer, KISTableSerializer, MainDataSerializer, AccumulativeDataSerializer
-from .models import MainData
+from .models import MainData, Profiles
 
 creds = settings.DB_CREDS
 logger = logging.getLogger('data.kis_data.DataForDMK')
@@ -257,10 +258,14 @@ class DataForDMK(DataProcessing):
         """
         return {self.dmk_cols[-1]: self.count_dataset_total(reanimation_dataset)}
 
-    def get_dept_hosps(self, dh_dataset) -> dict:
-        packed_data = self.slice_dataset(dh_dataset, self.qs.profiles_mapping)
-        en_columns, data = packed_data[0], packed_data[1]
-        return dict(zip(en_columns, data))
+    def get_dept_hosps(self, dh_dataset):
+        profiles_queryset = Profiles.objects.all()
+        profiles = [{profile.name: profile.id} for profile in profiles_queryset]
+        # Here we are checking profile name from each row given dataset so that it accords
+        # profiles added into Profiles model and get list of ready to serializing dicts.
+        result_dicts = [{'number': row[1], 'profile_id': o.get(row[0])}
+                        for row in dh_dataset for o in profiles if o.get(row[0]) is not None]
+        return result_dicts
 
     def __collect_data(self) -> dict:
         """
@@ -284,8 +289,8 @@ class DataForDMK(DataProcessing):
         # Add dates key-value pair to collected data dict.
         today_dict = {'dates': date.today()}
         ready_main_data = today_dict | main_data
-        ready_accum_data = today_dict | dh_dataset
-        return {'main_data': ready_main_data, 'accum_data': ready_accum_data}
+        print(dh_dataset)
+        return {'main_data': ready_main_data, 'accum_data': dh_dataset}
 
     @staticmethod
     def __check_data(data):
@@ -338,15 +343,17 @@ class DataForDMK(DataProcessing):
         main = common_dict['main_data']
         accum = common_dict['accum_data']
         main_sr = MainDataSerializer(data=main)
-        accum_sr = AccumulativeDataSerializer(data=accum)
         try:
+            for row in accum:
+                accum_sr = AccumulativeDataSerializer(data=row)
+                accum_sr.is_valid(raise_exception=True)
+                accum_sr.save()
             main_sr.is_valid(raise_exception=True)
-            accum_sr.is_valid(raise_exception=True)
-            main_instance = main_sr.save()
-            accum_instance = accum_sr.save()
+            main_sr.save()
             self.__check_data([main_sr.data, accum_sr.data])
-            return [main_instance, accum_instance]
-        except (ValidationError, SyntaxError, AssertionError) as e:
+            return
+        except (ValidationError, SyntaxError, AssertionError, IntegrityError) as e:
+            print(e)
             en_err_text = self.__translate(e)
             logger.error(en_err_text)
             # return e  # Returns original error object if needed while debugging
@@ -596,3 +603,7 @@ def ensure_cashing() -> None:
         p_kis = KISDataProcessing(KISData(QuerySets().queryset_for_kis())).create_ready_dicts()
         cache.set('kis', p_kis)
 
+
+# ks = KISData(QuerySets().queryset_for_dmk())
+# DataForDMK(ks).get_dept_hosps(ks.db_conn.execute_query("SELECT med_profile, amount FROM mm.dept_hosp;"))
+# DataForDMK(ks).save_to_dmk()
