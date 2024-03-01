@@ -32,6 +32,8 @@ class ProfilesAdmin(admin.ModelAdmin):
 
 class PlanNumbersAdmin(admin.ModelAdmin):
 
+    change_list_template = 'data/admin/change_list.html'
+
     def has_delete_permission(self, request, obj=None):
         return False
 

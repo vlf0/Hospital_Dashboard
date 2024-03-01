@@ -1,0 +1,27 @@
+{% extends "admin/change_list.html" %}
+
+{% block content %}
+  <div id="content" class="flex">
+    <h1>{{ title }}</h1>
+    {# Your custom content here #}
+
+    {% block object-tools %}
+        <ul class="object-tools">
+          {% block object-tools-items %}
+              <li>
+                  <a href="{% url 'admin:data_plannumbers_add' %}" class="addlink">
+                    Создать объект для настройки планов
+                  </a>
+              </li>
+          {% endblock %}
+        </ul>
+    {% endblock %}
+
+      {# You can customize the object tools if needed #}
+      {{ block.super }}
+    {% endblock %}
+    {% block result_list %}
+      {# Customize the result list if needed #}
+      {{ block.super }}
+    {% endblock %}
+  </div>
