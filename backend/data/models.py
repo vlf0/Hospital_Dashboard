@@ -1,5 +1,6 @@
 """Responsible for models (tables in DMK BD)."""
 from django.db import models
+from django.contrib import admin
 from .models_managers import CustomManager
 
 
@@ -25,6 +26,20 @@ class MainData(models.Model):
         ]
 
 
+class Profiles(models.Model):
+
+    name = models.CharField(max_length=50, verbose_name='Название профиля')
+    active = models.BooleanField(default=True, verbose_name='Статус')
+
+    def __str__(self):
+        return f'ID: {self.id}, Профиль: {self.name}'
+
+    class Meta:
+        verbose_name = 'Профиль'
+        verbose_name_plural = 'Профили'
+        ordering = ['name']
+
+
 class AccumulationOfIncoming(models.Model):
     """
     Represent table contains data of incoming patients sorted by depts.
@@ -34,15 +49,32 @@ class AccumulationOfIncoming(models.Model):
     # Custom manager
     objects = CustomManager()
 
-    dates = models.DateField(unique=True)
-    therapy = models.CharField(max_length=50, null=True)
-    surgery = models.CharField(max_length=50, null=True)
-    cardiology = models.CharField(max_length=50, null=True)
-    urology = models.CharField(max_length=50, null=True)
-    neurology = models.CharField(max_length=50, null=True)
+    dates = models.DateField(auto_now_add=True)
+    profile = models.ForeignKey(Profiles, on_delete=models.CASCADE)
+    number = models.IntegerField()
 
     class Meta:
         indexes = [
-            models.Index(fields=['dates'])
+            models.Index(fields=['number'])
         ]
+
+
+class PlanNumbers(models.Model):
+    """Represent table containing plan numbers of each depts."""
+    # Custom manager
+    objects = CustomManager()
+
+    profile = models.OneToOneField(Profiles, on_delete=models.CASCADE, verbose_name='Профиль')
+    plan = models.IntegerField(verbose_name='План')
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['plan'])
+        ]
+        verbose_name = 'План'
+        verbose_name_plural = 'Планы профилей'
+        ordering = ['profile']
+
+    def __str__(self):
+        return f'ID: {self.id}. Профиль: {self.profile.name}, текущий план: {self.plan}'
 

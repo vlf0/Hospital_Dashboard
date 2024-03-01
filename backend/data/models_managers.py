@@ -22,4 +22,4 @@ class CustomManager(models.Manager):
         """Truncate all rows from model that uses by manager."""
         model_name = self.model.__name__.lower()
         with connection.cursor() as cursor:
-            cursor.execute(f"""TRUNCATE public.data_{model_name};""")
+            cursor.execute(f"""TRUNCATE public.data_{model_name} RESTART IDENTITY CASCADE;""")

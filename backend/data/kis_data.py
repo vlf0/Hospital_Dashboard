@@ -581,7 +581,7 @@ class KISDataProcessing(DataProcessing):
         return result
 
 
-def ensure_cashing() -> Never:
+def ensure_cashing() -> None:
     """
     Check redis cash and write data into if storage is empty.
 

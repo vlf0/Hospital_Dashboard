@@ -52,7 +52,6 @@ def insert_data():
 
 @shared_task
 def remove_accum():
-
-    AccumulationOfIncoming.objects.raw("""TRUNCATE public.data_accumulationofincoming;""")
+    AccumulationOfIncoming.objects.truncate_data()
 
 
