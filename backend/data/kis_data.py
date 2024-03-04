@@ -263,7 +263,7 @@ class DataForDMK(DataProcessing):
         profiles = [{profile.name: profile.id} for profile in profiles_queryset]
         # Here we are checking profile name from each row given dataset so that it accords
         # profiles added into Profiles model and get list of ready to serializing dicts.
-        result_dicts = [{'number': row[1], 'profile_id': o.get(row[0])}
+        result_dicts = [{'number': row[1], 'profile': o.get(row[0])}
                         for row in dh_dataset for o in profiles if o.get(row[0]) is not None]
         return result_dicts
 
@@ -289,7 +289,6 @@ class DataForDMK(DataProcessing):
         # Add dates key-value pair to collected data dict.
         today_dict = {'dates': date.today()}
         ready_main_data = today_dict | main_data
-        print(dh_dataset)
         return {'main_data': ready_main_data, 'accum_data': dh_dataset}
 
     @staticmethod
@@ -336,27 +335,52 @@ class DataForDMK(DataProcessing):
         :raises SyntaxError: If there is a syntax error in the serializer.
         :raises AssertionError: If there is an assertion error during saving.
 
-        :return: `MainData`: Saved data into the model. If on of the exception will raise - returns nothing and
+        :return: MainData instance and list of AccumulatedData instances:
+         Saved data as a model instance. If on of the exception will raise - returns None and
          write to log file.
         """
         common_dict = self.__collect_data()
         main = common_dict['main_data']
         accum = common_dict['accum_data']
-        main_sr = MainDataSerializer(data=main)
+        main_res = self.save_main(main)
+        accum_res = self.save_accumulated(accum)
+        return
+
+    def save_main(self, main_data: dict) -> Any:
+        """
+        Serializer and save a new model instance.
+
+         If any defined errors will occur - instance will now save and method returns None.
+        :param main_data: *dict*: Ready for serializing data.
+        :return: *Any*
+        """
+        main_sr = MainDataSerializer(data=main_data)
         try:
-            for row in accum:
-                accum_sr = AccumulativeDataSerializer(data=row)
-                accum_sr.is_valid(raise_exception=True)
-                accum_sr.save()
             main_sr.is_valid(raise_exception=True)
             main_sr.save()
-            self.__check_data([main_sr.data, accum_sr.data])
-            return
+            return main_sr.save()
         except (ValidationError, SyntaxError, AssertionError, IntegrityError) as e:
-            print(e)
-            en_err_text = self.__translate(e)
-            logger.error(en_err_text)
-            # return e  # Returns original error object if needed while debugging
+            en_error = self.__translate(e)
+            logger.error(en_error)
+
+    def save_accumulated(self, accum_data: list[dict]) -> Any:
+        """
+        Iterate through given Serializer and save a few new model instances.
+
+         If any defined errors will occur - instance will now save and method returns None.
+        :param accum_data: *list*: List of dicts ready for serializing data.
+        :return: *Any*
+        """
+        saved_instances = []
+        for row in accum_data:
+            accum_sr = AccumulativeDataSerializer(data=row)
+            try:
+                accum_sr.is_valid(raise_exception=True)
+                accum_sr.save()
+                saved_instances.append(accum_sr.save())
+            except (ValidationError, SyntaxError, AssertionError, IntegrityError) as e:
+                logger.error(e)
+        return saved_instances
 
 
 class KISDataProcessing(DataProcessing):
@@ -603,7 +627,3 @@ def ensure_cashing() -> None:
         p_kis = KISDataProcessing(KISData(QuerySets().queryset_for_kis())).create_ready_dicts()
         cache.set('kis', p_kis)
 
-
-# ks = KISData(QuerySets().queryset_for_dmk())
-# DataForDMK(ks).get_dept_hosps(ks.db_conn.execute_query("SELECT med_profile, amount FROM mm.dept_hosp;"))
-# DataForDMK(ks).save_to_dmk()

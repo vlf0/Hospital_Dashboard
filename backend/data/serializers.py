@@ -15,7 +15,7 @@ class AccumulativeDataSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AccumulationOfIncoming
-        fields = ['dates', 'number', 'profile_id']
+        fields = ['dates', 'number', 'profile']
 
 
 class KISDataSerializer(serializers.Serializer):
