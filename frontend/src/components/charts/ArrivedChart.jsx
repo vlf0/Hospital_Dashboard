@@ -24,7 +24,7 @@ const ArrivedChart = () => {
     const navigate = useNavigate();
     const plan = 120;
 
-    const dmk_charts = useContext(DataContext).dmk;
+    const dmk_charts = useContext(DataContext).dmk.main_dmk;
     const mappedData = extractProperty(dmk_charts, 'arrived');
     ensureArrayLength(mappedData, 7);
 

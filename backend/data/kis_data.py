@@ -612,7 +612,7 @@ def ensure_cashing() -> None:
                     .values('id', 'dates', 'number', 'profile__name'),
                     many=True
                     ).data
-        dmk = {'main': main_dmk, 'accum_dmk': accum_dmk}
+        dmk = {'main_dmk': main_dmk, 'accum_dmk': accum_dmk}
         cache.set('dmk', dmk)
     if cache.get('kis') is None:
         p_kis = KISDataProcessing(KISData(QuerySets().queryset_for_kis())).create_ready_dicts()

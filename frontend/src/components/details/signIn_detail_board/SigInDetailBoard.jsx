@@ -3,18 +3,20 @@ import SignInDetailTable from "./SignInDetailTable";
 import DataContext from "../../DataContext";
 import './detail_blocks.css';
 import './signin_table.css';
+import { constructFrom } from "date-fns";
 
 
 const SignInDetailBoard = () => {
 
   const data = useContext(DataContext);
 
-  const dept_hosp = data.kis[0].dept_hosp[0]
-  let dmk = data.dmk
-  dmk = dmk[dmk.length-1]
+  const kis = data.kis[0].arrived[0]
 
-  let kis = data.kis
-  kis = kis[0].arrived[0]
+  // Accumulated data for month's plan
+  const accum_dmk = data.dmk.accum_dmk
+
+  let main_dmk = data.dmk.main_dmk
+  main_dmk = main_dmk[main_dmk.length-1]
 
 
     return (
@@ -22,10 +24,10 @@ const SignInDetailBoard = () => {
           <span className='detail_block_header'> Обратившиеся </span>
           <div className='blocks_container'>
             <div className='separated_detail_block'> 
-              <p> Отказано </p> {dmk.refused} 
+              <p> Отказано </p> {main_dmk.refused} 
             </div>
             <div className='separated_detail_block'>
-            <p> Госпитализировано </p> {dmk.hosp}
+            <p> Госпитализировано </p> {main_dmk.hosp}
             </div>
           </div>
           <span className='detail_block_header'> Госпитализировано по каналам </span>
@@ -51,7 +53,7 @@ const SignInDetailBoard = () => {
             <div className='separated_detail_block'>  
               <p> Не указано </p> {kis.undefined} </div>
           </div>
-          <SignInDetailTable data={dept_hosp}/>
+          <SignInDetailTable data={accum_dmk}/>
         </div>
 
     );

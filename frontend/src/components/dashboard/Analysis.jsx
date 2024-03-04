@@ -22,10 +22,10 @@ function GetAnalysis() {
 
   const location = useLocation();
   
-  const dmk = useContext(DataContext).dmk;
+  const main_dmk = useContext(DataContext).dmk.main_dmk;
 
-  const currentDay = dmk[dmk.length - 1];
-  const yesterday = dmk[dmk.length - 2];
+  const currentDay = main_dmk[main_dmk.length - 1];
+  const yesterday = main_dmk[main_dmk.length - 2];
 
   const arrived = CustomMap(currentDay.arrived, yesterday.arrived)
   const hosp = CustomMap(currentDay.hosp, yesterday.hosp)
@@ -39,7 +39,7 @@ function GetAnalysis() {
 
       {/* <h1>{data.arrived}</h1> */}
       <TopBlock textContent={'Оперативная сводка ГКБ Им. Демихова'}/>
-      <animated.div className='dashboard' style={props}>
+      <animated.div className='dashboard' style={1}>
         <div className='board-cards'>
           <BlockInfo headerText='Поступившие' data={arrived}/>
           <BlockInfo headerText='Госпитализировано' data={hosp}/>
@@ -50,7 +50,7 @@ function GetAnalysis() {
         </div>
         <div className='board-charts'>
           <ArrivedChart />
-          <SignOutChart />
+          <SignOutChart /> 
           <DeadsChart />
         </div>
       </animated.div>

@@ -2,7 +2,7 @@ import React from 'react';
 
 const plan = 100
 
-const ColoredLine = ({ percentage, arrivedFact }) => {
+const ColoredLine = ({ percentage, plan, arrivedFact }) => {
   const gradient = `linear-gradient(to right, #828cff ${percentage}%, #e785fc ${percentage}%)`;
 
   const lineStyle = {
@@ -31,13 +31,13 @@ const ColoredLine = ({ percentage, arrivedFact }) => {
   </div>;
 };
 
-const ScaleX = ({ arrivedFact }) => {
+const ScaleX = ({ hospFact, hospPlan }) => {
 
-  const percentage = arrivedFact / plan * 100;
+  const percentage = hospFact / hospPlan * 100;
   
   return (
     <div>
-      <ColoredLine arrivedFact={arrivedFact} percentage={percentage}/>
+      <ColoredLine arrivedFact={hospFact} plan={hospPlan} percentage={percentage}/>
       {/* Add other components or content as needed */}
     </div>
   );
