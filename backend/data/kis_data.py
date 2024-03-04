@@ -11,7 +11,7 @@ from django.db.utils import IntegrityError
 from .psycopg_module import BaseConnectionDB
 from .sql_queries import QuerySets
 from .serializers import KISDataSerializer, KISTableSerializer, MainDataSerializer, AccumulativeDataSerializer
-from .models import MainData, Profiles
+from .models import MainData, Profiles, AccumulationOfIncoming
 
 creds = settings.DB_CREDS
 logger = logging.getLogger('data.kis_data.DataForDMK')
@@ -344,7 +344,7 @@ class DataForDMK(DataProcessing):
         accum = common_dict['accum_data']
         main_res = self.save_main(main)
         accum_res = self.save_accumulated(accum)
-        return
+        return [main_res, accum_res]
 
     def save_main(self, main_data: dict) -> Any:
         """
@@ -489,23 +489,6 @@ class KISDataProcessing(DataProcessing):
         ready_dataset = self.__result_for_sr(columns, summary_dataset)
         return self.__serialize(ready_dataset)
 
-    # def __dept_hosp_process(self, pre_dataset) -> dict:
-    #     """
-    #     Process and serialize data related to hospitalized patients.
-    #
-    #      If dataset is the one of postgres errors then create columns list and dataset manually
-    #      that contains all zero to serializer can process it and avoiding errors.
-    #
-    #     :param pre_dataset: *list*: Dataset from DB as a list of tuples.
-    #     :type pre_dataset: list[tuple]
-    #     :return: *dict*: Serialized data.
-    #     """
-    #     packed_data = self.__slice_dataset(pre_dataset, self.qs.profiles_mapping)
-    #     en_columns, dataset = packed_data[0], packed_data[1]
-    #     dataset = [tuple(dataset)]
-    #     ready_dataset = self.__result_for_sr(en_columns, dataset)
-    #     return self.__serialize(ready_dataset)
-
     def __signout_process(self, signout_dataset) -> dict:
         """
         Process and serialize data related to signouts.
@@ -620,9 +603,17 @@ def ensure_cashing() -> None:
      First call of the day provides writing data into cache and use
      the cache during the day new call to db instead.
     """
+    today = date.strftime(date.today(), '%Y-%m-%d')
     if cache.get('dmk') is None:
-        p_dmk = MainDataSerializer(MainData.objects.custom_filter(), many=True).data
-        cache.set('dmk', p_dmk)
+        main_dmk = MainDataSerializer(MainData.objects.custom_filter(), many=True).data
+        accum_dmk = AccumulativeDataSerializer(
+                    AccumulationOfIncoming.objects
+                    .select_related().filter(dates=today)
+                    .values('id', 'dates', 'number', 'profile__name'),
+                    many=True
+                    ).data
+        dmk = {'main': main_dmk, 'accum_dmk': accum_dmk}
+        cache.set('dmk', dmk)
     if cache.get('kis') is None:
         p_kis = KISDataProcessing(KISData(QuerySets().queryset_for_kis())).create_ready_dicts()
         cache.set('kis', p_kis)
