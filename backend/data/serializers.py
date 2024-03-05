@@ -1,6 +1,6 @@
 """Responsible for serializers."""
 from rest_framework import serializers
-from .models import MainData, AccumulationOfIncoming
+from .models import MainData, AccumulationOfIncoming, Profiles
 
 
 class MainDataSerializer(serializers.ModelSerializer):
@@ -11,13 +11,23 @@ class MainDataSerializer(serializers.ModelSerializer):
         fields = ['dates', 'arrived', 'hosp', 'refused', 'signout', 'deads', 'reanimation']
 
 
-class AccumulativeDataSerializer(serializers.ModelSerializer):
+class ProfilesSerializer(serializers.ModelSerializer):
 
-    profile_name = serializers.CharField(source='profile__name', read_only=True)
+    current_date = serializers.DateField(source='accumulationofincoming__dates', read_only=True)
+    fact = serializers.IntegerField(source='accumulationofincoming__number', read_only=True)
+    plan = serializers.IntegerField(source='plannumbers__plan', read_only=True)
+
+    class Meta:
+        model = Profiles
+        fields = ['id', 'name', 'active', 'current_date', 'fact', 'plan']
+
+
+class AccumulativeDataSerializerSave(serializers.ModelSerializer):
+    profile_id = serializers.PrimaryKeyRelatedField(source='profile', queryset=Profiles.objects.all())
 
     class Meta:
         model = AccumulationOfIncoming
-        fields = ['id', 'dates', 'number', 'profile_name']
+        fields = ['id', 'dates', 'number', 'profile_id']
 
 
 class KISDataSerializer(serializers.Serializer):

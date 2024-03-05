@@ -1,6 +1,6 @@
 """Responsible for classes defining non-model query-sets from another DB."""
 import logging
-from typing import Generator, Never, Any
+from typing import Generator, Any
 from datetime import date
 from collections import Counter
 from itertools import chain
@@ -10,11 +10,17 @@ from django.conf import settings
 from django.db.utils import IntegrityError
 from .psycopg_module import BaseConnectionDB
 from .sql_queries import QuerySets
-from .serializers import KISDataSerializer, KISTableSerializer, MainDataSerializer, AccumulativeDataSerializer
-from .models import MainData, Profiles, AccumulationOfIncoming
+from .serializers import (
+     KISDataSerializer,
+     KISTableSerializer,
+     MainDataSerializer,
+     AccumulativeDataSerializerSave,
+     ProfilesSerializer)
+from .models import MainData, Profiles
 
 creds = settings.DB_CREDS
 logger = logging.getLogger('data.kis_data.DataForDMK')
+today = date.today
 
 
 class CleanData:
@@ -263,7 +269,7 @@ class DataForDMK(DataProcessing):
         profiles = [{profile.name: profile.id} for profile in profiles_queryset]
         # Here we are checking profile name from each row given dataset so that it accords
         # profiles added into Profiles model and get list of ready to serializing dicts.
-        result_dicts = [{'number': row[1], 'profile': o.get(row[0])}
+        result_dicts = [{'number': row[1], 'profile_id': o.get(row[0])}
                         for row in dh_dataset for o in profiles if o.get(row[0]) is not None]
         return result_dicts
 
@@ -287,7 +293,7 @@ class DataForDMK(DataProcessing):
             dh_dataset = self.get_dept_hosps(next(gen))
             main_data = arrived | signout | deads
         # Add dates key-value pair to collected data dict.
-        today_dict = {'dates': date.today()}
+        today_dict = {'dates': today()}
         ready_main_data = today_dict | main_data
         return {'main_data': ready_main_data, 'accum_data': dh_dataset}
 
@@ -373,12 +379,13 @@ class DataForDMK(DataProcessing):
         """
         saved_instances = []
         for row in accum_data:
-            accum_sr = AccumulativeDataSerializer(data=row)
+            accum_sr = AccumulativeDataSerializerSave(data=row)
             try:
                 accum_sr.is_valid(raise_exception=True)
                 accum_sr.save()
                 saved_instances.append(accum_sr.save())
             except (ValidationError, SyntaxError, AssertionError, IntegrityError) as e:
+                print(e)
                 logger.error(e)
         return saved_instances
 
@@ -603,18 +610,20 @@ def ensure_cashing() -> None:
      First call of the day provides writing data into cache and use
      the cache during the day new call to db instead.
     """
-    today = date.strftime(date.today(), '%Y-%m-%d')
     if cache.get('dmk') is None:
         main_dmk = MainDataSerializer(MainData.objects.custom_filter(), many=True).data
-        accum_dmk = AccumulativeDataSerializer(
-                    AccumulationOfIncoming.objects
-                    .select_related().filter(dates=today)
-                    .values('id', 'dates', 'number', 'profile__name'),
-                    many=True
-                    ).data
-        dmk = {'main_dmk': main_dmk, 'accum_dmk': accum_dmk}
+        accum_dmk = collect_model()
+        dmk = {'main_dmk': main_dmk, f'accum_dmk - {today()}': accum_dmk}
         cache.set('dmk', dmk)
     if cache.get('kis') is None:
         p_kis = KISDataProcessing(KISData(QuerySets().queryset_for_kis())).create_ready_dicts()
         cache.set('kis', p_kis)
 
+
+def collect_model():
+    data = Profiles.objects \
+        .select_related() \
+        .filter(accumulationofincoming__dates=today()) \
+        .values('name', 'accumulationofincoming__number', 'plannumbers__plan')
+    accum_sr = ProfilesSerializer(data, many=True)
+    return accum_sr.data
