@@ -1,6 +1,6 @@
 .board-cards {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   position: relative;
   height: -webkit-fill-available;
   box-shadow: 4px 13px 20px 0px #434343;
@@ -10,7 +10,12 @@
   margin: 15px;
   margin-top: 0;
   flex-wrap: wrap;
-  justify-content: space-between;
+  align-content: center;
+}
+
+.cards_line {
+  display: flex;
+  flex-wrap: wrap;
 }
 
 .board-charts {

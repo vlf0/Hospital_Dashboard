@@ -36,9 +36,6 @@ const SignInDetailBoard = () => {
 
   const kis = data.kis[0].arrived[0]
 
-  // Accumulated data for month's plan
-  const accum_dmk = useContext(DataContext).dmk.accum_dmk
-
   let main_dmk = data.dmk.main_dmk
   main_dmk = main_dmk[main_dmk.length-1]
 
@@ -76,10 +73,8 @@ const SignInDetailBoard = () => {
           <div className='separated_detail_block'>  
             <p> Не указано </p> {kis.undefined} </div>
         </div>
-
-        <button onClick={fetchDataFromApi}>Fetch New Data</button>
         <SignInDetailTable key={reload} />
-
+        <button className="reload_button" onClick={fetchDataFromApi}>Обновить планы</button>
       </div>
     );
 }

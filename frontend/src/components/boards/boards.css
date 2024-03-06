@@ -11,7 +11,7 @@
   border: 1px solid black;
   box-shadow: 4px 13px 20px 0px #434343;
   border-radius: 10px;
-  background: radial-gradient(#778ec654, #6da8ff94);
+  background: linear-gradient(0deg, #4884cd, #78b1f8);
 }
 
 /* Data gotten by API in card */

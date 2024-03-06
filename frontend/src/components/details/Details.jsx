@@ -29,7 +29,7 @@ function DetailBoard({ sign }) {
     from: { opacity: 0 },
     to: { opacity: 1 },
     config: { duration: 700 },
-  }); 
+  });
 
   let topBlockHeader;
   let content;
@@ -53,13 +53,8 @@ function DetailBoard({ sign }) {
 
   return (
     <>
-    {/* <animated.div
-    className='top_block'
-    style={props}>
-      <Header textHeader={textHeader} currentDatetime={currentDatetime}/>
-    </animated.div> */}
     <TopBlock menu_point={sign} textContent={topBlockHeader} />
-    
+
     <animated.div className='dashboard' style={props}>
       {content}
     </animated.div>

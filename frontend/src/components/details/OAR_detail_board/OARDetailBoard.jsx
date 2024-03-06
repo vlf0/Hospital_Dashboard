@@ -12,7 +12,7 @@ const OARDetailBoard = ({ dept, values, deads }) => {
   const [selectedValue, setSelectedValue] = useState(null);
 
   const toggleDeadTableVisibility = (type, event) => {
-    const department = event.target.getAttribute('orit-name')
+    const department = event.currentTarget.getAttribute('orit-name');
     setIsOARTableVisible(!isOARTableVisible);
     setTableType(type);
     setSelectedValue(department);
@@ -42,7 +42,7 @@ const OARDetailBoard = ({ dept, values, deads }) => {
         >
           <p> Поступило новых пациентов </p> {values[0]}
         </div>
-          
+
         <div
           className="separated_detail_block_X"
           onClick={(event) => toggleDeadTableVisibility("move", event)}
@@ -50,7 +50,7 @@ const OARDetailBoard = ({ dept, values, deads }) => {
         >
           <p> Переводы из отделений </p> {values[1]}
         </div>
-          
+
         <div
           className="separated_detail_block_X"
           onClick={(event) => toggleDeadTableVisibility("onTreatment", event)}
@@ -58,6 +58,7 @@ const OARDetailBoard = ({ dept, values, deads }) => {
         >
           <p> Находятся на лечении </p> {values[2]}
         </div>
+
 
         <div
           className="separated_detail_block"
