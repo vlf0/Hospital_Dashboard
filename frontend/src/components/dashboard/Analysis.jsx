@@ -39,7 +39,7 @@ function GetAnalysis() {
 
       {/* <h1>{data.arrived}</h1> */}
       <TopBlock textContent={'Оперативная сводка ГКБ Им. Демихова'}/>
-      <animated.div className='dashboard' style={1}>
+      <animated.div className='dashboard' style={props}>
         <div className='board-cards'>
           <BlockInfo headerText='Поступившие' data={arrived}/>
           <BlockInfo headerText='Госпитализировано' data={hosp}/>

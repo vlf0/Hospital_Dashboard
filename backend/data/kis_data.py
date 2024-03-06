@@ -613,7 +613,7 @@ def ensure_cashing() -> None:
     if cache.get('dmk') is None:
         main_dmk = MainDataSerializer(MainData.objects.custom_filter(), many=True).data
         accum_dmk = collect_model()
-        dmk = {'main_dmk': main_dmk, f'accum_dmk - {today()}': accum_dmk}
+        dmk = {'main_dmk': main_dmk, 'accum_dmk': accum_dmk}
         cache.set('dmk', dmk)
     if cache.get('kis') is None:
         p_kis = KISDataProcessing(KISData(QuerySets().queryset_for_kis())).create_ready_dicts()

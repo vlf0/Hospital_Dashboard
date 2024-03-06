@@ -1,16 +1,20 @@
-import React from 'react';
+import React, { useContext, useEffect } from 'react';
 import { useTable } from 'react-table';
 import ScaleX from '../ScaleX';
+import DataContext from '../../DataContext';
 
-const SignInDetailTable = ({ data }) => {
-  console.log(data);
+
+const SignInDetailTable = () => {
+
+  let data = JSON.parse(sessionStorage.getItem('data')).dmk.accum_dmk
+  console.log(data)
 
   const columns = [
-    { Header: 'Профиль', accessor: 'profile_name' },
+    { Header: 'Профиль', accessor: 'name' },
     {
       Header: 'План',
-      accessor: 'number',
-      Cell: ({ cell }) => <ScaleX hospFact={cell.value} hospPlan={50} />, // Adjust this line
+      accessor: 'fact',
+      Cell: ({ cell, row }) => (<ScaleX hospFact={cell.value} hospPlan={row.original.plan} />), 
     },
   ];
 
@@ -19,6 +23,14 @@ const SignInDetailTable = ({ data }) => {
     columns,
     data, // Use the provided data directly
   });
+
+  
+  // Use useEffect to trigger table update when data changes
+  useEffect(() => {
+    // Trigger update of the table instance when 'data' changes
+    // This is necessary to reflect the changes in the table
+    prepareRow(rows);
+  }, [data, prepareRow, rows]);
 
   return (
     <div className='detail_block_header'>

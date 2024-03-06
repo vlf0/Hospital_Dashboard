@@ -50,6 +50,7 @@ const TopBlock = ({ textContent, menu_point }) => {
         <MenuUnit point={outpoint} to='/signout_detail' />
         <MenuUnit point={oarpoint} to='/OAR_detail' />
 
+
         {point_list.includes(menu_point)  && (
           <MenuUnit point={'Главная'} to='/' />
         )}
