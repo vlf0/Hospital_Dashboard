@@ -1,8 +1,12 @@
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 from django.core.cache import cache
 from django.shortcuts import redirect
 from django.contrib import admin
+from django.conf import settings
 from .models import Profiles, PlanNumbers
 from .kis_data import ensure_cashing
+from .consumers import NotificationConsumer
 from django_celery_beat.models import (
     IntervalSchedule,
     CrontabSchedule,
@@ -42,6 +46,7 @@ class PlanNumbersAdmin(admin.ModelAdmin):
         super().save_model(request, obj, form, change)
         cache.delete('dmk')
         ensure_cashing()
+        trigger_notification()
 
     def add_view(self, request, form_url="", extra_context=None):
         """Call custom function and make you stay on the same page."""
@@ -64,3 +69,16 @@ class PlanNumbersAdmin(admin.ModelAdmin):
 
 admin.site.register(Profiles, ProfilesAdmin)
 admin.site.register(PlanNumbers, PlanNumbersAdmin)
+
+
+def trigger_notification():
+    channel_layer = get_channel_layer()
+    print(channel_layer)
+    async_to_sync(channel_layer.group_send)(
+        'test',
+        {
+            'type': 'test.send_notification',
+            # 'message': 'Notification from trigger_notification',
+        }
+    )
+    print('ok')

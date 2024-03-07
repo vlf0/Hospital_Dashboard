@@ -1,6 +1,7 @@
 import React, { useContext, useState } from "react";
 import SignInDetailTable from "./SignInDetailTable";
 import DataContext from "../../DataContext";
+//import Notification from "../../WebSockets";
 
 import './detail_blocks.css';
 import './signin_table.css';
@@ -9,6 +10,26 @@ import './signin_table.css';
 
 const SignInDetailBoard = () => {
 
+const socket = new WebSocket('ws://localhost:8001/ws/notifications/');
+
+socket.onopen = (event) => {
+  console.log('WebSocket connection opened:', event);
+};
+
+socket.onmessage = (event) => {
+  console.log(event)
+  const data = JSON.parse(event.data);
+  console.log('WebSocket message received:', data);
+  // Handle the received data as needed
+};
+
+socket.onclose = (event) => {
+  console.log('WebSocket connection closed:', event);
+};
+
+socket.onerror = (event) => {
+  console.error('WebSocket error:', event);
+};
 
   const [reload, setReload] = useState(false);
 
@@ -75,6 +96,9 @@ const SignInDetailBoard = () => {
         </div>
         <SignInDetailTable key={reload} />
         <button className="reload_button" onClick={fetchDataFromApi}>Обновить планы</button>
+
+
+
       </div>
     );
 }

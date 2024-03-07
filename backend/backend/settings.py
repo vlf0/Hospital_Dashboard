@@ -33,6 +33,7 @@ ROOT_URLCONF = 'backend.urls'
 AUTH_USER_MODEL = 'users.CustomUser'
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -45,6 +46,7 @@ INSTALLED_APPS = [
     'users',
     'data',
     'django_filters',
+    'channels'
 ]
 
 MIDDLEWARE = [
@@ -94,6 +96,23 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'backend.wsgi.application'
+
+ASGI_APPLICATION = "backend.asgi.application"
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    },
+}
+
+# CHANNEL_LAYERS = {
+#     "default": {
+#         "BACKEND": "channels_redis.core.RedisChannelLayer",
+#         "CONFIG": {
+#             "hosts": [("127.0.0.1", 6379)],
+#         },
+#     },
+# }
 
 # Get the DB creds from .env file
 DATABASES = {'default': env.db('DMK_URL')}
