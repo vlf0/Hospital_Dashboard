@@ -1,11 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import GetAnalysis from './components/dashboard/Analysis';
 import DetailBoard from './components/details/Details';
 import DataContext from './components/DataContext';
 import GetData from './components/GetData';
 import NoConnection from './components/NoConnection';
-
 
 
 
