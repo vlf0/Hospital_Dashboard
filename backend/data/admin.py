@@ -73,12 +73,11 @@ admin.site.register(PlanNumbers, PlanNumbersAdmin)
 
 def trigger_notification():
     channel_layer = get_channel_layer()
-    print(channel_layer)
     async_to_sync(channel_layer.group_send)(
-        'test',
+        'plan',
         {
-            'type': 'test.send_notification',
-            # 'message': 'Notification from trigger_notification',
+            'type': 'send_notification',
+            'message': 'Updated',
         }
     )
-    print('ok')
+

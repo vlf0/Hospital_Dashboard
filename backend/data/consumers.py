@@ -1,21 +1,21 @@
-# import json
+import json
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
 
 
 class NotificationConsumer(WebsocketConsumer):
 
+    groups = ['plan']
+
     def connect(self):
-        async_to_sync(self.channel_layer.group_add('test', self.channel_name))
         self.accept()
-        print(self.channel_layer)
-        print('accepted')
+        async_to_sync(self.channel_layer.group_add('plan', self.channel_name))
 
     def send_notification(self, event):
-        self.send(text_data='test_data')
-        print('sending')
+        message = json.dumps(event['message'])
+        self.send(text_data=message)
 
     def disconnect(self, close_code):
-        async_to_sync(self.channel_layer.group_discard('test', self.channel_name))
-        print('closed')
+        async_to_sync(self.channel_layer.group_discard('plan', self.channel_name))
+
 
