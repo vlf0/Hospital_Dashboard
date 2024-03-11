@@ -1,42 +1,49 @@
 import React, { useContext, useState, useEffect } from "react";
 import SignInDetailTable from "./SignInDetailTable";
 import DataContext from "../../DataContext";
-import useWebSocket from "../../WebSockets";
+import { useWebSocketContext } from "../../websocket/WebSocketContext";
 import './detail_blocks.css';
 import './signin_table.css';
 
 const SignInDetailBoard = () => {
-  // const [reload, setReload] = useState(false);
 
-  // const fetchDataFromApi = async () => {
-  //   try {
-  //     // Fetch new data from the API
-  //     const response = await fetch('http://localhost:8000/api/v1/main_data/');
-  //     const newData = await response.json();
+  const [reload, setReload] = useState(false);
+  const webSocket = useWebSocketContext();
+ 
+  const fetchDataFromApi = async () => {
+    try {
+      // Fetch new data from the API
+      const response = await fetch('http://localhost:8000/api/v1/main_data/');
+      const newData = await response.json();
+  
+      sessionStorage.removeItem('data');
+      // Update sessionStorage with the new data
+      sessionStorage.setItem('data', JSON.stringify(newData));
+  
+      // Trigger a re-render by updating the state
+      setReload(prevReload => !prevReload);
+    } catch (error) {
+      console.error('Error fetching new data:', error);
+    }
+  };
+  
+  useEffect(() => {
+    if (webSocket) {
+      webSocket.onmessage = () => {
+        fetchDataFromApi();
+      };
+    }
+  
+    return () => {
+    };
+  }, [webSocket, reload]);
 
-  //     sessionStorage.removeItem('data');
-  //     // Update sessionStorage with the new data
-  //     sessionStorage.setItem('data', JSON.stringify(newData));
 
-  //     // Trigger a re-render by updating the state
-  //     setReload((prevReload) => !prevReload);
-  //   } catch (error) {
-  //     console.error('Error fetching new data:', error);
-  //   }
-  //   console.log('ok');
-  // };
 
   const data = useContext(DataContext);
   const kis = data.kis[0].arrived[0];
   let main_dmk = data.dmk.main_dmk;
   main_dmk = main_dmk[main_dmk.length - 1];
-
-
-  //   // Use the custom hook to handle WebSocket setup
-  // useWebSocket(fetchDataFromApi, () => {
-  //   // Handle WebSocket errors if needed
-  //   console.log('done');
-  // });
 
   return (
     <div className='detail_block'>
