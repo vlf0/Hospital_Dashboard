@@ -1,6 +1,4 @@
 import React, { useContext } from 'react';
-import { useNavigate} from 'react-router-dom';
-// import { useSpring, animated } from 'react-spring';
 import {Bar} from 'react-chartjs-2';
 import Chart from 'chart.js/auto';
 import AnnotationPlugin from 'chartjs-plugin-annotation';
@@ -22,8 +20,8 @@ Chart.defaults.color = '#090b1f';
 
 const ArrivedChart = () => {
     
-    const navigate = useNavigate();
-    const plan = 120;
+
+    const planValue = 120;
 
     const dmk_charts = useContext(DataContext).dmk.main_dmk;
     const pairValues = extractProperties(dmk_charts)
@@ -48,29 +46,18 @@ const ArrivedChart = () => {
         barThickness: 'flex',
         barPercentage: 0.9, 
         categoryPercentage: 0.9,
-        // layout: {
-        //     padding: {
-        //       top: 20, // Adjust the top padding as needed
-        //     }
-        //   },
         scales: {
             x: {
-                // stacked: true,
                 grid: { 
                   drawOnChartArea: false,
                   drawTicks: false
                 },
                 ticks: {
-                    // display: false,
                     beginAtZero: true,
                     color: '#090b1f',   
-                    font: {
-                    // size: 14,
-                    // weight: 'bold' 
-                },},
+                },
             },
             y: {
-                // stacked: true,
                 grid: {
                   drawOnChartArea: true,
                   drawTicks: false
@@ -78,7 +65,7 @@ const ArrivedChart = () => {
              
                 ticks: {
                     color: (context) => {
-                        if (context.tick.value === plan) {
+                        if (context.tick.value === planValue) {
                             return '#860000'; // Customize the color of the custom grid lines
                         } else {
                             return '#090b1f'; // Default tick color
@@ -86,8 +73,8 @@ const ArrivedChart = () => {
                     },
                     callback: (value, index, values) => {
                         // Customize the tick value
-                        if (value === 125) {
-                            return 'план 125'; // Change the tick label for the value 60
+                        if (value === planValue) {
+                            return `план ${planValue}`; // Change the tick label for the value 60
                         } else {
                             return value; // Use the default tick label for other values
                         }
@@ -96,8 +83,6 @@ const ArrivedChart = () => {
                 },
             },
         },
-        
-
         plugins: { 
             datalabels: {
                 display: true,
@@ -106,7 +91,6 @@ const ArrivedChart = () => {
                         color: 'black',
                         font: {
                           size: 13,
-                        //   weight: 'bold',
                           },
                         anchor: 'end',
                         align: 'end',
@@ -122,7 +106,7 @@ const ArrivedChart = () => {
                             if (context.dataset.data[context.dataIndex] === null) {
                                 return '';
                             }
-                            const percernts = ((title / plan  * 100) - 100).toFixed(1);
+                            const percernts = ((title / planValue  * 100) - 100).toFixed(1);
                             const color = percernts < 0 ? '#b200ac' : 'blue';
 
                             return '\t' + percernts+'%';
@@ -133,7 +117,7 @@ const ArrivedChart = () => {
                           },
                         color: (context) => {
                           const value = context.dataset.data[context.dataIndex];
-                          const percent = ((value / plan) * 100 - 100).toFixed(1);
+                          const percent = ((value / planValue) * 100 - 100).toFixed(1);
   
                           return percent < 0 ? '#b200ac' : '#00a318';
                         },
@@ -146,8 +130,8 @@ const ArrivedChart = () => {
                     annotations: {
                       line1: {
                         type: 'line',
-                        yMin: 120,
-                        yMax: 120,
+                        yMin: planValue,
+                        yMax: planValue,
                         borderColor: '#ff6384',
                         borderWidth: 1.5,
                       },
@@ -164,23 +148,16 @@ const ArrivedChart = () => {
                     size: 13,
             },                
             padding: {
-            //   top: 20, // Adjust the top padding as needed
               bottom: 30,
             }
             },
         },
     };
 
-    // Chart component
     return (
         <div className='arrived_chart'>
           <Bar data={arrived_data} options={chartOptions} />
         </div>
-
-        // Code for animation chart itself
-        // <animated.div className='arrived_chart' style={props}>
-        //     <Bar data={arrived_data} options={chartOptions} />
-        // </animated.div>
     );
 };
 

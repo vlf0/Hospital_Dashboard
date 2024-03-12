@@ -1,14 +1,13 @@
 import React, { useContext } from 'react';
-import { useNavigate} from 'react-router-dom';
-// import { useSpring, animated } from 'react-spring';
 import { Bar } from 'react-chartjs-2';
 import Chart from 'chart.js/auto';
 import AnnotationPlugin from 'chartjs-plugin-annotation';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import DataContext from '../DataContext';
 import GetWeekDays from '../dates/DatesFormat';
-import { extractProperty } from '../Feauters';
-import { ensureArrayLength } from '../Feauters';
+import { extractProperties } from '../Feauters';
+import { mapArrivedValues } from '../Feauters';
+import { GetDates } from '../dates/DatesFormat';
 import "./arrived_chart.css";
 
 Chart.register(AnnotationPlugin);
@@ -21,12 +20,12 @@ Chart.defaults.color = '#090b1f';
 
 const DeadsChart = () => {
 
-    const navigate = useNavigate();
-    const plan = 10;
+    const planValue = 40;
 
     const dmk_charts = useContext(DataContext).dmk.main_dmk;
-    const mappedData = extractProperty(dmk_charts, 'deads');
-    ensureArrayLength(mappedData, 7);
+    const pairValues = extractProperties(dmk_charts)
+    const mappedData = mapArrivedValues(pairValues, GetDates());
+
 
     const mappedWeek = GetWeekDays();
 
@@ -49,25 +48,18 @@ const DeadsChart = () => {
         categoryPercentage: 0.9,
         scales: {
             x: {
-                // stacked: true,
-
                 grid: { 
                   drawOnChartArea: false,
                   drawTicks: false
                 },
                 ticks: {
-                    // display: false,
+
                     beginAtZero: true,
-                    color: '#090b1f',   
-                    font: {
-                        // size: 14,
-                        // weight: 'bold' 
-                },},
+                    color: '#090b1f',    
+                },
             },
             y: {
-                // stacked: true,
                 beginAtZero: true,
-                // max: 20,
                 grid: {
                   drawOnChartArea: true,
                   drawTicks: false
@@ -75,7 +67,7 @@ const DeadsChart = () => {
              
                 ticks: {
                     color: (context) => {
-                        if (context.tick.value === plan) {
+                        if (context.tick.value === planValue) {
                             return '#860000'; // Customize the color of the custom grid lines
                         } else {
                             return '#090b1f'; // Default tick color
@@ -83,8 +75,8 @@ const DeadsChart = () => {
                     },
                     callback: (value, index, values) => {
                         // Customize the tick value
-                        if (value === 10) {
-                            return 'план 10'; // Change the tick label for the value 60
+                        if (value === planValue) {
+                            return `план ${planValue}`; // Change the tick label for the value 60
                         } else {
                             return value; // Use the default tick label for other values
                         }
@@ -102,11 +94,9 @@ const DeadsChart = () => {
                         color: 'black',
                         font: {
                           size: 13,
-                        //   weight: 'bold',
-                          },
+                        },
                         anchor: 'end',
                         align: 'end',
-                        // Return N/A string if bar value is null
                         formatter: (title, context) => {
                             if (context.dataset.data[context.dataIndex] === null) {
                               return 'N/A';
@@ -119,7 +109,7 @@ const DeadsChart = () => {
                             if (context.dataset.data[context.dataIndex] === null) {
                                 return '';
                             }
-                            const percernts = ((title / plan  * 100) - 100).toFixed(1);
+                            const percernts = ((title / planValue  * 100) - 100).toFixed(1);
                             return '\t' + percernts+'%';
                         },
                         font: {
@@ -128,7 +118,7 @@ const DeadsChart = () => {
                         },
                         color: (context) => {
                           const value = context.dataset.data[context.dataIndex];
-                          const percent = ((value / plan) * 100 - 100).toFixed(1);
+                          const percent = ((value / planValue) * 100 - 100).toFixed(1);
   
                           return percent < 0 ? '#b200ac' : '#049d00';
                         },
@@ -141,10 +131,10 @@ const DeadsChart = () => {
                     annotations: {
                       line1: {
                         type: 'line',
-                        yMin: 10,
-                        yMax: 10,
+                        yMin: planValue,
+                        yMax: planValue,
                         borderColor: '#ff6384',
-                        borderWidth: 2,
+                        borderWidth: 1,
                       },
                     },
               },
@@ -165,7 +155,6 @@ const DeadsChart = () => {
         },
     };
 
-    // Chart component
     return (
         <div className='arrived_chart'>
           <Bar data={arrived_data} options={chartOptions} />
