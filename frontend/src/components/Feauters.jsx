@@ -19,6 +19,7 @@ export function CustomMap(currentDay, yesterday) {
     return result
 };
 
+
 export function Persents(today, yesterday) {
 
     let percent = ((today-yesterday)/yesterday*100).toFixed(1)
@@ -27,9 +28,30 @@ export function Persents(today, yesterday) {
     return percent
 };
 
+
 export const extractProperty = (dataList, key) => {
     return dataList.map(item => item[key]);
 };
+
+
+export const extractProperties = (dataList) => {
+  return dataList.map(item => ({ dates: item.dates, arrived: item.arrived }));
+};
+
+
+export function mapArrivedValues(data, dateArray) {
+  const result = Array(dateArray.length).fill(null);
+
+  for (const item of data) {
+    const index = dateArray.indexOf(item.dates);
+    if (index !== -1) {
+      result[index] = item.arrived;
+    }
+  }
+
+  return result;
+}
+
   
 export function ensureArrayLength(array, desiredLength) {
   if (array.length !== desiredLength) {
@@ -113,5 +135,12 @@ export function CurrentOarTable(dataset) {
 
   return modifiedObjects;
 };
+
+
+export function GetNameOfDay(dateString) {
+  return ['Вск', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб']
+  [new Date(dateString).getDay()];
+}
+
 
 

@@ -7,8 +7,9 @@ import AnnotationPlugin from 'chartjs-plugin-annotation';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import DataContext from '../DataContext';
 import GetWeekDays from '../dates/DatesFormat';
-import { extractProperty } from '../Feauters';
-import { ensureArrayLength } from '../Feauters';
+import { mapArrivedValues } from '../Feauters';
+import { extractProperties } from '../Feauters';
+import { GetDates } from '../dates/DatesFormat';
 import "./arrived_chart.css";
 
 Chart.register(AnnotationPlugin);
@@ -25,11 +26,11 @@ const ArrivedChart = () => {
     const plan = 120;
 
     const dmk_charts = useContext(DataContext).dmk.main_dmk;
-    const mappedData = extractProperty(dmk_charts, 'arrived');
-    ensureArrayLength(mappedData, 7);
+    const pairValues = extractProperties(dmk_charts)
+    const mappedData = mapArrivedValues(pairValues, GetDates());
 
     const mappedWeek = GetWeekDays();
-
+    
     const arrived_data = {
         labels: mappedWeek,
         datasets: [
