@@ -56,7 +56,8 @@
 }
 
 .separated_detail_block_X:hover {
-  background-color: #f0f0f0; /* Background color for the hover effect */
+  background: linear-gradient(0deg, #5597c7b8, #a1ead1a3);
+  box-shadow: 4px 13px 20px 0px #133a8f69;
 }
 
 .detail_block_header {

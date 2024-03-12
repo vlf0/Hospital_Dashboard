@@ -46,14 +46,15 @@ const TopBlock = ({ textContent, menu_point }) => {
 
       {/* Dropdown */}
       <animated.div className='dropdown' style={dropdownProps}>
+        {point_list.includes(menu_point)  && (
+          <MenuUnit point={'Главная'} to='/' />
+        )}
         <MenuUnit point={arrivedpoint} to='/arrived_detail' />
         <MenuUnit point={outpoint} to='/signout_detail' />
         <MenuUnit point={oarpoint} to='/OAR_detail' />
 
 
-        {point_list.includes(menu_point)  && (
-          <MenuUnit point={'Главная'} to='/' />
-        )}
+
 
       </animated.div>
     </animated.div>

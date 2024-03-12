@@ -6,7 +6,6 @@ import ScaleX from '../ScaleX';
 const SignInDetailTable = () => {
 
   let data = JSON.parse(sessionStorage.getItem('data')).dmk.accum_dmk
-  console.log(data)
 
   const columns = [
     { Header: 'Профиль', 

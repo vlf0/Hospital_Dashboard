@@ -24,7 +24,6 @@ const SignInDetailBoard = () => {
 
       // Update sessionStorage with the new data
       sessionStorage.setItem('data', JSON.stringify(newData));
-      console.log(JSON.parse(sessionStorage.getItem('data')).dmk.accum_dmk);
 
       // Trigger re-render by toggling the reload state
       setReload(prevReload => !prevReload);
