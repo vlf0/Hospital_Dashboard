@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import GetAnalysis from './components/dashboard/Analysis';
 import DetailBoard from './components/details/Details';
 import DataContext from './components/DataContext';
-import { WebSocketProvider } from './components/websocket/WebSocketContext';
 import GetData from './components/GetData';
 import NoConnection from './components/NoConnection';
 
@@ -28,7 +27,6 @@ function App() {
   if (data) {
 
     return (
-    <WebSocketProvider>
       <DataContext.Provider value={data}>
         <Router>
           <Routes>
@@ -39,7 +37,6 @@ function App() {
           </Routes>
         </Router>
       </DataContext.Provider>
-    </WebSocketProvider>  
     );
   }
   else {

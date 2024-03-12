@@ -1,22 +1,12 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useMemo } from 'react';
 
-const WebSocketContext = createContext();
+export const WebSocketContext = createContext();
 
-export const WebSocketProvider = ({ children }) => {
-  const [webSocket, setWebSocket] = useState(null);
-
-  useEffect(() => {
-    const socket = new WebSocket('ws://localhost:8001/ws/notifications/');
-
-    setWebSocket(socket);
-
-    return () => {
-      socket.close();
-    };
-  }, []);
+export const WebSocketProvider = ({ children, socket }) => {
+  const memoizedSocket = useMemo(() => socket, [socket]);
 
   return (
-    <WebSocketContext.Provider value={webSocket}>
+    <WebSocketContext.Provider value={memoizedSocket}>
       {children}
     </WebSocketContext.Provider>
   );

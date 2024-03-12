@@ -3,11 +3,14 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import { WebSocketProvider } from './components/websocket/WebSocketContext';
 
+export const mainSocket = new WebSocket('ws://localhost:8001/ws/notifications/');
+
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-    <WebSocketProvider>
-      <App />
-    </WebSocketProvider>
+  <WebSocketProvider socket={mainSocket}>
+    <App />
+  </WebSocketProvider>
 );
 
 // If you want to start measuring performance in your app, pass a function

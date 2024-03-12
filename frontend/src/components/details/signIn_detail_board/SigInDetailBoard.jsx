@@ -1,50 +1,46 @@
-import React, { useContext, useState, useEffect } from "react";
+import React, { useContext, useEffect, useState  } from "react";
 import SignInDetailTable from "./SignInDetailTable";
 import DataContext from "../../DataContext";
-import { useWebSocketContext } from "../../websocket/WebSocketContext";
+import { mainSocket } from "../../..";
 import './detail_blocks.css';
 import './signin_table.css';
 
+
+
 const SignInDetailBoard = () => {
-
-  const [reload, setReload] = useState(false);
-  const webSocket = useWebSocketContext();
- 
-  const fetchDataFromApi = async () => {
-    try {
-      // Fetch new data from the API
-      const response = await fetch('http://localhost:8000/api/v1/main_data/');
-      const newData = await response.json();
-  
-      sessionStorage.removeItem('data');
-      // Update sessionStorage with the new data
-      sessionStorage.setItem('data', JSON.stringify(newData));
-  
-      // Trigger a re-render by updating the state
-      setReload(prevReload => !prevReload);
-    } catch (error) {
-      console.error('Error fetching new data:', error);
-    }
-  };
-  
-  useEffect(() => {
-    if (webSocket) {
-      webSocket.onmessage = () => {
-        fetchDataFromApi();
-      };
-    }
-  
-    return () => {
-    };
-  }, [webSocket, reload]);
-
-
 
   const data = useContext(DataContext);
   const kis = data.kis[0].arrived[0];
   let main_dmk = data.dmk.main_dmk;
   main_dmk = main_dmk[main_dmk.length - 1];
 
+
+  const [reload, setReload] = useState(false);
+
+  const fetchDataFromApi = async () => {
+    try {
+      const response = await fetch('http://localhost:8000/api/v1/main_data/');
+      const newData = await response.json();
+
+      // Update sessionStorage with the new data
+      sessionStorage.setItem('data', JSON.stringify(newData));
+      console.log(JSON.parse(sessionStorage.getItem('data')).dmk.accum_dmk);
+
+      // Trigger re-render by toggling the reload state
+      setReload(prevReload => !prevReload);
+    } catch (error) {
+      console.error('Error fetching new data:', error);
+    }
+  };
+
+  useEffect(() => {
+    mainSocket.onmessage = () => {
+      fetchDataFromApi();
+    };
+  }, [reload]);
+  
+
+  
   return (
     <div className='detail_block'>
       <span className='detail_block_header'> Обратившиеся </span>
@@ -78,7 +74,7 @@ const SignInDetailBoard = () => {
         <div className='separated_detail_block'>  
           <p> Не указано </p> {kis.undefined} </div>
       </div>
-      <SignInDetailTable key={reload} />
+      <SignInDetailTable key={reload}/>
       {/* <button className="reload_button" onClick={fetchDataFromApi}>Обновить планы</button> */}
 
 

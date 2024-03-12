@@ -1,12 +1,13 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useTable } from 'react-table';
 import ScaleX from '../ScaleX';
-import DataContext from '../../DataContext';
 
 
 const SignInDetailTable = () => {
 
   let data = JSON.parse(sessionStorage.getItem('data')).dmk.accum_dmk
+  console.log(data);
+
 
   const columns = [
     { Header: 'Профиль', accessor: 'name' },
@@ -26,8 +27,6 @@ const SignInDetailTable = () => {
   
   // Use useEffect to trigger table update when data changes
   useEffect(() => {
-    // Trigger update of the table instance when 'data' changes
-    // This is necessary to reflect the changes in the table
     prepareRow(rows);
   }, [data, prepareRow, rows]);
 
