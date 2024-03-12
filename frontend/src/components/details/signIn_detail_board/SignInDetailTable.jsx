@@ -6,14 +6,37 @@ import ScaleX from '../ScaleX';
 const SignInDetailTable = () => {
 
   let data = JSON.parse(sessionStorage.getItem('data')).dmk.accum_dmk
+  console.log(data)
 
   const columns = [
-    { Header: 'Профиль', accessor: 'name' },
+    { Header: 'Профиль', 
+      accessor: 'name',
+        Cell: ({ cell }) => (
+          <div style={{ 
+            color: '#1a1a1a', // Text color
+            fontSize: 16,     // Font size
+            fontWeight: 700,  // Font weight
+            fontFamily: 'sans-serif', // Font family
+          }}>{cell.value}</div>
+    ) },
     {
       Header: 'План',
-      accessor: 'fact',
+      accessor: 'total',
       Cell: ({ cell, row }) => (<ScaleX hospFact={cell.value} hospPlan={row.original.plan} />), 
     },
+    {
+      Header: 'Percents',
+      Cell: ({ row }) => {
+        const percent = ((row.values.total / row.original.plan) * 100);
+        const formattedPercent = percent.toFixed(0) + '%'; // Add "%" at the end
+        return <div style={{ color: percent > 100 ? '#12702b' : '#47010f',
+                             fontSize: 14,
+                             fontWeight: 700,
+                             fontFamily: 'sans-serif'
+                            }
+                          }>{formattedPercent}</div>;
+      }
+    }
   ];
 
   // Create a table instance

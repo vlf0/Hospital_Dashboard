@@ -8,6 +8,7 @@ from django.core.cache import cache
 from rest_framework.exceptions import ValidationError
 from django.conf import settings
 from django.db.utils import IntegrityError
+from django.db.models import Sum
 from .psycopg_module import BaseConnectionDB
 from .sql_queries import QuerySets
 from .serializers import (
@@ -623,7 +624,9 @@ def ensure_cashing() -> None:
 def collect_model():
     data = Profiles.objects \
         .select_related() \
-        .filter(accumulationofincoming__dates=today()) \
-        .values('name', 'accumulationofincoming__number', 'plannumbers__plan')
+        .annotate(total=Sum('accumulationofincoming__number')) \
+        .values('name', 'total', 'plannumbers__plan')
     accum_sr = ProfilesSerializer(data, many=True)
     return accum_sr.data
+
+

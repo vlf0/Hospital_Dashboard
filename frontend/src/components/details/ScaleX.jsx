@@ -1,13 +1,12 @@
 import React from 'react';
 
-const plan = 100
 
 const ColoredLine = ({ percentage, plan, arrivedFact }) => {
   const gradient = `linear-gradient(to right, #828cff ${percentage}%, #e785fc ${percentage}%)`;
 
   const lineStyle = {
     width: '-webkit-fill-available',
-    height: '18px', // Set the height of the line
+    height: '30px', // Set the height of the line
     background: gradient,
     display: 'flex',
     flexDirection: 'row',
@@ -15,14 +14,14 @@ const ColoredLine = ({ percentage, plan, arrivedFact }) => {
     alignItems: 'center',
     justifyContent: 'space-between',
     alignContent: 'center',
+    margin: -3,
   };
 
   const spanStyle = {
-    fontSize: '12px',
+    fontSize: '14px',
     fontWeight: 'bold',
     marginLeft: '22px',
     marginRight: '22px',
-    marginBottom: '1px',
   };
 
   return <div style={lineStyle}>

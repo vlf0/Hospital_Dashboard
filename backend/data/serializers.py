@@ -16,10 +16,11 @@ class ProfilesSerializer(serializers.ModelSerializer):
     current_date = serializers.DateField(source='accumulationofincoming__dates', read_only=True)
     fact = serializers.IntegerField(source='accumulationofincoming__number', read_only=True)
     plan = serializers.IntegerField(source='plannumbers__plan', read_only=True)
+    total = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Profiles
-        fields = ['id', 'name', 'active', 'current_date', 'fact', 'plan']
+        fields = ['id', 'name', 'active', 'current_date', 'fact', 'plan', 'total']
 
 
 class AccumulativeDataSerializerSave(serializers.ModelSerializer):
