@@ -5,6 +5,7 @@ import DetailBoard from './components/details/Details';
 import DataContext from './components/DataContext';
 import GetData from './components/GetData';
 import NoConnection from './components/NoConnection';
+import ArrivedDetails from './components/details/other_details/ArrivedDetails';
 
 
 
@@ -34,6 +35,8 @@ function App() {
             <Route path="/arrived_detail" element={<DetailBoard sign={'in'} textHeader={'Детализация обратившихся'} />} />
             <Route path="/signout_detail" element={<DetailBoard sign={'out'} textHeader={'Детализация выписанных'} />} />
             <Route path="/OAR_detail" element={<DetailBoard sign={'oar'} textHeader={'Детализация реанимационных отделений'} />} />
+            <Route path="/arrived" element={<ArrivedDetails />} />
+            {/* <Route path="/arrived" element={<ArrivedDetails />} /> */}
           </Routes>
         </Router>
       </DataContext.Provider>

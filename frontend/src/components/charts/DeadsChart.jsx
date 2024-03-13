@@ -1,4 +1,5 @@
 import React, { useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Bar } from 'react-chartjs-2';
 import Chart from 'chart.js/auto';
 import AnnotationPlugin from 'chartjs-plugin-annotation';
@@ -21,6 +22,7 @@ Chart.defaults.color = '#090b1f';
 const DeadsChart = () => {
 
     const planValue = 40;
+    const navigate = useNavigate();
 
     const dmk_charts = useContext(DataContext).dmk.main_dmk;
     const pairValues = extractProperties(dmk_charts)
@@ -153,6 +155,10 @@ const DeadsChart = () => {
               }
             },
         },
+        onClick: function () {
+            var link = '/signout';
+            navigate(link); // Changes the current page's URL
+        }
     };
 
     return (

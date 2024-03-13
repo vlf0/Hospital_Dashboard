@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState  } from "react";
 import SignInDetailTable from "./SignInDetailTable";
 import DataContext from "../../DataContext";
 import { mainSocket } from "../../..";
+import GetWeekDays, { GetDates } from "../../dates/DatesFormat";
 import './detail_blocks.css';
 import './signin_table.css';
 
@@ -9,6 +10,11 @@ import './signin_table.css';
 
 const SignInDetailBoard = () => {
 
+
+  console.log(GetWeekDays())
+  console.log(GetDates())
+
+  
   const data = useContext(DataContext);
   const kis = data.kis[0].arrived[0];
   let main_dmk = data.dmk.main_dmk;
