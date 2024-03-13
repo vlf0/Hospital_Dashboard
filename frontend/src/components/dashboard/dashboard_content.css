@@ -1,0 +1,34 @@
+.board-cards {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  height: -webkit-fill-available;
+  box-shadow: 4px 13px 20px 0px #434343;
+  background: linear-gradient(358deg, #818181, #939393);
+  border: 1px solid #1e2630a1;
+  border-radius: 5px;
+  margin: 15px;
+  margin-top: 0;
+  flex-wrap: wrap;
+  align-content: center;
+}
+
+.cards_line {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.board-charts {
+  display: flex;
+  flex-direction: row;
+  position: relative;
+  height: -webkit-fill-available;
+  /* box-shadow: 4px 13px 20px 0px #434343;
+  background: linear-gradient(358deg, #598593, #939393);
+  border: 1px solid #1e2630a1; */
+  border-radius: 5px;
+  margin: 15px;
+  margin-top: 0;
+  flex-wrap: wrap;
+  justify-content: space-around;
+}
