@@ -22,7 +22,7 @@ Chart.defaults.color = '#090b1f';
 const DeadsChart = () => {
 
     const planValue = 40;
-    const navigate = useNavigate();
+    // const navigate = useNavigate();
 
     const dmk_charts = useContext(DataContext).dmk.main_dmk;
     const pairValues = extractProperties(dmk_charts)
@@ -155,10 +155,10 @@ const DeadsChart = () => {
               }
             },
         },
-        onClick: function () {
-            var link = '/signout';
-            navigate(link); // Changes the current page's URL
-        }
+        // onClick: function () {
+        //     var link = '/signout';
+        //     navigate(link); 
+        // }
     };
 
     return (

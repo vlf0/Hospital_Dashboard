@@ -1,4 +1,5 @@
 import React, { useContext} from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Bar } from 'react-chartjs-2';
 import Chart from 'chart.js/auto';
 import AnnotationPlugin from 'chartjs-plugin-annotation';
@@ -22,13 +23,32 @@ const SignOutChart = () => {
 
     const planValue = 60;
 
+    const navigate = useNavigate();
+    const handleClick = (event, chartElements) => {
+      if (chartElements.length > 0) {
+      const clickedBarIndex = chartElements[0].index;
+      console.log(signout_data)
+      const clickedBarCustomData = signout_data['datasets'][0]['srtDates'][clickedBarIndex]['date'];
+          const link = `/details?type=signout&date=${clickedBarCustomData}`;
+          navigate(link);
+      }
+    };
+
+
+
     const dmk_charts = useContext(DataContext).dmk.main_dmk;
     const pairValues = extractProperties(dmk_charts)
     const mappedData = mapArrivedValues(pairValues, GetDates());
 
     const mappedWeek = GetWeekDays();
+    const barOptions = GetDates();
+    
+    const dataWithDates = mappedWeek.map((weekDay, index) => ({
+        label: weekDay,
+        date: barOptions[index]
+      }));
 
-    const arrived_data = {
+    const signout_data = {
         labels: mappedWeek,
         datasets: [
             {
@@ -37,6 +57,7 @@ const SignOutChart = () => {
               backgroundColor: ['#212e93b3'],
               borderColor: '#090b1f',
               borderWidth: 1,
+              srtDates: dataWithDates
             },
         ],
     };
@@ -148,13 +169,13 @@ const SignOutChart = () => {
                     bottom: 30,
               }
             },
-
         },
+        onClick: handleClick
     };
 
     return (
         <div className='arrived_chart'>
-          <Bar data={arrived_data} options={chartOptions} />
+          <Bar data={signout_data} options={chartOptions} />
         </div>
     );
 };
