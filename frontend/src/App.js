@@ -35,7 +35,7 @@ function App() {
             <Route path="/arrived_detail" element={<DetailBoard sign={'in'} textHeader={'Детализация обратившихся'} />} />
             <Route path="/signout_detail" element={<DetailBoard sign={'out'} textHeader={'Детализация выписанных'} />} />
             <Route path="/OAR_detail" element={<DetailBoard sign={'oar'} textHeader={'Детализация реанимационных отделений'} />} />
-            <Route path="/arrived" element={<ArrivedDetails />} />
+            <Route path="/details" element={<ArrivedDetails />} />
             {/* <Route path="/arrived" element={<ArrivedDetails />} /> */}
           </Routes>
         </Router>

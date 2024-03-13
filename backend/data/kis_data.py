@@ -63,12 +63,12 @@ class KISData:
       - get_data_generator -> Generator: Create a generator object performing each query from queryset by request.
     """
 
-    def __init__(self, query_sets):
+    def __init__(self, query_sets: list):
         """
         Initialize an instance of KISData.
 
         :param query_sets: *list*: A list containing the data queries
-          and queries of its columns. Each query pair is a list.
+         and queries of its columns. Each query pair is a list.
         """
         self.query_sets = query_sets
         self.db_conn = BaseConnectionDB(dbname=creds['dbname'],
@@ -423,11 +423,13 @@ class KISDataProcessing(DataProcessing):
     deads_oar = []
     counted_oar = []
 
-    def __init__(self, kisdata_obj):
+    def __init__(self, kisdata_obj=None):
         """
         Initialize the KISDataProcessing instance.
 
-        :param kisdata_obj: *Generator*: A generator providing datasets.
+        :param kisdata_obj: *Generator*: The `KISData` instance.
+         None value by default for using class out of common tasks scope without initialization KISData instance
+         as a current class instance attribute.
         """
         super().__init__(kisdata_obj)
 
@@ -476,7 +478,7 @@ class KISDataProcessing(DataProcessing):
             sr_data = KISTableSerializer(ready_dataset, many=True).data
         return sr_data
 
-    def __arrived_process(self, arrived_dataset) -> dict:
+    def arrived_process(self, arrived_dataset) -> dict:
         """
         Process and serialize data related to arrivals.
 
@@ -497,7 +499,7 @@ class KISDataProcessing(DataProcessing):
         ready_dataset = self.__result_for_sr(columns, summary_dataset)
         return self.__serialize(ready_dataset)
 
-    def __signout_process(self, signout_dataset) -> dict:
+    def signout_process(self, signout_dataset) -> dict:
         """
         Process and serialize data related to signouts.
 
@@ -519,7 +521,7 @@ class KISDataProcessing(DataProcessing):
         ready_dataset = self.__result_for_sr(summary_columns, summary_dataset)
         return self.__serialize(ready_dataset)
 
-    def __deads_process(self, deads_dataset) -> dict:
+    def deads_process(self, deads_dataset) -> dict:
         """
         Process and serialize data related to signouts.
 
@@ -536,7 +538,7 @@ class KISDataProcessing(DataProcessing):
         ready_dataset = self.__result_for_sr(columns, deads_dataset)
         return self.__serialize(ready_dataset, data_serializer=False)
 
-    def __oar_process(self, dataset, columns) -> dict:
+    def oar_process(self, dataset, columns) -> dict:
         """
         Process and serialize data related to hospitalized in reanimation.
 
@@ -587,13 +589,12 @@ class KISDataProcessing(DataProcessing):
             return result
         # If connection successfully getting and processing data.
         gen = self.kisdata_obj.get_data_generator()
-        arrived = self.__arrived_process(next(gen))
-        # hosp_dept = self.__dept_hosp_process(next(gen))
-        signout = self.__signout_process(next(gen))
-        deads = self.__deads_process(next(gen))
-        oar_arrived = self.__oar_process(next(gen), self.qs.COLUMNS['oar_arrived_t'])
-        oar_moved = self.__oar_process(next(gen), self.qs.COLUMNS['oar_moved_t'])
-        oar_current = self.__oar_process(next(gen), self.qs.COLUMNS['oar_current_t'])
+        arrived = self.arrived_process(next(gen))
+        signout = self.signout_process(next(gen))
+        deads = self.deads_process(next(gen))
+        oar_arrived = self.oar_process(next(gen), self.qs.COLUMNS['oar_arrived_t'])
+        oar_moved = self.oar_process(next(gen), self.qs.COLUMNS['oar_moved_t'])
+        oar_current = self.oar_process(next(gen), self.qs.COLUMNS['oar_current_t'])
         oar_numbers = self.oar_count()
         # Creating list of ready processed datasets.
         ready_dataset = [arrived, signout, deads, oar_arrived, oar_moved, oar_current, oar_numbers]
@@ -622,6 +623,7 @@ def ensure_cashing() -> None:
 
 
 def collect_model():
+    """Create postgres view contains all needed data of month plans table and return serialized data."""
     data = Profiles.objects \
         .select_related() \
         .annotate(total=Sum('accumulationofincoming__number')) \
@@ -630,3 +632,25 @@ def collect_model():
     return accum_sr.data
 
 
+def get_chosen_date(request):
+    res = None
+    queries = QuerySets()
+    gen = KISData
+    kis = KISDataProcessing
+
+    kind = request.query_params.get('type', None)
+    dates = request.query_params.get('date', None)
+
+    if kind == 'arrived':
+        query = queries.ARRIVED
+        processing = kis().arrived_process
+    elif kind == 'signout':
+        query = queries.SIGNOUT
+        processing = kis().signout_process
+    else:
+        return
+
+    kisdata_obj = gen(queries.chosen_date_query(query, dates))
+    dataset = next(kisdata_obj.get_data_generator())
+    res = processing(dataset)
+    return res

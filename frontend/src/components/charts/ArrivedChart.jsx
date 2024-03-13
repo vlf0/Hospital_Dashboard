@@ -26,18 +26,11 @@ const ArrivedChart = () => {
       if (chartElements.length > 0) {
       const clickedBarIndex = chartElements[0].index;
       const clickedBarCustomData = arrived_data['datasets'][0]['srtDates'][clickedBarIndex]['date'];
-          const link = `/arrived?date=${clickedBarCustomData}`;
+          const link = `/details?type=arrived&date=${clickedBarCustomData}`;
           navigate(link);
       }
     };
 
-    // const handleClick = (event, chartElements) => {
-    //   if (chartElements.length > 0) {
-    //     const clickedBarIndex = chartElements[0].index;
-    //     const clickedBarCustomData = arrived_data['datasets'][0]['srtDates'][clickedBarIndex]['date'];
-    //     // Perform actions based on clickedBarCustomData
-    //   }
-    // };
 
     const planValue = 120;
 

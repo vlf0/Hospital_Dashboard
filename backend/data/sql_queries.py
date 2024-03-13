@@ -1,4 +1,5 @@
 """This module defines class responsible for giving whole query set of separated queries."""
+from datetime import date
 
 
 class QuerySets:
@@ -10,19 +11,36 @@ class QuerySets:
     Also has method for creating common list of these queries.
     """
 
-    ARRIVED = "SELECT * FROM mm.arrived;"
+    today = date.today
 
-    DEPT_HOSP = "SELECT med_profile, amount FROM mm.dept_hosp;"
+    ARRIVED = f"""
+               SELECT 
+               ar.status,
+               ar.dept,
+               ar.channel,
+               ar.patient_type 
+               FROM mm.arrived ar
+               WHERE DATE(dates) = '{today()}';
+               """
 
-    SIGNOUT = "SELECT dept, status FROM mm.signout;"
+    DEPT_HOSP = """SELECT med_profile, amount FROM mm.dept_hosp;"""
 
-    DEADS = "SELECT pat_fio, ib_num, sex, agee, arriving_dt, state, dept, days, diag_arr, diag_dead FROM mm.deads;"
+    SIGNOUT = f"""
+               SELECT 
+               sg.dept,
+               sg.status
+               FROM mm.signout sg
+               WHERE DATE(dates) = '{today()}';  
+               """
 
-    OAR_ARRIVED_QUERY = "SELECT pat_fio, ib_num, ages, dept, doc_fio, diag_start FROM mm.oar_arrived;"
+    DEADS = """SELECT pat_fio, ib_num, sex, agee, arriving_dt, state, dept, days, diag_arr, diag_dead FROM mm.deads;"""
 
-    OAR_MOVED_QUERY = "SELECT pat_fio, ib_num, ages, dept, doc_fio, move_date, from_dept, diag_start FROM mm.oar_moved;"
+    OAR_ARRIVED_QUERY = """SELECT pat_fio, ib_num, ages, dept, doc_fio, diag_start FROM mm.oar_arrived;"""
 
-    OAR_CURRENT_QUERY = "SELECT pat_fio, ib_num, ages, dept, doc_fio, days, diag_start FROM mm.oar_current;"
+    OAR_MOVED_QUERY = """SELECT pat_fio, ib_num, ages, dept, doc_fio, move_date, from_dept, diag_start
+                         FROM mm.oar_moved;"""
+
+    OAR_CURRENT_QUERY = """SELECT pat_fio, ib_num, ages, dept, doc_fio, days, diag_start FROM mm.oar_current;"""
 
     # Each string of this list is a keyword of dict where value is a serialized data.
     DICT_KEYWORDS = ['arrived', 'signout', 'deads',
@@ -80,10 +98,21 @@ class QuerySets:
         """
         Create list of lists queries from class attributes needed for data to front-end.
 
-        :return: List of lists.
+        :return: *list*: List of lists.
         """
         dmk_queries = self.queryset_for_dmk()[:-1]
         dmk_queries.insert(-1, self.DEADS)
         result = dmk_queries + [self.OAR_MOVED_QUERY, self.OAR_CURRENT_QUERY]
         return result
+
+    def chosen_date_query(self, query: str, chosen_date: str) -> list:
+        """
+        Replace date in the given query to passed and return query with needed date.
+
+        :param query: *str*: Original class attribute query contains today date filter.
+        :param chosen_date: Date for filtering that was chose users.
+        :return: *str*: Changed query contains actual chosen date.
+        """
+        new_query = query.replace(str(self.today()), chosen_date)
+        return [new_query]
 
