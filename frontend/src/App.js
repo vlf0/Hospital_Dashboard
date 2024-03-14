@@ -17,7 +17,7 @@ function App() {
     data = JSON.parse(data)
   }
   else {
-    const fetchedData = GetData()
+    const fetchedData = GetData('http://localhost:8000/api/v1/main_data/')
     if (fetchedData) {
       sessionStorage.setItem('data', JSON.stringify(fetchedData))
       data = JSON.parse(sessionStorage.getItem('data'))

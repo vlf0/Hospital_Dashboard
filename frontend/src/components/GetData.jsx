@@ -1,13 +1,13 @@
 import {useState, useEffect} from "react";
 
 
-function GetData() {
+function GetData(urlPath) {
     const [data, userData] = useState(null);
     
     useEffect(() => {
       const fetchData = async () => {
         try {
-          const response = await fetch('http://localhost:8000/api/v1/main_data/');
+          const response = await fetch(urlPath);
           const jsonData = await response.json();
           userData(jsonData);
         }
