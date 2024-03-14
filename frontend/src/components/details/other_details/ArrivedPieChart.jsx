@@ -3,6 +3,7 @@ import { Pie } from 'react-chartjs-2';
 import './details.css';
 
 
+
 const mapChannels = {
   ch103: '103',
   clinic_only: 'Поликлиника',
@@ -24,13 +25,12 @@ const ArrivedDetailPie = ( {labels, data} ) => {
                      .filter(channel => channel !== undefined);
   const ruTypes = labels.map(name => mapTypes[name])
                   .filter(channel => channel !== undefined);
-  console.log(ruChannels)
-  console.log(ruTypes)
+
 
   const channels = data.slice(0, ruChannels.length)
   const types = data.slice(ruTypes.length)
-  console.log(channels)
-  console.log(types)
+
+
 
 
   const channelsData = {
@@ -84,17 +84,7 @@ const ArrivedDetailPie = ( {labels, data} ) => {
         },
       },
     },
-    // layout: {
-    //   padding: {
-    //     top: 20, 
-    //   },
-    // },
   };
-  
-
-
-
-
   
 
 
@@ -125,13 +115,50 @@ const ArrivedDetailPie = ( {labels, data} ) => {
     ],
   };
 
-  const typesOptions  = {
-
+  const typesOptions = {
+    plugins: {
+      legend: {
+        labels: {
+          padding: 15,
+          font: {
+            family: 'Arial',
+            size: 15,
+            weight: 'bold',
+          },
+        },
+      },
+      title: {
+        display: true,
+        text: 'Детализация по типу пациентов',
+        color: '#090b1f',
+        font: {
+          size: 18,
+        },
+        padding: {
+          bottom: 15,
+        },
+      },
+    },
   };
+
+
+
+//   {(typesData.datasets[0].data.some(data => data !== undefined) && channelsData.datasets[0].data.some(data => data !== undefined)) ? (
+//     <>
+//       <Pie data={channelsData} options={channelsOptions} />
+//       <Pie data={typesData} options={typesOptions} />
+//     </>
+//   ) : (
+//     <p>No data available</p>
+//   )}
+
+  console.log(types)
+
+
 
   return (
     <div className='details'>
-      <h2>Pie Chart Example</h2>
+      <h2 >Pie Chart Example</h2>
       <div className='arrived_pie'>
         <Pie data={channelsData} options={channelsOptions} />
         <Pie data={typesData} options={typesOptions} />
