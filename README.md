@@ -4,4 +4,4 @@ This project - is web dashboard allowed access to critical important information
 and displaying data dynamics. It collects needed data by API and outputting them in one web board. 
 Data getting proceed from Postgres DB belonging to hospital.
 
-Collaborators - [Anton Ryadovoy](https://github.com/AntonRyadovoy) 
+Collaborators - [Yaroslav Panasenko](https://github.com/vlf0) 

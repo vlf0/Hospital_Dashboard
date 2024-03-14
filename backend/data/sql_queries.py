@@ -14,13 +14,49 @@ class QuerySets:
     today = date.today
 
     ARRIVED = f"""
+               SELECT
+               	  1 AS Госпитизировано,
+               	  mm.dept_get_name(h.dept_id) AS Отделение,
+               	  ect.dzm56 AS Канал_госпитализации,
+               		CASE h.patienttype
+               			WHEN '0' THEN 'ЗЛ'
+               			WHEN '1' THEN 'Иногородний'
+               			WHEN '2' THEN 'НР'
+               			WHEN '3' THEN 'НИЛ'
+               			WHEN '4' THEN 'Контрагент'
+               			WHEN '5' THEN 'ДМС'
+               			WHEN '-1' THEN 'Не указано'
+               		ELSE h.patienttype::TEXT
+               		END AS Тип_пациента
+               
+               FROM mm.mdoc m
+               JOIN mm.hospdoc h ON h.mdoc_id = m.id
+               JOIN mm.ehr_case ec ON ec.id = h.ehr_case_id
+               JOIN mm.ehr_case_title ect ON ect.caseid  = ec.id 
+               
+               WHERE ec.create_dt BETWEEN current_date - INTERVAL '1 day, -7 hours' AND current_date - INTERVAL '-7 hours'
+               
+               UNION ALL 									
+               
                SELECT 
-               ar.status,
-               ar.dept,
-               ar.channel,
-               ar.patient_type 
-               FROM mm.arrived ar
-               WHERE DATE(dates) = '{today()}';
+                      0 AS отказано,
+               	   'Приемное' AS Отделение,
+               	    ect2.dzm56 AS Канал_госпитализации,
+               		  CASE a.patienttype
+               			WHEN '0' THEN 'ЗЛ'
+               			WHEN '1' THEN 'Иногородний'
+               			WHEN '2' THEN 'НР'
+               			WHEN '3' THEN 'НИЛ'
+               			WHEN '4' THEN 'Контрагент'
+               			WHEN '5' THEN 'ДМС'
+               			WHEN '-1' THEN 'Не указано'
+               		ELSE a.patienttype::TEXT
+               		END AS Тип_пациента
+               		FROM mm.ambticket a
+               		JOIN mm.hosp_refuse hr ON hr.ambticket_id = a.id 
+               		JOIN mm.ehr_case_title ect2 ON ect2.caseid  = a.ehr_case_id
+               
+               WHERE hr.end_dt BETWEEN current_date - INTERVAL '1 day, -7 hours' AND current_date - INTERVAL '-7 hours';
                """
 
     DEPT_HOSP = """SELECT med_profile, amount FROM mm.dept_hosp;"""
@@ -48,7 +84,7 @@ class QuerySets:
 
     # Lists of columns for mapping with values to creating CleanData class instances.
     COLUMNS = {
-        'arrived': ['ch103', 'clinic_only', 'ch103_clinic', 'singly', 'ZL', 'foreign', 'moscow', 'undefined'],
+        'arrived': ['ch103', 'clinic_only', 'ch103_clinic', 'singly', 'ZL', 'foreign', 'moscow', 'undefined'], # Add plan field
         'signout': ['deads', 'moved', 'signout'],
         'deads_t': ['pat_fio', 'ib_num', 'sex', 'age', 'arriving_dt', 'state', 'dept', 'days', 'diag_arr', 'diag_dead'],
         'oar_arrived_t': ['pat_fio', 'ib_num', 'age', 'dept', 'doc_fio', 'diag_start'],
@@ -60,10 +96,9 @@ class QuerySets:
     DMK_COLUMNS = ['arrived', 'hosp', 'refused', 'signout', 'deads', 'reanimation']
 
     # Filter-words for filter_dataset method of DataProcessing class.
-    channels = ['103', 'Поликлиника', '103 Поликлиника', 'Самотек']
-    statuses = ['ЗЛ', 'Иногородние', 'Москвичи', 'не указано']
+    channels = ['103', 'Поликлиника', '103 Поликлиника', 'самотек']  # Add plan field
+    statuses = ['ЗЛ', 'Иногородний', 'ДМС', 'Не указано']  # Add plan field
     signout = ['Умер', 'Переведен', 'Выписан']
-
     # Dict for mapping with serializer fields (relates to "план/факт по профилям" table).
     # All english names is fields of serializer.
     profiles_mapping = {

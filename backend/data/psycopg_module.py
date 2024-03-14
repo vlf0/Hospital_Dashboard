@@ -67,7 +67,7 @@ class BaseConnectionDB:
         """
         return f'{self.conn}'
 
-    def __connect(self) -> Never:
+    def __connect(self) -> None:
         """
         Private method to establish a database connection.
 
