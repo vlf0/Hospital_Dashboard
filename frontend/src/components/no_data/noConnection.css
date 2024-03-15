@@ -48,14 +48,13 @@
 }
 
 .pie_chart_name {
-  margin-top: 50px;
+  margin-top: 15px;
   font-size: 18px;
   font-family: sans-serif;
   font-weight: bold;
   padding: 10px;
   text-align: center;
 }
-
 
 .null_data {
   margin-bottom: 20pc;

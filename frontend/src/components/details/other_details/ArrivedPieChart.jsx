@@ -101,7 +101,7 @@ const ArrivedDetailPie = ( {labels, data} ) => {
           'rgba(117, 217, 160, 0.4)',
           'rgba(54, 162, 235, 0.4)',
           'rgba(255, 206, 86, 0.4)',
-          'rgba(154, 161, 157, 0.4)',
+          'rgba(245, 147, 66, 0.4)',
           'rgba(153, 102, 255, 0.4)',
           'rgba(255, 159, 64, 0.4)',
         ],
@@ -155,21 +155,19 @@ const ArrivedDetailPie = ( {labels, data} ) => {
 
   return (
     <div className='details'>
-
       <Header textHeader={'Детализация госпитализированных'} date={dateParam}/>  
-
-      <div className='arrived_pie'>
-      {pie1 ? (
-      <Pie data={channelsData} options={channelsOptions} />
-      ) : (
-        <NoData name={'Детализация по каналам поступления'}/>
-      )}
-      {pie2 ? (
-      <Pie data={typesData} options={typesOptions} />
-      ) : (
-        <NoData name={'Детализация по типу пациентов'}/>
-      )}
-      </div>
+        <div className='arrived_pie'>
+          {pie1 ? (
+          <Pie data={channelsData} options={channelsOptions} />
+          ) : (
+            <NoData name={'Детализация по каналам поступления'}/>
+          )}
+          {pie2 ? (
+          <Pie data={typesData} options={typesOptions} />
+          ) : (
+            <NoData name={'Детализация по типу пациентов'}/>
+          )}
+        </div>
     </div>
   );
 };

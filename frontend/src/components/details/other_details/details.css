@@ -12,3 +12,11 @@
   height: 600px;
   justify-content: space-evenly;
 }
+
+.signout_pie {
+  display: flex;
+  flex-direction: row;
+  width: 600px;
+  height: 600px;
+  justify-content: space-evenly;
+}
