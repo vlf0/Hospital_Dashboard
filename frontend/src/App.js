@@ -4,8 +4,10 @@ import GetAnalysis from './components/dashboard/Analysis';
 import DetailBoard from './components/details/Details';
 import DataContext from './components/DataContext';
 import GetData from './components/GetData';
-import NoConnection from './components/NoConnection';
+import NoConnection from './components/no_data/NoConnection';
 import ArrivedDetails from './components/details/other_details/ArrivedDetails';
+
+
 
 
 

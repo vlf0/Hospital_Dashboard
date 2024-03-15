@@ -2,7 +2,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import GetData from '../../GetData';
 import ArrivedDetailPie from './ArrivedPieChart';
-import NoConnection from '../../NoConnection';
+import SignoutDetailPie from './SignoutPieChart';
+import NoConnection from '../../no_data/NoConnection';
+
 
 const ArrivedDetails = () => {
     const location = useLocation();
@@ -25,14 +27,23 @@ const ArrivedDetails = () => {
       }
     }
     
+
+    let pie;
+
     if (data) {
-        const keys = Object.keys(data['data']['0'])
-        const values = Object.values(data['data']['0'])
 
+      const keys = Object.keys(data['data']['0'])
+      const values = Object.values(data['data']['0'])
 
-    return (
-      <ArrivedDetailPie labels={keys} data={values}/>
-    );
+        if (keys[0] === 'deads') {
+          pie = <SignoutDetailPie labels={keys} data={values} />
+        } else {
+          pie = <ArrivedDetailPie labels={keys} data={values} />
+        }
+
+      
+
+      return (pie);
     } else {
       return (
         <NoConnection />
