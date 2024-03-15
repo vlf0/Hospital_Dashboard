@@ -8,11 +8,17 @@ import TopBlock from '../menu/TopBlock';
 import BlockInfo from '../boards/BlockInfo';
 import DataContext from '../DataContext';
 import { CustomMap } from '../Feauters';
+import { currentDatetime } from '../Feauters';
+import { getMainDMK } from '../Feauters';
+import { getYesterdayDate } from '../Feauters';
 import "../parent.css" 
 import './dashboard_content.css'
 
 
 function GetAnalysis() {
+
+  const today = new Date();
+  const yesterDay = getYesterdayDate();
 
 
   const props = useSpring({
@@ -25,8 +31,9 @@ function GetAnalysis() {
   
   const main_dmk = useContext(DataContext).dmk.main_dmk;
 
-  const currentDay = main_dmk[main_dmk.length - 1];
-  const yesterday = main_dmk[main_dmk.length - 2];
+  const currentDay = getMainDMK(main_dmk, today, 1);
+  const yesterday = getMainDMK(main_dmk, yesterDay, 2);
+
 
   const arrived = CustomMap(currentDay.arrived, yesterday.arrived)
   const hosp = CustomMap(currentDay.hosp, yesterday.hosp)
@@ -39,7 +46,7 @@ function GetAnalysis() {
     <> 
 
       {/* <h1>{data.arrived}</h1> */}
-      <TopBlock textContent={'Оперативная сводка ГКБ Им. Демихова'}/>
+      <TopBlock textContent={'Оперативная сводка ГКБ Им. Демихова'} date={currentDatetime}/>
       <animated.div className='main_dashboard' style={props}>
         <div className='board-cards'>
           <div className='cards_line'>

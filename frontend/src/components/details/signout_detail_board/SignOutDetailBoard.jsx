@@ -3,15 +3,21 @@ import { useSpring, animated } from "react-spring";
 import DeadsChartDetail from "./DeadsChartDetail";
 import SignOutDetailTable from "./SignOutDetailTable";
 import DataContext from "../../DataContext";
+import { getMainDMK } from "../../Feauters";
 import '../signIn_detail_board/detail_blocks.css';
+import { formatDate } from "../../dates/DatesFormat";
 
 
 
 const SignOutDetailBoard = () => {
 
+  const today = new Date();
+  
   const data = useContext(DataContext);
-  let dmk_current = data.dmk
-  dmk_current = dmk_current[dmk_current.length - 1]
+  const dmkData = data.dmk.main_dmk
+  let dmk;
+  dmk = getMainDMK(dmkData, today, 1)
+
   let kis = data.kis
   kis = kis[0].signout[0]
 
@@ -41,7 +47,7 @@ const SignOutDetailBoard = () => {
         <div className='separated_detail_block'> 
           <p> Перевод в другую МО </p> { kis.moved } </div>
         <div className='separated_detail_block'>
-           <p> Выписка </p> { kis.signout }
+           <p> Выписка </p> { dmk.signout }
        </div>
       </div>
       <span className='detail_block_header'> Выписка по отделениям </span>

@@ -8,13 +8,11 @@ import './top_block.css';
 const arrivedpoint = 'Поступившие';
 const outpoint = 'Выписанные';
 const oarpoint = 'ОАР и ОРИТ';
-const point_list = ['in', 'out', 'oar']
+const point_list = ['in', 'out', 'oar', 'details']
 
 
-const TopBlock = ({ textContent, menu_point }) => {
+const TopBlock = ({ textContent, menu_point, date }) => {
   const [isHovered, setHovered] = useState(false);
-
-  const currentDatetime = new Date().toLocaleDateString('ru-RU');
 
   const handleToggleHover = () => {
     setHovered(!isHovered);
@@ -44,7 +42,7 @@ const TopBlock = ({ textContent, menu_point }) => {
     >
       {/* <p className='main_header'>{textContent}</p>
       <span className='now_date'>по состоянию на {currentDatetime}</span> */}
-      <Header textHeader={textContent} date={currentDatetime}/>
+      <Header textHeader={textContent} date={date}/>
 
       {/* Dropdown */}
       <animated.div className='dropdown' style={dropdownProps}>

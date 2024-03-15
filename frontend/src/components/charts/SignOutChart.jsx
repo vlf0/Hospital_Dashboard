@@ -27,7 +27,6 @@ const SignOutChart = () => {
     const handleClick = (event, chartElements) => {
       if (chartElements.length > 0) {
       const clickedBarIndex = chartElements[0].index;
-      console.log(signout_data)
       const clickedBarCustomData = signout_data['datasets'][0]['srtDates'][clickedBarIndex]['date'];
           const link = `/details?type=signout&date=${clickedBarCustomData}`;
           navigate(link);
@@ -37,8 +36,8 @@ const SignOutChart = () => {
 
 
     const dmk_charts = useContext(DataContext).dmk.main_dmk;
-    const pairValues = extractProperties(dmk_charts)
-    const mappedData = mapArrivedValues(pairValues, GetDates());
+    const pairValues = extractProperties(dmk_charts, 'signout')
+    const mappedData = mapArrivedValues(pairValues, GetDates(), 'signout');
 
     const mappedWeek = GetWeekDays();
     const barOptions = GetDates();

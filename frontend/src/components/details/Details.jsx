@@ -5,11 +5,13 @@ import SignOutDetailBoard from './signout_detail_board/SignOutDetailBoard';
 import OARDetailBoard from './OAR_detail_board/OARDetailBoard';
 import TopBlock from '../menu/TopBlock';
 import DataContext from '../DataContext';
+import { currentDatetime } from '../Feauters';
 import '../menu/top_block.css';
 import '../dashboard/dashboard_content.css';
 
 
 function DetailBoard({ sign }) {
+
 
   const data = useContext(DataContext).kis;
   const kis = data[0].oar_numbers;
@@ -53,7 +55,7 @@ function DetailBoard({ sign }) {
 
   return (
     <>
-    <TopBlock menu_point={sign} textContent={topBlockHeader} />
+    <TopBlock menu_point={sign} textContent={topBlockHeader} date={currentDatetime} />
 
     <animated.div className='dashboard' style={props}>
       {content}

@@ -35,9 +35,8 @@ const ArrivedChart = () => {
     const planValue = 120;
 
     const dmk_charts = useContext(DataContext).dmk.main_dmk;
-    const pairValues = extractProperties(dmk_charts);
-    const mappedData = mapArrivedValues(pairValues, GetDates());
-
+    const pairValues = extractProperties(dmk_charts, 'arrived');
+    const mappedData = mapArrivedValues(pairValues, GetDates(), 'arrived');
 
     const mappedWeek = GetWeekDays();
     const barOptions = GetDates();
