@@ -2,7 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import GetData from '../../GetData';
 import ArrivedDetailPie from './ArrivedPieChart';
-import NoConnection from '../../NoConnection';
+import NoConnection from '../../no_data/NoConnection';
+
 
 const ArrivedDetails = () => {
     const location = useLocation();

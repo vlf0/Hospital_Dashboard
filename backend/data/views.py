@@ -17,7 +17,6 @@ class KISDataReadViewSet(viewsets.ViewSet):
 class KISDataAnotherDates(viewsets.ViewSet):
 
     def list(self, request):
-        print(request.query_params)
         result = get_chosen_date(request)
         return Response({'data': result})
 

@@ -3,14 +3,14 @@ import current_date from '../dates/DatesFormat';
 import '../menu/top_block.css';
 
 
-const Header = ({textHeader}) => {
+const Header = ({textHeader, date}) => {
 
   const currentDatetime = new Date().toLocaleDateString('ru-RU');
 
   return (
     <>
     <p className='main_header'> {textHeader}</p>
-    <span className='now_date'> по состоянию на {currentDatetime}</span>
+    <span className='now_date'> по состоянию на {date}</span>
     </>
   );
 };

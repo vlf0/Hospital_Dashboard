@@ -1,6 +1,9 @@
 import React from 'react';
 import { Pie } from 'react-chartjs-2';
+import NoData from '../../no_data/NoData';
+import Header from '../Header';
 import './details.css';
+import '../../parent.css';
 
 
 
@@ -142,26 +145,30 @@ const ArrivedDetailPie = ( {labels, data} ) => {
   };
 
 
-
-//   {(typesData.datasets[0].data.some(data => data !== undefined) && channelsData.datasets[0].data.some(data => data !== undefined)) ? (
-//     <>
-//       <Pie data={channelsData} options={channelsOptions} />
-//       <Pie data={typesData} options={typesOptions} />
-//     </>
-//   ) : (
-//     <p>No data available</p>
-//   )}
-
-  console.log(types)
+  const pie1 = channels.some(data => data !== 0);
+  const pie2 = types.some(data => data !== 0);
 
 
+
+
+  const dateParam = new URLSearchParams(window.location.href).get('date').split('-').reverse().join('.');
 
   return (
     <div className='details'>
-      <h2 >Pie Chart Example</h2>
+
+      <Header textHeader={'Детализация госпитализированных'} date={dateParam}/>  
+
       <div className='arrived_pie'>
-        <Pie data={channelsData} options={channelsOptions} />
-        <Pie data={typesData} options={typesOptions} />
+      {pie1 ? (
+      <Pie data={channelsData} options={channelsOptions} />
+      ) : (
+        <NoData name={'Детализация по каналам поступления'}/>
+      )}
+      {pie2 ? (
+      <Pie data={typesData} options={typesOptions} />
+      ) : (
+        <NoData name={'Детализация по типу пациентов'}/>
+      )}
       </div>
     </div>
   );

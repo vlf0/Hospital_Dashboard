@@ -14,6 +14,7 @@ import './dashboard_content.css'
 
 function GetAnalysis() {
 
+
   const props = useSpring({
     from: { opacity: 0 },
     to: { opacity: 1 },

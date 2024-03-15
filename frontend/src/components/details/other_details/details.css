@@ -2,12 +2,13 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: -webkit-fill-available;
 }
   
 .arrived_pie {
   display: flex;
   flex-direction: row;
-  width: 600px;
+  width: -webkit-fill-available;
   height: 600px;
   justify-content: space-evenly;
 }
