@@ -21,13 +21,9 @@ Chart.defaults.color = '#090b1f';
 
 const DeadsChart = () => {
 
-    const planValue = 40;
-    // const navigate = useNavigate();
-
     const dmk_charts = useContext(DataContext).dmk.main_dmk;
-    const pairValues = extractProperties(dmk_charts)
-    const mappedData = mapArrivedValues(pairValues, GetDates());
-
+    const pairValues = extractProperties(dmk_charts, 'deads')
+    const mappedData = mapArrivedValues(pairValues, GetDates(), 'deads');
 
     const mappedWeek = GetWeekDays();
 
@@ -68,21 +64,6 @@ const DeadsChart = () => {
                   },
              
                 ticks: {
-                    color: (context) => {
-                        if (context.tick.value === planValue) {
-                            return '#860000'; // Customize the color of the custom grid lines
-                        } else {
-                            return '#090b1f'; // Default tick color
-                        }
-                    },
-                    callback: (value, index, values) => {
-                        // Customize the tick value
-                        if (value === planValue) {
-                            return `план ${planValue}`; // Change the tick label for the value 60
-                        } else {
-                            return value; // Use the default tick label for other values
-                        }
-                    },
                     font: {weight: 'bold'},
                 },
             },
@@ -106,40 +87,8 @@ const DeadsChart = () => {
                             return title; // Use the default title if the value is not null
                           },
                     },
-                    value: {
-                        formatter: (title, context) => {
-                            if (context.dataset.data[context.dataIndex] === null) {
-                                return '';
-                            }
-                            const percernts = ((title / planValue  * 100) - 100).toFixed(1);
-                            return '\t' + percernts+'%';
-                        },
-                        font: {
-                          size: 12,
-                          weight: 'bold',
-                        },
-                        color: (context) => {
-                          const value = context.dataset.data[context.dataIndex];
-                          const percent = ((value / planValue) * 100 - 100).toFixed(1);
-  
-                          return percent < 0 ? '#b200ac' : '#049d00';
-                        },
-                    },
                 },
-
             },
-
-            annotation: {
-                    annotations: {
-                      line1: {
-                        type: 'line',
-                        yMin: planValue,
-                        yMax: planValue,
-                        borderColor: '#ff6384',
-                        borderWidth: 1,
-                      },
-                    },
-              },
             legend: {
                 display: false,
             },
@@ -155,10 +104,6 @@ const DeadsChart = () => {
               }
             },
         },
-        // onClick: function () {
-        //     var link = '/signout';
-        //     navigate(link); 
-        // }
     };
 
     return (

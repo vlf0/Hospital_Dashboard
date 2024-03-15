@@ -1,6 +1,7 @@
 import React from 'react';
 import { Pie } from 'react-chartjs-2';
 import NoData from '../../no_data/NoData';
+import TopBlock from '../../menu/TopBlock';
 import Header from '../Header';
 import './details.css';
 import '../../parent.css';
@@ -154,8 +155,10 @@ const ArrivedDetailPie = ( {labels, data} ) => {
   const dateParam = new URLSearchParams(window.location.href).get('date').split('-').reverse().join('.');
 
   return (
+    <>
+    <TopBlock textContent={'Детализация выписки'} menu_point={'details'} date={dateParam} />
     <div className='details'>
-      <Header textHeader={'Детализация госпитализированных'} date={dateParam}/>  
+
         <div className='arrived_pie'>
           {pie1 ? (
           <Pie data={channelsData} options={channelsOptions} />
@@ -169,6 +172,7 @@ const ArrivedDetailPie = ( {labels, data} ) => {
           )}
         </div>
     </div>
+    </>
   );
 };
 

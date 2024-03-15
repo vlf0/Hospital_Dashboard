@@ -2,6 +2,7 @@ import React from 'react';
 import { Pie } from 'react-chartjs-2';
 import NoData from '../../no_data/NoData';
 import Header from '../Header';
+import TopBlock from '../../menu/TopBlock';
 import './details.css';
 import '../../parent.css';
 
@@ -75,8 +76,9 @@ const SignoutDetailPie = ( {labels, data} ) => {
   const dateParam = new URLSearchParams(window.location.href).get('date').split('-').reverse().join('.');
 
   return (
+    <>
+    <TopBlock textContent={'Детализация выписки'} menu_point={'details'} date={dateParam} />
     <div className='details'>
-      <Header textHeader={'Детализация выписки'} date={dateParam}/>  
         <div className='signout_pie'>
           {pie ? (
           <Pie data={resultsData} options={resultsOptions} />
@@ -85,6 +87,7 @@ const SignoutDetailPie = ( {labels, data} ) => {
           )}
         </div>
     </div>
+    </>
   );
 };
 

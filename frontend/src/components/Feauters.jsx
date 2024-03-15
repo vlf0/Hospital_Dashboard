@@ -1,4 +1,8 @@
 import { format, subHours } from 'date-fns';
+import { formatDate } from './dates/DatesFormat';
+
+export const currentDatetime = new Date().toLocaleDateString('ru-RU');
+
 
 export function DateFormatting(date) {
   // const dateString = "2024-01-10T00:40:15+03:00";
@@ -34,20 +38,20 @@ export const extractProperty = (dataList, key) => {
 };
 
 
-export const extractProperties = (dataList) => {
-  return dataList.map(item => ({ dates: item.dates, arrived: item.arrived }));
+export const extractProperties = (dataList, propertyKey) => {
+  return dataList.map(item => ({ dates: item.dates, [propertyKey]: item[propertyKey] }));
 };
 
 
-export function mapArrivedValues(data, dateArray) {
+export function mapArrivedValues(data, dateArray, propertyKey) {
   const result = Array(dateArray.length).fill(null);
 
-  for (const item of data) {
+  data.forEach(item => {
     const index = dateArray.indexOf(item.dates);
     if (index !== -1) {
-      result[index] = item.arrived;
+      result[index] = item[propertyKey];
     }
-  }
+  });
 
   return result;
 }
@@ -144,3 +148,23 @@ export function GetNameOfDay(dateString) {
 
 
 
+export function getYesterdayDate() {
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  return yesterday
+}
+
+
+
+export function getMainDMK(dmkData, day, nums) {
+
+  let mainDMK;
+
+  if (dmkData.length > 0 && dmkData[dmkData.length - nums]['dates'] === formatDate(day)) {
+    mainDMK = dmkData[dmkData.length - nums];
+  } else {
+    mainDMK = { dates: formatDate(day), arrived: 0, hosp: 0, refused: 0, signout: 0, deads: 0, reanimation: 0 };
+  }
+  
+  return mainDMK;
+}
