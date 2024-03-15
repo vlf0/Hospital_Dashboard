@@ -531,7 +531,12 @@ class KISDataProcessing(DataProcessing):
         """
         # Counting deads patients in OARs
         if oars_filtered := [len(self.filter_dataset(deads_dataset, 6, oar))
-                             for oar in ['ОРИТ №1', 'ОРИТ №2', 'ОРИТ №3']]:
+                             for oar in ['Отделение реанимации и интенсивной терапии № 1', 
+                                         'Отделение реанимации и интенсивной терапии № 2',
+                                         'Отделение реанимации и интенсивной терапии для больных с ОНМК',
+                                         'Отделение реанимации и интенсивной терапии для больных с острым инфарктом миокарда',
+                                         'Отделение анестезиологии-реанимации'
+                                         ]]:
             self.deads_oar = [tuple(oars_filtered)]
         # Processing table data for serializing.
         columns = self.qs.COLUMNS['deads_t']
@@ -549,7 +554,12 @@ class KISDataProcessing(DataProcessing):
         :return: *dict*:
         """
         # Creating list of calculating lens of each separated datasets that filtered by oar number
-        if oar_nums := [len(self.filter_dataset(dataset, 3, oar)) for oar in ['ОРИТ №1', 'ОРИТ №2', 'ОРИТ №3']]:
+        if oar_nums := [len(self.filter_dataset(dataset, 3, oar)) for oar in ['Отделение реанимации и интенсивной терапии № 1', 
+                                                                              'Отделение реанимации и интенсивной терапии № 2',
+                                                                              'Отделение реанимации и интенсивной терапии для больных с ОНМК',
+                                                                              'Отделение реанимации и интенсивной терапии для больных с острым инфарктом миокарда',
+                                                                              'Отделение анестезиологии-реанимации'
+                                                                              ]]:
             self.counted_oar.append([tuple(oar_nums)])
         ready_dataset = self.__result_for_sr(columns, dataset)
         return self.__serialize(ready_dataset, data_serializer=False)
@@ -565,7 +575,9 @@ class KISDataProcessing(DataProcessing):
         """
         oar_columns = self.qs.COLUMNS['oar_amounts']
         living_list = [(self.__result_for_sr(oar_columns, i)) for i in self.counted_oar]
+        print(living_list)
         deads_list = self.__result_for_sr(oar_columns, self.deads_oar)
+        print(deads_list)
         result = [{'arrived_nums': self.__serialize(living_list[0])},
                   {'moved_nums': self.__serialize(living_list[1])},
                   {'current_nums': self.__serialize(living_list[2])},
