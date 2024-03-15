@@ -28,7 +28,7 @@ class MainData(models.Model):
 
 class Profiles(models.Model):
 
-    name = models.CharField(max_length=50, verbose_name='Название профиля')
+    name = models.CharField(max_length=180, verbose_name='Название профиля')
     active = models.BooleanField(default=True, verbose_name='Статус')
 
     def __str__(self):

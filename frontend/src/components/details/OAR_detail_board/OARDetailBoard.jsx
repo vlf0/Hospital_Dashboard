@@ -12,7 +12,7 @@ const OARDetailBoard = ({ dept, values, deads }) => {
   const [selectedValue, setSelectedValue] = useState(null);
 
   const toggleDeadTableVisibility = (type, event) => {
-    const department = event.currentTarget.getAttribute('orit-name');
+      const department = event.currentTarget.getAttribute('orit-name');
     setIsOARTableVisible(!isOARTableVisible);
     setTableType(type);
     setSelectedValue(department);

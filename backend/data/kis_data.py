@@ -268,10 +268,21 @@ class DataForDMK(DataProcessing):
     def get_dept_hosps(self, dh_dataset):
         profiles_queryset = Profiles.objects.all()
         profiles = [{profile.name: profile.id} for profile in profiles_queryset]
+        # print(dh_dataset)
+        print()
+        # print(profiles)
         # Here we are checking profile name from each row given dataset so that it accords
         # profiles added into Profiles model and get list of ready to serializing dicts.
         result_dicts = [{'number': row[1], 'profile_id': o.get(row[0])}
                         for row in dh_dataset for o in profiles if o.get(row[0]) is not None]
+        result = []
+        for row in dh_dataset:
+            for o in profiles:
+                if o.get(row[0]) is not None:
+                    result.append({'number': row[1], 'profile_id': o.get(row[0])})
+
+        print(result)
+        print(result_dicts)
         return result_dicts
 
     def __collect_data(self) -> dict:

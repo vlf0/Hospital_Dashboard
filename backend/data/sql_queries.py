@@ -59,7 +59,26 @@ class QuerySets:
                WHERE hr.end_dt BETWEEN current_date - INTERVAL '1 day, -7 hours' AND current_date - INTERVAL '-7 hours';
                """
 
-    DEPT_HOSP = """SELECT med_profile, amount FROM mm.dept_hosp;"""
+    DEPT_HOSP = f"""
+                 SELECT 
+                 CASE pm.name
+                 	WHEN  'акушерству и гинекологии (за исключением использования вспомогательных репродуктивных технологий)' THEN 'Гинекология'
+                 	ELSE pm.name
+                 END AS профиль,
+                 count (m.id) AS cnt
+
+                 FROM mm.mdoc m
+                 JOIN mm.hospdoc h ON h.mdoc_id = m.id
+                 JOIN mm.ehr_case ec ON ec.id = h.ehr_case_id
+                 JOIN mm.ehr_case_title ect ON ect.caseid  = ec.id 
+                 JOIN mm.dept d ON d.id = h.dept_id
+                 JOIN mm.profile_med pm ON pm.id = d.profile_med_id 
+
+                 WHERE ec.create_dt BETWEEN current_date - INTERVAL '1 day, -7 hours' AND current_date - INTERVAL '-7 hours'
+
+                 GROUP BY d.name, pm.name
+                 ORDER BY cnt DESC;
+                 """
 
     SIGNOUT = f"""
                SELECT mm.dept_get_name(h.dept_id) AS Отделение,
@@ -231,11 +250,32 @@ class QuerySets:
     # Dict for mapping with serializer fields (relates to "план/факт по профилям" table).
     # All english names is fields of serializer.
     profiles_mapping = {
-        'Терапия': 'therapy',
-        'Хирургия': 'surgery',
-        'Кардиология': 'cardiology',
-        'Урология': 'urology',
-        'Неврология': 'neurology'
+        'анестезиологии и реаниматологии': 'oar_p',
+        'хирургии': 'surgery_p',
+        'терапии': 'therapy_p',
+        'неотложной медицинской помощи': 'emer1_p',
+        'акушерству и гинекологии (за исключением использованиявспомогательных репродуктивных технологий)': 'gynekology_p',
+        'рентгенологии': 'xray_p',
+        'скорой медицинской помощи': 'emer2_p',
+        'трансфузиологии': 'transfusiology_p',
+        'общей практике': 'gpractice_p',
+        'наркологии': 'narkology_p',
+        'урологии': 'urology_p',
+        'клинической лабораторной диагностике': 'lab_p',
+        'реаниматологии': 'rean_p',
+        'травматологии и ортопедии': 'truma_p',
+        'нейрохирургии': 'neuro_p',
+        'ультразвуковой диагностике': 'ultrasound_p',
+        'функциональной диагностике': 'func_p',
+        'кардиологии': 'cardio_p',
+        'эндокринологии': 'endo_p',
+        'неврологии': 'neurology_p',
+        'медицинской статистике': 'static_p',
+        'эпидемиологии': 'epid_p',
+        'неонатологии': 'neon_p',
+        'гистологии': 'gyst_p',
+        'эндоскопии': 'endocop_p',
+        'пульмонологии': 'pulmo_p'
     }
 
     # Dict for mapping columns on russian language with serializer fields (relates to "выписанные по отделениям" table).

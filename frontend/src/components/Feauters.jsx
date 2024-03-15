@@ -163,7 +163,7 @@ export function getMainDMK(dmkData, day, nums) {
   if (dmkData.length > 0 && dmkData[dmkData.length - nums]['dates'] === formatDate(day)) {
     mainDMK = dmkData[dmkData.length - nums];
   } else {
-    mainDMK = { dates: formatDate(day), arrived: 0, hosp: 0, refused: 0, signout: 0, deads: 0, reanimation: 0 };
+      mainDMK = { dates: formatDate(day), arrived: 0, hosp: 0, refused: 0, signout: 0, deads: 0, reanimation: 0 };
   }
   
   return mainDMK;
