@@ -2,16 +2,15 @@
 from django.core.cache import cache
 from rest_framework import viewsets
 from rest_framework.response import Response
-from .kis_data import ensure_cashing, get_chosen_date
+from .kis_data import get_chosen_date
+from .caching import Cacher
 
 
 class KISDataReadViewSet(viewsets.ViewSet):
 
     def list(self, request):
-        ensure_cashing()
-        kis = cache.get('kis')
-        dmk = cache.get('dmk')
-        return Response({'dmk': dmk, 'kis': kis})
+        cached_result = Cacher().main_caching()
+        return Response(cached_result)
 
 
 class KISDataAnotherDates(viewsets.ViewSet):
