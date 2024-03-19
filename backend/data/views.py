@@ -1,8 +1,6 @@
 """This module provide work of main django functions - views."""
-from django.core.cache import cache
 from rest_framework import viewsets
 from rest_framework.response import Response
-from .kis_data import get_chosen_date
 from .caching import Cacher
 
 
@@ -16,6 +14,6 @@ class KISDataReadViewSet(viewsets.ViewSet):
 class KISDataAnotherDates(viewsets.ViewSet):
 
     def list(self, request):
-        result = get_chosen_date(request)
-        return Response({'data': result})
+        cached_result = Cacher.additional_caching(request)
+        return Response(cached_result)
 

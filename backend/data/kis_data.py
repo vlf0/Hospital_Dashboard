@@ -627,7 +627,6 @@ def get_chosen_date(kind, dates):
         processing = kis().signout_process
     else:
         return
-
     kisdata_obj = gen(queries.chosen_date_query(query, dates))
     dataset = next(kisdata_obj.get_data_generator())
     result = processing(dataset)

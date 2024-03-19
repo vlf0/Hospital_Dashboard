@@ -27,6 +27,8 @@ class Cacher:
         if cache.get(f'{kind}_{dates}') is None:
             result_dict = get_chosen_date(kind, dates)
             cache.set(f'{kind}_{dates}', result_dict)
+            additional_kis = cache.get(f'{kind}_{dates}')
+            return {f'{kind}_{dates}': additional_kis}
 
     def main_caching(self) -> dict:
         """
