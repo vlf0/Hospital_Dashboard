@@ -499,6 +499,7 @@ class KISDataProcessing(DataProcessing):
         """
         # Defining columns for serializer and values for filtering datasets.
         columns, channels, statuses = self.qs.COLUMNS['arrived'], self.qs.channels, self.qs.statuses
+        print(columns, '\n', channels, '\n', statuses)
         # Getting first dataset by generator.
         hosp_data = self.filter_dataset(arrived_dataset, 0, 1)
         # Calculating channels numbers.

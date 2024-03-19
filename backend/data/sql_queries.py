@@ -34,7 +34,7 @@ class QuerySets:
                JOIN mm.ehr_case ec ON ec.id = h.ehr_case_id
                JOIN mm.ehr_case_title ect ON ect.caseid  = ec.id 
                
-               WHERE ec.create_dt BETWEEN current_date - INTERVAL '1 day, -7 hours' AND current_date - INTERVAL '-7 hours'
+               WHERE ec.create_dt BETWEEN current_date - INTERVAL '1 day, -6 hours' AND current_date - INTERVAL '-6 hours'
                
                UNION ALL 									
                
@@ -53,10 +53,11 @@ class QuerySets:
                		ELSE a.patienttype::TEXT
                		END AS Тип_пациента
                		FROM mm.ambticket a
+                    JOIN mm.ehr_case ec ON a.ehr_case_id = ec.id
                		JOIN mm.hosp_refuse hr ON hr.ambticket_id = a.id 
                		JOIN mm.ehr_case_title ect2 ON ect2.caseid  = a.ehr_case_id
                
-               WHERE hr.end_dt BETWEEN current_date - INTERVAL '1 day, -7 hours' AND current_date - INTERVAL '-7 hours';
+               WHERE ec.create_dt BETWEEN current_date - INTERVAL '1 day, -6 hours' AND current_date - INTERVAL '-6 hours';
                """
 
     DEPT_HOSP = f"""
@@ -74,7 +75,7 @@ class QuerySets:
                  JOIN mm.dept d ON d.id = h.dept_id
                  JOIN mm.profile_med pm ON pm.id = d.profile_med_id 
 
-                 WHERE ec.create_dt BETWEEN current_date - INTERVAL '1 day, -7 hours' AND current_date - INTERVAL '-7 hours'
+                 WHERE ec.create_dt BETWEEN current_date - INTERVAL '1 day, -6 hours' AND current_date - INTERVAL '-6 hours'
 
                  GROUP BY d.name, pm.name
                  ORDER BY cnt DESC;
@@ -91,7 +92,7 @@ class QuerySets:
                FROM mm.mdoc m
                JOIN mm.hospdoc h ON h.mdoc_id = m.id
                
-               WHERE h.leave_dt BETWEEN current_date - INTERVAL '1 day, -7 hours' AND current_date - INTERVAL '-7 hours'
+               WHERE h.leave_dt BETWEEN current_date - INTERVAL '1 day, -6 hours' AND current_date - INTERVAL '-6 hours'
                ORDER BY h.hosp_outcome_id;  
                """
 #Добавить mm.emp_get_fio_by_id (h.doctor_emp_id) - Лечащий врач
@@ -232,7 +233,7 @@ class QuerySets:
 
     # Lists of columns for mapping with values to creating CleanData class instances.
     COLUMNS = {
-        'arrived': ['ch103', 'clinic_only', 'ch103_clinic', 'singly', 'ZL', 'foreign', 'moscow', 'undefined'], # Add plan field
+        'arrived': ['ch103', 'clinic_only', 'ch103_clinic', 'singly', 'plan', 'ZL', 'foreign', 'nr', 'nil', 'dms', 'undefined'],
         'signout': ['deads', 'moved', 'signout'],
         'deads_t': ['pat_fio', 'ib_num', 'sex', 'age', 'arriving_dt', 'state', 'dept', 'days', 'diag_arr', 'diag_dead'],
         'oar_arrived_t': ['pat_fio', 'ib_num', 'age', 'dept', 'doc_fio', 'diag_start'],
@@ -244,8 +245,8 @@ class QuerySets:
     DMK_COLUMNS = ['arrived', 'hosp', 'refused', 'signout', 'deads', 'reanimation']
 
     # Filter-words for filter_dataset method of DataProcessing class.
-    channels = ['103', 'Поликлиника', '103 Поликлиника', 'самотек']  # Add plan field
-    statuses = ['ЗЛ', 'Иногородний', 'ДМС', 'Не указано']  # Add plan field
+    channels = ['103', 'поликлиника', '103 Поликлиника', 'самотек', 'план'] 
+    statuses = ['ЗЛ', 'Иногородний', 'НР', 'НИЛ', 'ДМС', 'Не указано'] 
     signout = ['Умер в стационаре', 'Переведён в другую МО из стационара', 'Выписан']
     # Dict for mapping with serializer fields (relates to "план/факт по профилям" table).
     # All english names is fields of serializer.
