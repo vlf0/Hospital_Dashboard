@@ -66,6 +66,14 @@ const ArrivedDetailPie = ( {labels, data} ) => {
 
   const channelsOptions = {
     plugins: {
+      datalabels: {
+        anchor: 'center',
+        align: 'start',
+        font: {
+          size: 15,
+          // weight: 'bold',
+        }
+      },
       legend: {
         labels: {
           padding: 15,
@@ -78,7 +86,7 @@ const ArrivedDetailPie = ( {labels, data} ) => {
       },
       title: {
         display: true,
-        text: 'Детализация по каналам поступления',
+        text: 'По каналам поступления',
         color: '#090b1f',
         font: {
           size: 18,
@@ -121,6 +129,14 @@ const ArrivedDetailPie = ( {labels, data} ) => {
 
   const typesOptions = {
     plugins: {
+      datalabels: {
+        anchor: 'center',
+        align: 'start',
+        font: {
+          size: 15,
+          // weight: 'bold',
+        }
+      },
       legend: {
         labels: {
           padding: 15,
@@ -133,7 +149,7 @@ const ArrivedDetailPie = ( {labels, data} ) => {
       },
       title: {
         display: true,
-        text: 'Детализация по типу пациентов',
+        text: 'По типу пациентов',
         color: '#090b1f',
         font: {
           size: 18,
@@ -156,19 +172,19 @@ const ArrivedDetailPie = ( {labels, data} ) => {
 
   return (
     <>
-    <TopBlock textContent={'Детализация выписки'} menu_point={'details'} date={dateParam} />
+    <TopBlock textContent={'Детализация госпитализированных'} menu_point={'details'} date={dateParam} />
     <div className='details'>
 
         <div className='arrived_pie'>
           {pie1 ? (
           <Pie data={channelsData} options={channelsOptions} />
           ) : (
-            <NoData name={'Детализация по каналам поступления'}/>
+            <NoData name={'По каналам поступления'}/>
           )}
           {pie2 ? (
           <Pie data={typesData} options={typesOptions} />
           ) : (
-            <NoData name={'Детализация по типу пациентов'}/>
+            <NoData name={'По типу пациентов'}/>
           )}
         </div>
     </div>
