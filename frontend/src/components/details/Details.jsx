@@ -16,6 +16,8 @@ function DetailBoard({ sign }) {
   const data = useContext(DataContext).kis;
   const kis = data[0].oar_numbers;
   const deads = kis[3].deads_nums[0];
+
+
   
   // Zipping and mapping data to pass as a props
   const arrived = Object.values(kis[0].arrived_nums[0]);

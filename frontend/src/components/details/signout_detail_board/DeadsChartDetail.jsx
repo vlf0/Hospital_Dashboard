@@ -18,7 +18,10 @@ Chart.defaults.color = '#090b1f';
 const chartMap = {
     'cardio_d': 'Кардиологическое отделение',
     'surgery_d': 'Хирургическое отделение',
-    'therapy_d': 'Терапевтическое отделение'
+    'therapy_d': 'Терапевтическое отделение',
+    'oar1_d': 'ОРИТ №1',
+    'oar2_d': 'ОРИТ №2',
+    'oar3_d': 'ОРИТ №3'
 }
 
 const DeadsChartDetail = ({ data }) => {
@@ -32,18 +35,18 @@ const DeadsChartDetail = ({ data }) => {
       );
 
     const endDepts = Object.keys(deptsOut)
-    const rudDepts = endDepts.map(index => chartMap[index])
+    const ruDepts = endDepts.map(index => chartMap[index])
     const nums = Object.values(deptsOut) 
 
 
     const plan = 60
 
     const arrived_data = {
-        labels: rudDepts,
+        labels: ruDepts,
         datasets: [
             {
               label: 'total',
-              data: nums,//data ? [data.data, data.data, data.data] : [10,20,10],
+              data: nums,
               backgroundColor: ['#2d8587'],
               borderColor: '#090b1f',
               borderWidth: 1,

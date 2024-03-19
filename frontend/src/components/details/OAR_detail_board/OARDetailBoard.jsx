@@ -7,6 +7,8 @@ import OnTreatmentOARDetailTable from "./OnTreatmentOARDetailTable";
 
 const OARDetailBoard = ({ dept, values, deads }) => {
 
+
+  console.log(values)
   const [isOARTableVisible, setIsOARTableVisible] = useState(false);
   const [tableType, setTableType] = useState(null);
   const [selectedValue, setSelectedValue] = useState(null);
