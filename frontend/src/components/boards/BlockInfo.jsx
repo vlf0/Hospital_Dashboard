@@ -6,7 +6,6 @@ import './boards.css';
 
 const BlockInfo = ({data, headerText}) => {
 
-  // const data = [112, 136]
 
   const props = useSpring({
     from: { transform: 'scale(0)', opacity: 0 },

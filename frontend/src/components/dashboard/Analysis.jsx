@@ -33,13 +33,17 @@ function GetAnalysis() {
 
   const currentDay = getMainDMK(main_dmk, today, 1);
   const yesterday = getMainDMK(main_dmk, yesterDay, 2);
+  // console.log(main_dmk)
+  // console.log(currentDay)
+  // console.log(yesterday)
 
-  const arrived = CustomMap(currentDay.arrived, yesterday.arrived)
-  const hosp = CustomMap(currentDay.hosp, yesterday.hosp)
-  const refused = CustomMap(currentDay.refused, yesterday.refused)
-  const signout = CustomMap(currentDay.signout, yesterday.signout)
-  const deads = CustomMap(currentDay.deads, yesterday.deads)
-  const reanimation = CustomMap(currentDay.reanimation, yesterday.reanimation)
+
+  const arrived = CustomMap(currentDay, yesterday, 'arrived')
+  const hosp = CustomMap(currentDay, yesterday, 'hosp')
+  const refused = CustomMap(currentDay, yesterday, 'refused')
+  const signout = CustomMap(currentDay, yesterday, 'signout')
+  const deads = CustomMap(currentDay, yesterday, 'deads')
+  const reanimation = CustomMap(currentDay, yesterday, 'reanimation')
 
   return (
     <> 

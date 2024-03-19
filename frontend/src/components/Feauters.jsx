@@ -18,9 +18,16 @@ export function DateFormatting(date) {
 };
 
 
-export function CustomMap(currentDay, yesterday) {
-    const result = [currentDay, yesterday, Persents(currentDay, yesterday)]
-    return result
+export function CustomMap(currentDay, yesterday, branch) {
+
+  let result;
+
+  if (currentDay[branch] === null || yesterday[branch] === null) {
+    result = ['null', 'null', 'null']
+  } else {
+    result = [currentDay[branch], yesterday[branch], Persents(currentDay[branch], yesterday[branch])]
+  }
+  return result
 };
 
 
@@ -160,10 +167,12 @@ export function getMainDMK(dmkData, day, nums) {
 
   let mainDMK;
 
-  if (dmkData.length > 0 && dmkData[dmkData.length - nums]['dates'] === formatDate(day)) {
+
+  if (dmkData.length > 1 && dmkData[dmkData.length - nums]['dates'] === formatDate(day)) {
     mainDMK = dmkData[dmkData.length - nums];
   } else {
-      mainDMK = { dates: formatDate(day), arrived: 0, hosp: 0, refused: 0, signout: 0, deads: 0, reanimation: 0 };
+    mainDMK = { dates: formatDate(day), arrived: null, hosp: null, refused: null,
+                signout: null, deads: null, reanimation: null };
   }
   
   return mainDMK;

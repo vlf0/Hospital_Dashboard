@@ -16,9 +16,9 @@ Chart.defaults.color = '#090b1f';
 
 // Depts map
 const chartMap = {
-    'cardio_d': 'Кардиологическое',
-    'surgery_d': 'Хирургическое',
-    'therapy_d': 'Терапевтическое'
+    'cardio_d': 'Кардиологическое отделение',
+    'surgery_d': 'Хирургическое отделение',
+    'therapy_d': 'Терапевтическое отделение'
 }
 
 const DeadsChartDetail = ({ data }) => {
