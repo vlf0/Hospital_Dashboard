@@ -33,7 +33,21 @@ class QuerySets:
                WHERE DATE(dates) = '{today()}';  
                """
 
-    DEADS = """SELECT pat_fio, ib_num, sex, agee, arriving_dt, state, dept, days, diag_arr, diag_dead FROM mm.deads;"""
+    DEADS = f"""
+             SELECT 
+             dd.pat_fio,
+             dd.ib_num,
+             dd.sex,
+             dd.agee,
+             dd.arriving_dt,
+             dd.state,
+             dd.dept,
+             dd.days,
+             dd.diag_arr,
+             dd.diag_dead
+             FROM mm.deads dd
+             where date(dates) = '{today()}';
+             """
 
     OAR_ARRIVED_QUERY = """SELECT pat_fio, ib_num, ages, dept, doc_fio, diag_start FROM mm.oar_arrived;"""
 
@@ -48,7 +62,7 @@ class QuerySets:
 
     # Lists of columns for mapping with values to creating CleanData class instances.
     COLUMNS = {
-        'arrived': ['ch103', 'clinic_only', 'ch103_clinic', 'singly', 'ZL', 'foreign', 'moscow', 'undefined'],
+        'arrived': ['ch103', 'clinic_only', 'ch103_clinic', 'singly', 'plan', 'ZL', 'foreign', 'nr', 'nil', 'dms', 'undefined'],
         'signout': ['deads', 'moved', 'signout'],
         'deads_t': ['pat_fio', 'ib_num', 'sex', 'age', 'arriving_dt', 'state', 'dept', 'days', 'diag_arr', 'diag_dead'],
         'oar_arrived_t': ['pat_fio', 'ib_num', 'age', 'dept', 'doc_fio', 'diag_start'],
@@ -60,8 +74,8 @@ class QuerySets:
     DMK_COLUMNS = ['arrived', 'hosp', 'refused', 'signout', 'deads', 'reanimation']
 
     # Filter-words for filter_dataset method of DataProcessing class.
-    channels = ['103', 'Поликлиника', '103 Поликлиника', 'Самотек']
-    statuses = ['ЗЛ', 'Иногородние', 'Москвичи', 'не указано']
+    channels = ['103', 'Поликлиника', '103 Поликлиника', 'самотек', 'план']
+    statuses = ['ЗЛ', 'Иногородний', 'НР', 'НИЛ', 'ДМС', 'Не указано'] 
     signout = ['Умер', 'Переведен', 'Выписан']
 
     # Dict for mapping with serializer fields (relates to "план/факт по профилям" table).
@@ -77,9 +91,9 @@ class QuerySets:
     # Dict for mapping columns on russian language with serializer fields (relates to "выписанные по отделениям" table).
     # All english names is fields of serializer.
     depts_mapping = {
-        'ОРИТ №1': 'oar1',
-        'ОРИТ №2': 'oar2',
-        'ОРИТ №3': 'oar3',
+        'ОРИТ №1': 'oar1_d',
+        'ОРИТ №2': 'oar2_d',
+        'ОРИТ №3': 'oar3_d',
         'Кардиологическое отделение': 'cardio_d',
         'Хирургическое отделение': 'surgery_d',
         'Терапевтическое отделение': 'therapy_d'

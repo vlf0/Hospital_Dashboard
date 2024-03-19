@@ -61,6 +61,10 @@ class KISDataSerializer(serializers.Serializer):
     surgery_d = serializers.IntegerField(required=False, allow_null=True)
     therapy_d = serializers.IntegerField(required=False, allow_null=True)
 
+    oar1_d = serializers.IntegerField(required=False, allow_null=True)
+    oar2_d = serializers.IntegerField(required=False, allow_null=True)
+    oar3_d = serializers.IntegerField(required=False, allow_null=True)
+
     oar1 = serializers.IntegerField(required=False, allow_null=True)
     oar2 = serializers.IntegerField(required=False, allow_null=True)
     oar3 = serializers.IntegerField(required=False, allow_null=True)

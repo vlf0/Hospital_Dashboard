@@ -5,7 +5,6 @@ import SignOutDetailTable from "./SignOutDetailTable";
 import DataContext from "../../DataContext";
 import { getMainDMK } from "../../Feauters";
 import '../signIn_detail_board/detail_blocks.css';
-import { formatDate } from "../../dates/DatesFormat";
 
 
 
@@ -22,8 +21,8 @@ const SignOutDetailBoard = () => {
   kis = kis[0].signout[0]
 
 
-  console.log(dmk)
-  console.log(kis)
+  // console.log(dmk)
+  // console.log(kis)
 
   const [isDeadTableVisible, setIsDeadTableVisible] = useState(false);
   const toggleDeadTableVisibility = () => {
@@ -42,16 +41,19 @@ const SignOutDetailBoard = () => {
 
   return (
     <div className='detail_block'>
+      <span className='detail_block_header'> Общее количество </span>
+      <div className='blocks_container'>
+        <div className='separated_detail_block'> 
+          <p> Выписано </p> { dmk.signout } </div>
+      </div>
       <span className='detail_block_header'> Исходы </span>
       <div className='blocks_container'>
         <div className='separated_detail_block_X' onClick={toggleDeadTableVisibility}>
-          <p> Смерть </p> { kis.deads }
-        </div>
+          <p> Смерть </p> { kis.deads } </div>
         <div className='separated_detail_block'> 
           <p> Перевод в другую МО </p> { kis.moved } </div>
         <div className='separated_detail_block'>
-           <p> Выписка </p> { dmk.signout }
-       </div>
+           <p> Выписка </p> { kis.signout } </div>
       </div>
       <span className='detail_block_header'> Выписка по отделениям </span>
       <DeadsChartDetail data={kis}/>
