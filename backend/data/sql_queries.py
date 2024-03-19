@@ -105,7 +105,7 @@ class QuerySets:
 	         		WHEN '2' THEN 'Жен'	
 	         	END,
 	         EXTRACT(YEAR from age(m.beg_dt, p.birth)) as Возраст,
-	         to_char (h.dept_dt, 'DD.MM.YYYY HH:MM') AS Дата_поступления,
+	         h.dept_dt AS Дата_поступления,
 	         ec.gravity AS Состояние_при_поступлении,
 	         mm.dept_get_name(h.dept_id) AS Отделение, --отделение в которой умер пациент
 	         h.bed_days AS кол_во_койко_дней,
@@ -123,7 +123,7 @@ class QuerySets:
              JOIN mm.people p ON p.id = m.people_id
              JOIN mm.ehr_case ec ON ec.id = h.ehr_case_id
  
-             WHERE h.leave_dt BETWEEN current_date - INTERVAL '1 day, -7 hours' AND current_date - INTERVAL '-7 hours'
+             WHERE h.leave_dt BETWEEN current_date - INTERVAL '1 day, -6 hours' AND current_date - INTERVAL '-6 hours'
              AND h.hosp_outcome_id ='5' -- 5, умер в стационаре;
              """
 
@@ -146,8 +146,8 @@ class QuerySets:
                          JOIN mm.hospdoc h ON h.mdoc_id = m.id
                          JOIN mm.people p ON p.id = m.people_id
                          
-                         WHERE h.hosp_dt BETWEEN current_date - INTERVAL '1 day, -7 hours' AND current_date - INTERVAL '-7 hours'
-                         AND h.dept_dt BETWEEN current_date - INTERVAL '1 day, -7 hours' AND current_date - INTERVAL '-7 hours'
+                         WHERE h.hosp_dt BETWEEN current_date - INTERVAL '1 day, -6 hours' AND current_date - INTERVAL '-6 hours'
+                         AND h.dept_dt BETWEEN current_date - INTERVAL '1 day, -6 hours' AND current_date - INTERVAL '-6 hours'
                          AND h.dept_id IN (SELECT d.id from mm.dept d WHERE d.dept_med_type_id = 10220)
                          ORDER BY h.dept_id DESC;
                          """
@@ -175,8 +175,8 @@ class QuerySets:
                        JOIN mm.hospdoc h ON h.mdoc_id = m.id
                        JOIN mm.people p ON p.id = m.people_id
 
-                       WHERE h.hosp_dt <=current_date - INTERVAL '1 day, -7 hours'
-                       AND h.dept_dt BETWEEN current_date - INTERVAL '1 day, -7 hours' AND current_date - INTERVAL '-7 hours'
+                       WHERE h.hosp_dt <=current_date - INTERVAL '1 day, -6 hours'
+                       AND h.dept_dt BETWEEN current_date - INTERVAL '1 day, -6 hours' AND current_date - INTERVAL '-6 hours'
                        AND h.dept_id IN (SELECT d.id from mm.dept d WHERE d.dept_med_type_id = 10220)
 
                        ORDER BY h.dept_id DESC;

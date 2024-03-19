@@ -268,9 +268,6 @@ class DataForDMK(DataProcessing):
     def get_dept_hosps(dh_dataset):
         profiles_queryset = Profiles.objects.all()
         profiles = [{profile.name: profile.id} for profile in profiles_queryset]
-        # print(dh_dataset)
-        print()
-        # print(profiles)
         # Here we are checking profile name from each row given dataset so that it accords
         # profiles added into Profiles model and get list of ready to serializing dicts.
         result_dicts = [{'number': row[1], 'profile_id': o.get(row[0])}
@@ -281,8 +278,6 @@ class DataForDMK(DataProcessing):
                 if o.get(row[0]) is not None:
                     result.append({'number': row[1], 'profile_id': o.get(row[0])})
 
-        print(result)
-        print(result_dicts)
         return result_dicts
 
     def __collect_data(self) -> dict:
@@ -499,7 +494,6 @@ class KISDataProcessing(DataProcessing):
         """
         # Defining columns for serializer and values for filtering datasets.
         columns, channels, statuses = self.qs.COLUMNS['arrived'], self.qs.channels, self.qs.statuses
-        print(columns, '\n', channels, '\n', statuses)
         # Getting first dataset by generator.
         hosp_data = self.filter_dataset(arrived_dataset, 0, 1)
         # Calculating channels numbers.
@@ -587,9 +581,7 @@ class KISDataProcessing(DataProcessing):
         """
         oar_columns = self.qs.COLUMNS['oar_amounts']
         living_list = [(self.__result_for_sr(oar_columns, i)) for i in self.counted_oar]
-        print(living_list)
         deads_list = self.__result_for_sr(oar_columns, self.deads_oar)
-        print(deads_list)
         result = [{'arrived_nums': self.__serialize(living_list[0])},
                   {'moved_nums': self.__serialize(living_list[1])},
                   {'current_nums': self.__serialize(living_list[2])},

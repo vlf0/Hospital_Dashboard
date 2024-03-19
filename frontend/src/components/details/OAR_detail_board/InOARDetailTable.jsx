@@ -10,9 +10,10 @@ const InOARDetailTable = ({ departament }) => {
   let arrived = oars.oar_arrived;
   arrived = ArrivedOarTable(arrived);
 
-  const filteredData = arrived
-  .filter(dict => dict['Отделение'] === departament)
-  .map(({ Отделение, ...rest }) => rest);
+    // Отделение реанимации и интенсивной терапии № 1
+    const filteredData = arrived
+        .filter(dict => dict['Отделение'] === departament)
+        .map(({ Отделение, ...rest }) => rest);
 
   const columns = Object.keys(arrived[0])
   .filter(key => key !== 'Отделение')

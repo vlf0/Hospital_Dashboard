@@ -45,9 +45,9 @@ function DetailBoard({ sign }) {
     topBlockHeader = 'Детализация выписанных';
   } else if (sign === 'oar') {
     content = <div className='detail_block'>
-              <OARDetailBoard dept={'ОРИТ №1'} values={oar1} deads={deads.oar1} /> 
-              <OARDetailBoard dept={'ОРИТ №2'} values={oar2} deads={deads.oar2} />
-              <OARDetailBoard dept={'ОРИТ №3'} values={oar3} deads={deads.oar3} />              
+              <OARDetailBoard dept={'Отделение реанимации и интенсивной терапии № 1'} values={oar1} deads={deads.oar1} /> 
+              <OARDetailBoard dept={'Отделение реанимации и интенсивной терапии № 2'} values={oar2} deads={deads.oar2} />
+              <OARDetailBoard dept={'Отделение реанимации и интенсивной терапии для больных с острым инфарктом миокарда'} values={oar3} deads={deads.oar3} />              
               </div>
     topBlockHeader = 'Детализация по реанимациям';
   };
