@@ -46,7 +46,15 @@ const SignoutDetailPie = ( {labels, data} ) => {
   };
 
   const resultsOptions = {
-    plugins: {
+    plugins: {    
+      datalabels: {
+        anchor: 'center',
+        align: 'start',
+        font: {
+          size: 15,
+          // weight: 'bold',
+        }
+      },
       legend: {
         labels: {
           padding: 15,
@@ -59,7 +67,7 @@ const SignoutDetailPie = ( {labels, data} ) => {
       },
       title: {
         display: true,
-        text: 'Детализация по выписке',
+        text: 'По исходу',
         color: '#090b1f',
         font: {
           size: 18,

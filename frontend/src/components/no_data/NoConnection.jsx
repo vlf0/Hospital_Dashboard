@@ -23,6 +23,11 @@ const NoConnection = () => {
     config: { duration: 1500 },
   });
 
+  const errorSpring = useSpring({
+    from: { opacity: 0, transform: 'translateY(100%)' },
+    to: { opacity: loading ? 0 : 1, transform: loading ? 'translateY(100%)' : 'translateY(0%)' },
+  });
+
   useEffect(() => {
     // When loading is complete, hide the spinner immediately
     if (!loading) {
@@ -52,7 +57,7 @@ const NoConnection = () => {
             />
           </animated.div>
         )}
-        <animated.div style={{ opacity: loading ? 0 : 1 }}>
+        <animated.div style={errorSpring}>
           <div className="error_text">
             Отсутствует подключение к серверу. Обратитесь к администратору.
           </div>  
