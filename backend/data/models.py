@@ -32,7 +32,10 @@ class Profiles(models.Model):
     active = models.BooleanField(default=True, verbose_name='Статус')
 
     def __str__(self):
-        return f'ID: {self.id}, Профиль: {self.name}'
+        return f'ID: {self.id}, Профиль: {self.name}, Активен: {"Да" if self.active else "Нет"}'
+
+    def __repr__(self):
+        return f'Profile(name=\'{self.name}\', active={self.active})'
 
     class Meta:
         verbose_name = 'Профиль'
@@ -46,7 +49,6 @@ class AccumulationOfIncoming(models.Model):
 
     Accumulates data every day and gives them by request.
     """
-    # Custom manager
     objects = CustomManager()
 
     dates = models.DateField(auto_now_add=True)
@@ -61,11 +63,11 @@ class AccumulationOfIncoming(models.Model):
 
 class PlanNumbers(models.Model):
     """Represent table containing plan numbers of each depts."""
-    # Custom manager
     objects = CustomManager()
 
-    profile = models.OneToOneField(Profiles, on_delete=models.CASCADE, verbose_name='Профиль')
+    profile = models.OneToOneField(Profiles, on_delete=models.CASCADE, verbose_name='Профиль', primary_key=True)
     plan = models.IntegerField(verbose_name='План')
+    active = models.BooleanField(verbose_name='Статус')
 
     class Meta:
         indexes = [
@@ -76,5 +78,6 @@ class PlanNumbers(models.Model):
         ordering = ['profile']
 
     def __str__(self):
-        return f'ID: {self.id}. Профиль: {self.profile.name}, текущий план: {self.plan}'
+        return f'Profile_id: {self.profile.id}, Профиль: {self.profile.name},' \
+               f' текущий план: {self.plan}, статус: {"Активен" if self.active else "Не активен"}'
 

@@ -4,7 +4,6 @@ from typing import Generator, Any
 from datetime import date
 from collections import Counter
 from itertools import chain
-from django.core.cache import cache
 from rest_framework.exceptions import ValidationError
 from django.conf import settings
 from django.db.utils import IntegrityError
@@ -17,7 +16,7 @@ from .serializers import (
      MainDataSerializer,
      AccumulativeDataSerializerSave,
      ProfilesSerializer)
-from .models import MainData, Profiles
+from .models import Profiles
 
 creds = settings.DB_CREDS
 logger = logging.getLogger('data.kis_data.DataForDMK')
@@ -265,7 +264,8 @@ class DataForDMK(DataProcessing):
         """
         return {self.dmk_cols[-1]: self.count_dataset_total(reanimation_dataset)}
 
-    def get_dept_hosps(self, dh_dataset):
+    @staticmethod
+    def get_dept_hosps(dh_dataset):
         profiles_queryset = Profiles.objects.all()
         profiles = [{profile.name: profile.id} for profile in profiles_queryset]
         # Here we are checking profile name from each row given dataset so that it accords
@@ -616,24 +616,6 @@ class KISDataProcessing(DataProcessing):
         return result
 
 
-def ensure_cashing() -> None:
-    """
-    Check redis cash and write data into if storage is empty.
-
-     We are calling this func in the main view to avoid unnecessary calls to the database.
-     First call of the day provides writing data into cache and use
-     the cache during the day new call to db instead.
-    """
-    if cache.get('dmk') is None:
-        main_dmk = MainDataSerializer(MainData.objects.custom_filter(), many=True).data
-        accum_dmk = collect_model()
-        dmk = {'main_dmk': main_dmk, 'accum_dmk': accum_dmk}
-        cache.set('dmk', dmk)
-    if cache.get('kis') is None:
-        p_kis = KISDataProcessing(KISData(QuerySets().queryset_for_kis())).create_ready_dicts()
-        cache.set('kis', p_kis)
-
-
 def collect_model():
     """Create postgres view contains all needed data of month plans table and return serialized data."""
     data = Profiles.objects \
@@ -644,14 +626,10 @@ def collect_model():
     return accum_sr.data
 
 
-def get_chosen_date(request):
-    res = None
+def get_chosen_date(kind, dates):
     queries = QuerySets()
     gen = KISData
     kis = KISDataProcessing
-
-    kind = request.query_params.get('type', None)
-    dates = request.query_params.get('date', None)
 
     if kind == 'arrived':
         query = queries.ARRIVED
@@ -661,8 +639,7 @@ def get_chosen_date(request):
         processing = kis().signout_process
     else:
         return
-
     kisdata_obj = gen(queries.chosen_date_query(query, dates))
     dataset = next(kisdata_obj.get_data_generator())
-    res = processing(dataset)
-    return res
+    result = processing(dataset)
+    return result
