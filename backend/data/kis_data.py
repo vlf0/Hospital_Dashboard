@@ -1,10 +1,11 @@
 """Responsible for classes defining non-model query-sets from another DB."""
 import logging
-from typing import Generator, Any
+from typing import Generator, Any, Union
 from datetime import date
 from collections import Counter
 from itertools import chain
 from rest_framework.exceptions import ValidationError
+from rest_framework.response import Response
 from django.conf import settings
 from django.db.utils import IntegrityError
 from django.db.models import Sum
@@ -16,7 +17,7 @@ from .serializers import (
      MainDataSerializer,
      AccumulativeDataSerializerSave,
      ProfilesSerializer)
-from .models import Profiles
+from .models import Profiles, MainData, AccumulationOfIncoming
 
 creds = settings.DB_CREDS
 logger = logging.getLogger('data.kis_data.DataForDMK')
@@ -250,22 +251,29 @@ class DataForDMK(DataProcessing):
         """
         Get data related to signouts and deaths patients.
 
-        :return: *dict*: Dictionary containing signout and deaths data.
+        :return: Dictionary containing signout and deaths data.
         """
         result_keys = self.dmk_cols[3:5]
         ready_values = self.count_data(signout_dataset, 1, 'Другая причина')
         return dict(zip(result_keys, ready_values))
 
-    def get_reanimation_data(self, reanimation_dataset) -> dict:
+    def get_reanimation_data(self, reanimation_dataset: list[tuple]) -> dict[str, int]:
         """
         Get data related to reanimation patients.
 
-        :return: *dict*: Dictionary containing reanimation data.
+        :param reanimation_dataset: Raw dataset from db.
+        :return: Dictionary containing reanimation data.
         """
         return {self.dmk_cols[-1]: self.count_dataset_total(reanimation_dataset)}
 
     @staticmethod
-    def get_dept_hosps(dh_dataset):
+    def get_dept_hosps(dh_dataset: list[tuple]) -> list[dict[str, Union[int, str]]]:
+        """
+        Get data related to hospitalized by depts patients.
+
+        :param dh_dataset: Raw dataset from db.
+        :return:
+        """
         profiles_queryset = Profiles.objects.all()
         profiles = [{profile.name: profile.id} for profile in profiles_queryset]
         # Here we are checking profile name from each row given dataset so that it accords
@@ -280,15 +288,16 @@ class DataForDMK(DataProcessing):
 
         return result_dicts
 
-    def __collect_data(self) -> dict:
+    def __collect_data(self) -> dict[str, dict]:
         """
         Get calculated main values for detail boards on the front-end for saving to DMK DB.
 
         The method calculates data from a set of datasets obtained one by one through iteration of the generator
         and then concatenates it into one common dictionary.
 
-        :return: *dict*: Main data for saving to DMK DB.
         :raises StopIteration: If the generator is already empty. This point also will writen to logs.
+
+        :return: Main data for saving to DMK DB.
         """
         if self.kisdata_obj.db_conn.conn is None:
             main_data = {i: None for i in self.dmk_cols}
@@ -305,15 +314,15 @@ class DataForDMK(DataProcessing):
         return {'main_data': ready_main_data, 'accum_data': dh_dataset}
 
     @staticmethod
-    def __check_data(data):
+    def __check_data(data: list[dict]) -> None:
         """
         Check ready collected data and write log info depending on checking result.
 
          If they are contains None values, log warning about this.
          Otherwise, log info about successfully data inserting.
 
-        :param data: *list*:
-        :type data: list[dict]
+        :param data: List of dict that contains serialized data.
+        :return: None
         """
         for result in data:
             if None in [value for value in result.values()]:
@@ -322,14 +331,14 @@ class DataForDMK(DataProcessing):
                 logger.info('Data recorded successfully.')
 
     @staticmethod
-    def __translate(err):
+    def __translate(err: Exception) -> str:
         """
         Replace original text error to english lang and return ready en string.
 
          It needed for correct symbols displaying in log file
 
         :param err: Error string as a some exception class instance.
-        :return: *str*: Ready changed error text.
+        :return: Ready changed error text.
         """
         err_text = str(err)
         if err_text[2:7] == 'dates':
@@ -340,7 +349,7 @@ class DataForDMK(DataProcessing):
                                         )
         return err_text
 
-    def save_to_dmk(self) -> Any:
+    def save_to_dmk(self) -> list[Union[MainData, None], AccumulationOfIncoming]:
         """
         Save the prepared data to the DMK DB using the MainData model and its serializer.
 
@@ -348,9 +357,8 @@ class DataForDMK(DataProcessing):
         :raises SyntaxError: If there is a syntax error in the serializer.
         :raises AssertionError: If there is an assertion error during saving.
 
-        :return: MainData instance and list of AccumulatedData instances:
-         Saved data as a model instance. If on of the exception will raise - returns None and
-         write to log file.
+        :return: List containing one MainData instance or None as a first list element and list of AccumulatedData instances
+         as a second element. If any error occurs - it write the logs to log-file.
         """
         common_dict = self.__collect_data()
         main = common_dict['main_data']
@@ -359,13 +367,13 @@ class DataForDMK(DataProcessing):
         accum_res = self.save_accumulated(accum)
         return [main_res, accum_res]
 
-    def save_main(self, main_data: dict) -> Any:
+    def save_main(self, main_data: dict) -> Union[MainData, None]:
         """
-        Serializer and save a new model instance.
+        Serialize and save a new model instance.
 
          If any defined errors will occur - instance will now save and method returns None.
-        :param main_data: *dict*: Ready for serializing data.
-        :return: *Any*
+        :param main_data: Ready for serializing data.
+        :return: MainData instance if not errors. If any errors occur - returns None.
         """
         main_sr = MainDataSerializer(data=main_data)
         try:
@@ -376,13 +384,15 @@ class DataForDMK(DataProcessing):
             en_error = self.__translate(e)
             logger.error(en_error)
 
-    def save_accumulated(self, accum_data: list[dict]) -> Any:
+    def save_accumulated(self, accum_data: list[dict]) -> list[Union[MainData, Any], list[AccumulationOfIncoming]]:
         """
         Iterate through given Serializer and save a few new model instances.
 
          If any defined errors will occur - instance will now save and method returns None.
-        :param accum_data: *list*: List of dicts ready for serializing data.
-        :return: *Any*
+        :param accum_data: List of dicts ready for serializing data.
+        :return: Common list of saved models where first object is MainData instance if or None
+         and second object always is list of AccumulationOfIncoming instances.
+         If any errors occur then returns empty list.
         """
         saved_instances = []
         for row in accum_data:
@@ -429,54 +439,47 @@ class KISDataProcessing(DataProcessing):
     deads_oar = []
     counted_oar = []
 
-    def __init__(self, kisdata_obj=None):
+    def __init__(self, kisdata_obj: KISData):
         """
         Initialize the KISDataProcessing instance.
 
-        :param kisdata_obj: *Generator*: The `KISData` instance.
-         None value by default for using class out of common tasks scope without initialization KISData instance
-         as a current class instance attribute.
+        :param kisdata_obj: The `KISData` instance.
         """
         super().__init__(kisdata_obj)
 
-    def __count_values(self, dataset, ind, keywords) -> list[int]:
+    def __count_values(self, dataset: list[tuple], ind: int, keywords: list[str]) -> list[int]:
         """
         Count values in the dataset based on index and keywords.
 
-        :param dataset: *list*: The dataset to count.
-        :type dataset: list[tuple]
-        :param ind: *int*: Index to count values.
-        :type ind: int
-        :param keywords: *list*: Keywords to match in the filter.
-        :type keywords: list[str]
-        :return: *list[int]*: List containing counted values.
+        :param dataset: The dataset to count.
+        :param ind: Index to count values.
+        :param keywords: Keywords to match in the filter.
+        :return: List containing counted values.
         """
         custom_filter = self.filter_dataset
         grouped_list = [len(custom_filter(dataset, ind, i)) for i in keywords]
         return grouped_list
 
-    def __result_for_sr(self, columns, dataset) -> list[CleanData]:
+    def __result_for_sr(self, columns: list[str], dataset: list[tuple]) -> list[CleanData]:
         """
         Create instances of `CleanData` with data from the dataset.
 
-        :param columns: *list*: A list of column names representing the attributes of the `CleanData` instances.
-        :type columns: list[str]
-        :param dataset: *list*: A list of lists, where each inner list contains
+        :param columns: A list of column names representing the attributes of the `CleanData` instances.
+        :param dataset: A list of lists, where each inner list contains
          data corresponding to a row in the database.
-        :type dataset: list[tuple]
-        :return: *list[CleanData]*: A list of `CleanData` class instances, each instantiated with
+        :return: A list of `CleanData` class instances, each instantiated with
          data from the provided dataset.
         """
         return self.create_instance(columns, dataset)
 
     @staticmethod
-    def __serialize(ready_dataset, data_serializer=True) -> dict:
+    def __serialize(ready_dataset: list[CleanData], data_serializer: bool = True) -> dict[str, Any]:
         """
         Serialize the processed dataset using the KISDataSerializer.
 
-        :param ready_dataset: *list[CleanData]*: The processed dataset.
-        :type ready_dataset: list[CleanData]
-        :return: *dict*: Serialized data.
+        :param ready_dataset: The processed dataset.
+        :param data_serializer: Boolean value responsible for the applying serializer to dataset.
+        :return: Serialized data.
         """
         if data_serializer:
             sr_data = KISDataSerializer(ready_dataset, many=True).data
@@ -484,13 +487,12 @@ class KISDataProcessing(DataProcessing):
             sr_data = KISTableSerializer(ready_dataset, many=True).data
         return sr_data
 
-    def arrived_process(self, arrived_dataset) -> dict:
+    def arrived_process(self, arrived_dataset: list[tuple]) -> dict[str, Any]:
         """
         Process and serialize data related to arrivals.
 
-        :param arrived_dataset: *list*: Dataset from DB as a list of tuples.
-        :type arrived_dataset: list[tuple]
-        :return: *dict*: Serialized data.
+        :param arrived_dataset: Dataset from DB as a list of tuples.
+        :return: Serialized data.
         """
         # Defining columns for serializer and values for filtering datasets.
         columns, channels, statuses = self.qs.COLUMNS['arrived'], self.qs.channels, self.qs.statuses
@@ -502,16 +504,16 @@ class KISDataProcessing(DataProcessing):
         sorted_statuses_datasets = self.__count_values(hosp_data, -1, statuses)
         # Creating 1 row data in dataset.
         summary_dataset = [tuple(sorted_channels_datasets+sorted_statuses_datasets)]
+        print(summary_dataset)
         ready_dataset = self.__result_for_sr(columns, summary_dataset)
         return self.__serialize(ready_dataset)
 
-    def signout_process(self, signout_dataset) -> dict:
+    def signout_process(self, signout_dataset: list[tuple]) -> dict[str, Any]:
         """
         Process and serialize data related to signouts.
 
-        :param signout_dataset: *list*: Dataset from DB as a list of tuples.
-        :type signout_dataset: list[tuple]
-        :return: *dict*: Serialized data.
+        :param signout_dataset: Dataset from DB as a list of tuples.
+        :return: Serialized data.
         """
         columns, keywords = self.qs.COLUMNS['signout'], self.qs.signout
         # Calculating signout from defined depts
@@ -527,13 +529,12 @@ class KISDataProcessing(DataProcessing):
         ready_dataset = self.__result_for_sr(summary_columns, summary_dataset)
         return self.__serialize(ready_dataset)
 
-    def deads_process(self, deads_dataset) -> dict:
+    def deads_process(self, deads_dataset: list[tuple]) -> dict[str, Any]:
         """
         Process and serialize data related to signouts.
 
-        :param deads_dataset: *list*: Dataset from DB as a list of tuples.
-        :type deads_dataset: list[tuple]
-        :return: *dict*: Serialized data.
+        :param deads_dataset: Dataset from DB as a list of tuples.
+        :return: Serialized data.
         """
         # Counting deads patients in OARs
         if oars_filtered := [len(self.filter_dataset(deads_dataset, 6, oar))
@@ -549,15 +550,13 @@ class KISDataProcessing(DataProcessing):
         ready_dataset = self.__result_for_sr(columns, deads_dataset)
         return self.__serialize(ready_dataset, data_serializer=False)
 
-    def oar_process(self, dataset, columns) -> dict:
+    def oar_process(self, dataset: list[tuple], columns: list[str]) -> dict[str, Any]:
         """
         Process and serialize data related to hospitalized in reanimation.
 
-        :param dataset: *list*: Dataset from DB as a list of tuples.
-        :type dataset: list[tuple]
-        :param columns: *list*: List of column names for mapping with data.
-        :type columns: list[str]
-        :return: *dict*:
+        :param dataset: Dataset from DB as a list of tuples.
+        :param columns: List of column names for mapping with data.
+        :return: Dict of serialized data.
         """
         # Creating list of calculating lens of each separated datasets that filtered by oar number
         if oar_nums := [len(self.filter_dataset(dataset, 3, oar)) for oar in ['Отделение реанимации и интенсивной терапии № 1', 
@@ -577,7 +576,7 @@ class KISDataProcessing(DataProcessing):
         In process of processing data we are first saving calculated numbers in class attributes,
         then using it for serializing and including into summary answer list.
 
-        :return: *list[dict]*: List of serialized data with keywords as a dict.
+        :return: List of serialized data with keywords as a dict.
         """
         oar_columns = self.qs.COLUMNS['oar_amounts']
         living_list = [(self.__result_for_sr(oar_columns, i)) for i in self.counted_oar]
@@ -596,7 +595,7 @@ class KISDataProcessing(DataProcessing):
          Checking for connection failure, if so, then manually creating dictations with None values
          and returning them as serialized data for the response.
 
-        :return: *list[dict]*: List of dictionaries containing processed and serialized datasets.
+        :return: List of dictionaries containing processed and serialized datasets.
         """
         keywords = self.qs.DICT_KEYWORDS
         if self.kisdata_obj.db_conn.conn is None:
@@ -620,7 +619,7 @@ class KISDataProcessing(DataProcessing):
         return result
 
 
-def collect_model():
+def collect_model() -> dict:
     """Create postgres view contains all needed data of month plans table and return serialized data."""
     data = Profiles.objects \
         .select_related() \
@@ -630,17 +629,26 @@ def collect_model():
     return accum_sr.data
 
 
-def get_chosen_date(kind, dates):
+def get_chosen_date(kind: Union[str, None], dates: Union[str, None]) -> Union[dict, None]:
+    """
+    Make hit to KIS DB for getting chosen date details data and return serialized data.
+
+    :param kind: Part of URL-params that is responsible for the type of details data.
+     None If URL-params not passed by default.
+    :param dates: Part of URL-params that is responsible for the date of details data.
+     None If URL-params not passed by default.
+    :return: Dict of serialized data if URL-params passed, otherwise None.
+    """
     queries = QuerySets()
     gen = KISData
     kis = KISDataProcessing
 
     if kind == 'arrived':
         query = queries.ARRIVED
-        processing = kis().arrived_process
+        processing = kis(1).arrived_process
     elif kind == 'signout':
         query = queries.SIGNOUT
-        processing = kis().signout_process
+        processing = kis(1).signout_process
     else:
         return
     kisdata_obj = gen(queries.chosen_date_query(query, dates))

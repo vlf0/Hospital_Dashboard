@@ -1,6 +1,6 @@
 """Describes connection and sql queries to Postgres DB."""
 import logging
-from typing import Any, Never
+from typing import Any
 from psycopg2 import OperationalError, ProgrammingError
 from psycopg2.errors import UndefinedTable, SyntaxError
 import psycopg2
@@ -82,7 +82,7 @@ class BaseConnectionDB:
             self.error = connection_error
             logger.error(str(self.error).rstrip('\n'))
 
-    def close_connection(self) -> Never:
+    def close_connection(self) -> None:
         """Save commits and close the database connection and all its cursors."""
         if self.conn is not None:
             self.conn.commit()

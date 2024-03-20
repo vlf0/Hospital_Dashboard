@@ -233,7 +233,8 @@ class QuerySets:
 
     # Lists of columns for mapping with values to creating CleanData class instances.
     COLUMNS = {
-        'arrived': ['ch103', 'clinic_only', 'ch103_clinic', 'singly', 'plan', 'ZL', 'foreign', 'nr', 'nil', 'dms', 'undefined'],
+        'arrived': ['ch103', 'clinic_only', 'ch103_clinic', 'singly', 'plan',
+                    'ZL', 'foreign', 'nr', 'nil', 'dms', 'undefined'],
         'signout': ['deads', 'moved', 'signout'],
         'deads_t': ['pat_fio', 'ib_num', 'sex', 'age', 'arriving_dt', 'state', 'dept', 'days', 'diag_arr', 'diag_dead'],
         'oar_arrived_t': ['pat_fio', 'ib_num', 'age', 'dept', 'doc_fio', 'diag_start'],
@@ -245,7 +246,8 @@ class QuerySets:
     DMK_COLUMNS = ['arrived', 'hosp', 'refused', 'signout', 'deads', 'reanimation']
 
     # Filter-words for filter_dataset method of DataProcessing class.
-    channels = ['103', 'поликлиника', '103 Поликлиника', 'самотек', 'план'] 
+    # If needed to add something more - "aapend" it, e.g. insert at the end of existing matched list.
+    channels = ['103', 'Поликлиника', '103 Поликлиника', 'самотек', 'план']
     statuses = ['ЗЛ', 'Иногородний', 'НР', 'НИЛ', 'ДМС', 'Не указано'] 
     signout = ['Умер в стационаре', 'Переведён в другую МО из стационара', 'Выписан']
     # Dict for mapping with serializer fields (relates to "план/факт по профилям" table).

@@ -1,3 +1,4 @@
+"""Provided class """
 from django.core.cache import cache
 from .kis_data import QuerySets, KISData, KISDataProcessing, collect_model, get_chosen_date
 from .serializers import MainDataSerializer
