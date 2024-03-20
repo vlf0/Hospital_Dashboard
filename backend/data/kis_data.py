@@ -523,9 +523,8 @@ class KISDataProcessing(DataProcessing):
         """
         columns, keywords = self.qs.COLUMNS['signout'], self.qs.signout
         # Calculating signout from defined depts
-        signout_only = self.filter_dataset(signout_dataset, 1, 'Выписан')
-        counter = Counter(signout_dataset)
-        counted_signout_dataset = [(dept[0], cnt) for dept, cnt in counter.items()]
+        counter = Counter(item[0] for item in signout_dataset)
+        counted_signout_dataset = [(dept, count) for dept, count in counter.items()]
         # Preparing data for creating processed dataset
         packed_data = self.slice_dataset(counted_signout_dataset, self.qs.depts_mapping)
         en_columns, dataset = packed_data[0], packed_data[1]
