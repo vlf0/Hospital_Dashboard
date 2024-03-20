@@ -2,7 +2,6 @@ import React from 'react';
 import { Pie } from 'react-chartjs-2';
 import NoData from '../../no_data/NoData';
 import TopBlock from '../../menu/TopBlock';
-import Header from '../Header';
 import './details.css';
 import '../../parent.css';
 
@@ -13,13 +12,16 @@ const mapChannels = {
   clinic_only: 'Поликлиника',
   ch103_clinic: '103 Поликлиника',
   singly: 'Самотек',
+  plan: 'План'
 };
 
 const mapTypes = {
   ZL: 'ЗЛ',
   foreign: 'Иногородние',
-  moscow: 'Москвичи',
-  undefined: 'не указано'
+  nr: 'НИЛ',
+  nil: 'НР',
+  dms: 'ДМС',
+  undefined: 'Не указано'
 };
 
 const ArrivedDetailPie = ( {labels, data} ) => {
@@ -32,8 +34,7 @@ const ArrivedDetailPie = ( {labels, data} ) => {
 
 
   const channels = data.slice(0, ruChannels.length)
-  const types = data.slice(ruTypes.length)
-
+  const types = data.slice(ruChannels.length)
 
 
 

@@ -230,11 +230,13 @@ class DataForDMK(DataProcessing):
         :return: *list*: List containing total, positive, and negative amounts.
         """
         data = self.filter_dataset(dataset, ind, value)
+        print(data)
         total_amount = self.count_dataset_total(dataset)
         positive_amount = len(data)
+        print(positive_amount)
         negative_amount = total_amount - positive_amount
         if ind == 1:
-            return [total_amount, negative_amount]
+            return [total_amount, positive_amount]
         return [total_amount, positive_amount, negative_amount]
 
     def get_arrived_data(self, arrived_dataset) -> dict:
@@ -254,7 +256,7 @@ class DataForDMK(DataProcessing):
         :return: Dictionary containing signout and deaths data.
         """
         result_keys = self.dmk_cols[3:5]
-        ready_values = self.count_data(signout_dataset, 1, 'Другая причина')
+        ready_values = self.count_data(signout_dataset, 1, 'Умер')
         return dict(zip(result_keys, ready_values))
 
     def get_reanimation_data(self, reanimation_dataset: list[tuple]) -> dict[str, int]:
@@ -498,7 +500,6 @@ class KISDataProcessing(DataProcessing):
         sorted_statuses_datasets = self.__count_values(hosp_data, -1, statuses)
         # Creating 1 row data in dataset.
         summary_dataset = [tuple(sorted_channels_datasets+sorted_statuses_datasets)]
-        print(summary_dataset)
         ready_dataset = self.__result_for_sr(columns, summary_dataset)
         return self.__serialize(ready_dataset)
 
@@ -511,9 +512,8 @@ class KISDataProcessing(DataProcessing):
         """
         columns, keywords = self.qs.COLUMNS['signout'], self.qs.signout
         # Calculating signout from defined depts
-        signout_only = self.filter_dataset(signout_dataset, 1, 'Выписан')
-        counter = Counter(signout_dataset)
-        counted_signout_dataset = [(dept[0], cnt) for dept, cnt in counter.items()]
+        counter = Counter(item[0] for item in signout_dataset)
+        counted_signout_dataset = [(dept, count) for dept, count in counter.items()]
         # Preparing data for creating processed dataset
         packed_data = self.slice_dataset(counted_signout_dataset, self.qs.depts_mapping)
         en_columns, dataset = packed_data[0], packed_data[1]

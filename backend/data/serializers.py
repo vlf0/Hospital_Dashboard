@@ -43,9 +43,12 @@ class KISDataSerializer(serializers.Serializer):
     clinic_only = serializers.IntegerField(required=False, allow_null=True)
     ch103_clinic = serializers.IntegerField(required=False, allow_null=True)
     singly = serializers.IntegerField(required=False, allow_null=True)
+    plan = serializers.IntegerField(required=False, allow_null=True)
     ZL = serializers.IntegerField(required=False, allow_null=True)
     foreign = serializers.IntegerField(required=False, allow_null=True)
-    moscow = serializers.IntegerField(required=False, allow_null=True)
+    nr = serializers.IntegerField(required=False, allow_null=True)
+    nil = serializers.IntegerField(required=False, allow_null=True)
+    dms = serializers.IntegerField(required=False, allow_null=True)
     undefined = serializers.IntegerField(required=False, allow_null=True)
     # Fields of hospitalized patients that counted by depts.
     therapy = serializers.IntegerField(required=False, allow_null=True)
