@@ -34,7 +34,7 @@ class QuerySets:
                JOIN mm.ehr_case ec ON ec.id = h.ehr_case_id
                JOIN mm.ehr_case_title ect ON ect.caseid  = ec.id 
                
-               WHERE ec.create_dt BETWEEN current_date - INTERVAL '1 day, -6 hours' AND current_date - INTERVAL '-6 hours'
+               WHERE ec.create_dt BETWEEN DATE('{today()}') - INTERVAL '1 day, -6 hours' AND DATE('{today()}') - INTERVAL '-6 hours'
                
                UNION ALL 									
                
@@ -57,7 +57,7 @@ class QuerySets:
                		JOIN mm.hosp_refuse hr ON hr.ambticket_id = a.id 
                		JOIN mm.ehr_case_title ect2 ON ect2.caseid  = a.ehr_case_id
                
-               WHERE ec.create_dt BETWEEN current_date - INTERVAL '1 day, -6 hours' AND current_date - INTERVAL '-6 hours';
+               WHERE ec.create_dt BETWEEN DATE('{today()}') - INTERVAL '1 day, -6 hours' AND DATE('{today()}') - INTERVAL '-6 hours';
                """
 
     DEPT_HOSP = f"""
@@ -92,7 +92,7 @@ class QuerySets:
                FROM mm.mdoc m
                JOIN mm.hospdoc h ON h.mdoc_id = m.id
                
-               WHERE h.leave_dt BETWEEN current_date - INTERVAL '1 day, -6 hours' AND current_date - INTERVAL '-6 hours'
+               WHERE h.leave_dt BETWEEN DATE('{today()}') - INTERVAL '1 day, -6 hours' AND DATE('{today()}') - INTERVAL '-6 hours'
                ORDER BY h.hosp_outcome_id;  
                """
 #Добавить mm.emp_get_fio_by_id (h.doctor_emp_id) - Лечащий врач

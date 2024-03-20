@@ -230,11 +230,15 @@ class DataForDMK(DataProcessing):
         :return: *list*: List containing total, positive, and negative amounts.
         """
         data = self.filter_dataset(dataset, ind, value)
+        print(data)
         total_amount = self.count_dataset_total(dataset)
+        print(total_amount)
         positive_amount = len(data)
+        print(positive_amount)
         negative_amount = total_amount - positive_amount
+        print(negative_amount)
         if ind == 1:
-            return [total_amount, negative_amount]
+            return [total_amount, positive_amount]
         return [total_amount, positive_amount, negative_amount]
 
     def get_arrived_data(self, arrived_dataset) -> dict:
@@ -254,7 +258,10 @@ class DataForDMK(DataProcessing):
         :return: Dictionary containing signout and deaths data.
         """
         result_keys = self.dmk_cols[3:5]
-        ready_values = self.count_data(signout_dataset, 1, 'Другая причина')
+        print()
+        print(result_keys)
+        ready_values = self.count_data(signout_dataset, 1, 'Умер в стационаре')
+        print(ready_values)
         return dict(zip(result_keys, ready_values))
 
     def get_reanimation_data(self, reanimation_dataset: list[tuple]) -> dict[str, int]:
@@ -504,7 +511,6 @@ class KISDataProcessing(DataProcessing):
         sorted_statuses_datasets = self.__count_values(hosp_data, -1, statuses)
         # Creating 1 row data in dataset.
         summary_dataset = [tuple(sorted_channels_datasets+sorted_statuses_datasets)]
-        print(summary_dataset)
         ready_dataset = self.__result_for_sr(columns, summary_dataset)
         return self.__serialize(ready_dataset)
 

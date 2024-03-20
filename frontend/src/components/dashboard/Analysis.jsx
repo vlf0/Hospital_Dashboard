@@ -33,10 +33,6 @@ function GetAnalysis() {
 
   const currentDay = getMainDMK(main_dmk, today, 1);
   const yesterday = getMainDMK(main_dmk, yesterDay, 2);
-  console.log(main_dmk)
-  console.log(currentDay)
-  console.log(yesterday)
-
 
   const arrived = CustomMap(currentDay, yesterday, 'arrived')
   const hosp = CustomMap(currentDay, yesterday, 'hosp')

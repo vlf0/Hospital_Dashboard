@@ -4,7 +4,6 @@ import { Bar } from 'react-chartjs-2';
 import Chart from 'chart.js/auto';
 import AnnotationPlugin from 'chartjs-plugin-annotation';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
-import current_date from '../../dates/DatesFormat';
 import '../../charts/arrived_chart.css';
 
 Chart.register(AnnotationPlugin);
@@ -16,12 +15,14 @@ Chart.defaults.color = '#090b1f';
 
 // Depts map
 const chartMap = {
+    'oar1_d': 'ОРИТ №1',
+    'dp_d': 'Приемное отделение',
+    'oar2_d': 'ОРИТ №2',
+    'oar3_d': 'ОРИТ №3',
     'cardio_d': 'Кардиологическое отделение',
     'surgery_d': 'Хирургическое отделение',
     'therapy_d': 'Терапевтическое отделение',
-    'oar1_d': 'ОРИТ №1',
-    'oar2_d': 'ОРИТ №2',
-    'oar3_d': 'ОРИТ №3'
+
 }
 
 const DeadsChartDetail = ({ data }) => {

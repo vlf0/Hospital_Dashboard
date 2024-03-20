@@ -44,7 +44,6 @@ const SignInDetailBoard = () => {
     };
   }, [reload]);
   
-console.log(kis)
   
   return (
     <div className='detail_block'>
@@ -68,7 +67,7 @@ console.log(kis)
         <div className='separated_detail_block'>
            <p> Самотёк </p> {kis.singly} </div>
         <div className='separated_detail_block'>
-           <p> План </p> {'STUB'} </div>
+           <p> План </p> {kis.plan} </div>
       </div>
       <span className='detail_block_header'> Госпитализировано в статусе </span>
       <div className='blocks_container'>
@@ -79,9 +78,9 @@ console.log(kis)
         <div className='separated_detail_block'> 
           <p> НР </p> {kis.singly} </div>
         <div className='separated_detail_block'>  
-          <p> НИЛ </p> {'STUB'} </div>
+          <p> НИЛ </p> {kis.nil} </div>
         <div className='separated_detail_block'>  
-          <p> ДМС </p> {'STUB'} </div>
+          <p> ДМС </p> {kis.nr} </div>
         <div className='separated_detail_block'>  
           <p> Не указано </p> {kis.undefined} </div>
       </div>

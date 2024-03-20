@@ -2,7 +2,7 @@
 from rest_framework.response import Response
 from .models import MainData
 from .serializers import MainDataSerializer
-from .kis_data import collect_model, get_chosen_date
+from .kis_data import KISDataProcessing, KISData, QuerySets, collect_model, get_chosen_date
 
 
 def main_cache_disable(func):
@@ -14,8 +14,10 @@ def main_cache_disable(func):
     def wrapper(*args, **kwargs):
         main_dmk = MainDataSerializer(MainData.objects.custom_filter(), many=True).data
         accum_dmk = collect_model()
-        dmk = {'main_dmk': main_dmk, 'accum_dmk': accum_dmk}
-        return Response(dmk)
+        p_kis = KISDataProcessing(KISData(QuerySets().queryset_for_kis())).create_ready_dicts()
+        p_dmk = {'main_dmk': main_dmk, 'accum_dmk': accum_dmk}
+        data = {'dmk': p_dmk, 'kis': p_kis}
+        return Response(data)
     return wrapper
 
 
