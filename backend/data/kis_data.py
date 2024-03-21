@@ -230,10 +230,8 @@ class DataForDMK(DataProcessing):
         :return: *list*: List containing total, positive, and negative amounts.
         """
         data = self.filter_dataset(dataset, ind, value)
-        print(data)
         total_amount = self.count_dataset_total(dataset)
         positive_amount = len(data)
-        print(positive_amount)
         negative_amount = total_amount - positive_amount
         if ind == 1:
             return [total_amount, positive_amount]
@@ -276,7 +274,7 @@ class DataForDMK(DataProcessing):
         :param dh_dataset: Raw dataset from db.
         :return:
         """
-        profiles_queryset = Profiles.objects.all()
+        profiles_queryset = Profiles.objects.filter(active=True)
         profiles = [{profile.name: profile.id} for profile in profiles_queryset]
         # Here we are checking profile name from each row given dataset so that it accords
         # profiles added into Profiles model and get list of ready to serializing dicts.
@@ -608,7 +606,7 @@ def collect_model() -> dict:
     data = Profiles.objects \
         .select_related() \
         .annotate(total=Sum('accumulationofincoming__number')) \
-        .values('name', 'total', 'plannumbers__plan')
+        .values('name', 'total', 'plannumbers__plan').filter(active=True)   
     accum_sr = ProfilesSerializer(data, many=True)
     return accum_sr.data
 

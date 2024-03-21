@@ -1,4 +1,5 @@
 """Responsible for models managers."""
+from typing import Any
 from django.db import models, connection
 from datetime import date, timedelta
 
@@ -8,7 +9,6 @@ class CustomManager(models.Manager):
 
     - Custom method: custom_filter() gives 7 last rows from model.
     """
-
     def custom_filter(self):
         """
         Get 7 last model objects and return as a queryset.
