@@ -528,13 +528,17 @@ class KISDataProcessing(DataProcessing):
         :param deads_dataset: Dataset from DB as a list of tuples.
         :return: Serialized data.
         """
+        # Getting separated datasets of deads pats by each reanimation for details.
+        deads_datasets = tuple({oar: self.filter_dataset(deads_dataset, 6, oar)} for oar in ['ОРИТ №1', 'ОРИТ №2', 'ОРИТ №3'])
+        print(deads_datasets)
+
+        # Processing table data for serializing.
+        columns = self.qs.COLUMNS['deads_t']
+        ready_dataset = self.__result_for_sr(columns, deads_dataset)
         # Counting deads patients in OARs
         if oars_filtered := [len(self.filter_dataset(deads_dataset, 6, oar)) 
                              for oar in ['ОРИТ №1', 'ОРИТ №2', 'ОРИТ №3']]:  # Need change orits names
             self.deads_oar = [tuple(oars_filtered)]
-        # Processing table data for serializing.
-        columns = self.qs.COLUMNS['deads_t']
-        ready_dataset = self.__result_for_sr(columns, deads_dataset)
         return self.__serialize(ready_dataset, data_serializer=False)
 
     def oar_process(self, dataset: list[tuple], columns: list[str]) -> dict[str, Any]:

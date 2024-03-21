@@ -61,10 +61,9 @@ const OARDetailBoard = ({ dept, values, deads }) => {
           <p> Находятся на лечении </p> {values[2]}
         </div>
 
-
         <div
-          className="separated_detail_block"
-          // onClick={(event) => toggleDeadTableVisibility("move", event)}
+          className="separated_detail_block_X"
+          onClick={(event) => toggleDeadTableVisibility("onTreatment", event)}
           orit-name={dept}
         >
           <p> Умерли в отделении </p> {deads}

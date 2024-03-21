@@ -110,7 +110,7 @@ class KISTableSerializer(KISDataSerializer):
     # Fields to moved to reanimation dataset related
     move_date = serializers.DateTimeField(required=False, allow_null=True)
     from_dept = serializers.CharField(required=False, allow_null=True)
-
+    # Fields to deads from reanimation dataset related
 
 
 
