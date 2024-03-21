@@ -15,14 +15,29 @@ Chart.defaults.color = '#090b1f';
 
 // Depts map
 const chartMap = {
-    'oar1_d': 'ОРИТ №1',
-    'dp_d': 'Приемное отделение',
-    'oar2_d': 'ОРИТ №2',
-    'oar3_d': 'ОРИТ №3',
-    'cardio_d': 'Кардиологическое отделение',
-    'surgery_d': 'Хирургическое отделение',
-    'therapy_d': 'Терапевтическое отделение',
-
+    'oaronmk_d': 'ОРИТ ОИМ',
+    'surgery_d': 'Хирургическое',
+    'oar1_d': 'ОРИТ № 1',
+    'dp_d': 'Приемное ДП',
+    'oar_d': 'ОАР',
+    'trauma_d': 'травматологии и ортопедии',
+    'neurosurgery_d': 'Нейрохирургическое',
+    'oaroim_d': 'ОРИТ ОИМ',
+    'oar2_d': 'ОРИТ № 2',
+    'cardio_d': 'Кардиологическое',
+    'therapy_d': 'Терапевтическое',
+    'endo_d': 'Эндокринологическое',
+    'neuroonmk_d': 'Неврологическое ОНМК',
+    'urology_d': 'Урологическое',
+    'pursurgery_d': 'Гнойной хирургии',
+    'cardio2_d': '2 кардиологическое (ОИМ)',
+    'skp_d': 'СКП',
+    'gynecology_d': 'Гинекологическое',
+    'emer_d': 'Приемное отделение',
+    'multi_pay_d': 'МПО',
+    'apc_d': 'ДС АПЦ',
+    'combine_d': 'Сочетанной травмы',
+    'pulmonology_d': 'Пульмонологическое'
 }
 
 const DeadsChartDetail = ({ data }) => {
@@ -35,7 +50,6 @@ const DeadsChartDetail = ({ data }) => {
           .filter(([key, value]) => key.endsWith('_d'))
       );
 
-    console.log(deptsOut)
     const endDepts = Object.keys(deptsOut)
     const ruDepts = endDepts.map(index => chartMap[index])
     const nums = Object.values(deptsOut) 
@@ -148,7 +162,7 @@ const DeadsChartDetail = ({ data }) => {
 
     // Chart component
     return (
-        <div className='arrived_chart'>
+        <div className='signout_by_depts_chart'>
           <Bar data={arrived_data} options={chartOptions} />
         </div>
     );

@@ -39,7 +39,7 @@ class PlanNumbersAdmin(admin.ModelAdmin):
         """Override method so that perform renewing data in cache."""
         super().save_model(request, obj, form, change)
         cache.delete('dmk')
-        Cacher().plans_caching()
+        Cacher().dmk_cache()
         trigger_notification()
 
 
