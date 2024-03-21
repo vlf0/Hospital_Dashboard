@@ -137,7 +137,7 @@ class QuerySets:
                          (SELECT ic.kod
                             FROM mm.ds ds
                             JOIN mm.icd10 ic ON ic.id = ds.icd10_id
-                            WHERE ds.ds_type_id = 1
+                            WHERE ds.ds_kind_id = 1
                             AND ds.ehr_case_id = h.ehr_case_id
                             ORDER BY ds.create_dt DESC
                             LIMIT 1) AS Диаг_поступление
