@@ -14,19 +14,17 @@ function DetailBoard({ sign }) {
 
 
   const data = useContext(DataContext).kis;
-  const kis = data[0].oar_numbers;
-  const deads = kis[3].deads_nums[0];
 
+  const kis = data.oar_numbers;
+  const deads = kis[3].deads_nums[0];
   
   // Zipping and mapping data to pass as a props
   const arrived = Object.values(kis[0].arrived_nums[0]);
   const moved = Object.values(kis[1].moved_nums[0]);
   const current = Object.values(kis[2].current_nums[0]);
 
-  
   const oar1 = [arrived[0],moved[0], current[0]];
   const oar2 = [arrived[1],moved[1], current[1]];
-  const oar3 = [arrived[2], moved[2], current[2]];
   const oar4 = [arrived[3], moved[3], current[3]];
   const oar5 = [arrived[4],moved[4], current[4]];
 
@@ -49,7 +47,6 @@ function DetailBoard({ sign }) {
     topBlockHeader = 'Детализация выписанных';
   } else if (sign === 'oar') {
       content = <div className='detail_block'>
-                <OARDetailBoard dept={'Отделение реанимации и интенсивной терапии'} values={oar3} deads={deads.oar_d} />
                 <OARDetailBoard dept={'Отделение реанимации и интенсивной терапии № 1'} values={oar2} deads={deads.oar1_d} />
                 <OARDetailBoard dept={'Отделение реанимации и интенсивной терапии № 2'} values={oar5} deads={deads.oar2_d} />          
                 <OARDetailBoard dept={'Отделение реанимации и интенсивной терапии для больных с ОНМК'} values={oar1} deads={deads.oaronmk_d} />

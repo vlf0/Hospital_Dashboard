@@ -6,7 +6,7 @@ import './signout_table.css';
 
 const SignOutDetailTable = () => {
   let kisDeads = useContext(DataContext).kis;
-  kisDeads = (kisDeads[0].deads);
+  kisDeads = kisDeads.deads;
 
   const readyRuData = DeadTableProcess(kisDeads);
 
