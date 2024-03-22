@@ -75,6 +75,7 @@ export function ensureArrayLength(array, desiredLength) {
 };
 
 export function DeadTableProcess(dataset) {
+
   // Using map to transform each item in the dataset
   const modifiedObjects = dataset.map(item => {
     return {
@@ -82,6 +83,7 @@ export function DeadTableProcess(dataset) {
       '№ ИБ': item.ib_num,
       'Пол': item.sex,
       'Возраст': item.age,
+      'Отделение': item.dept,
       'Дата поступления': DateFormatting(item.arriving_dt),
       'Состояние при поступлении': item.state,
       'Кол-во койко дней': item.days,
@@ -141,6 +143,27 @@ export function CurrentOarTable(dataset) {
       'Койко дней': item.days,
       'Лечащий врач': item.doc_fio,
       'Дигноз при поступлении': item.diag_start
+    };
+  });
+
+  return modifiedObjects;
+};
+
+
+export function DeadsOarTable(dataset) {
+
+  const modifiedObjects = dataset.map(item => {
+    return {
+      'ФИО': item.pat_fio,
+      '№ ИБ': item.ib_num,
+      'Пол': item.sex,
+      'Возраст': item.age,
+      'Отделение': item.dept,
+      'Дата поступления': item.arriving_dt,
+      'Состояние при поступлении': item.state,
+      'Кол-во койко дней': item.days,
+      'Дигноз при поступлении': item.diag_arr,
+      'Дигноз при выписке': item.diag_dead
     };
   });
 

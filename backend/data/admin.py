@@ -29,6 +29,9 @@ class ProfilesAdmin(admin.ModelAdmin):
         if not created:
             profile_plan.active = obj.active
             profile_plan.save()
+        cache.delete('dmk')
+        Cacher().dmk_cache()
+        trigger_notification()
 
 
 class PlanNumbersAdmin(admin.ModelAdmin):

@@ -228,7 +228,7 @@ class QuerySets:
                          """
 
     # Each string of this list is a keyword of dict where value is a serialized data.
-    DICT_KEYWORDS = ['arrived', 'signout', 'deads',
+    DICT_KEYWORDS = ['arrived', 'signout', 'deads', 'oar_deads',
                      'oar_arrived', 'oar_moved', 'oar_current', 'oar_numbers']
 
     # Lists of columns for mapping with values to creating CleanData class instances.
@@ -250,6 +250,13 @@ class QuerySets:
     channels = ['103', 'Поликлиника', '103 Поликлиника', 'самотек', 'план']
     statuses = ['ЗЛ', 'Иногородний', 'НР', 'НИЛ', 'ДМС', 'Не указано'] 
     signout = ['Умер в стационаре', 'Переведён в другую МО из стационара', 'Выписан']
+    oar_depts = ['Отделение реанимации и интенсивной терапии № 1', 
+                 'Отделение реанимации и интенсивной терапии № 2',
+                 'Отделение реанимации и интенсивной терапии для больных с ОНМК',
+                 'Отделение реанимации и интенсивной терапии для больных с острым инфарктом миокарда',
+                 'Отделение анестезиологии-реанимации'
+                ]
+
     # Dict for mapping with serializer fields (relates to "план/факт по профилям" table).
     # All english names is fields of serializer.
     profiles_mapping = {

@@ -76,11 +76,11 @@ const SignInDetailBoard = () => {
         <div className='separated_detail_block'>
           <p> Иногородние </p> {kis.foreign} </div>
         <div className='separated_detail_block'> 
-          <p> НР </p> {kis.singly} </div>
+          <p> НР </p> {kis.nr} </div>
         <div className='separated_detail_block'>  
           <p> НИЛ </p> {kis.nil} </div>
         <div className='separated_detail_block'>  
-          <p> ДМС </p> {kis.nr} </div>
+          <p> ДМС </p> {kis.dms} </div>
         <div className='separated_detail_block'>  
           <p> Не указано </p> {kis.undefined} </div>
       </div>

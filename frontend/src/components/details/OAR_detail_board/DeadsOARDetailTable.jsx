@@ -1,17 +1,32 @@
 import React, { useContext } from 'react';
 import { useTable } from 'react-table';
-import DataContext from "../../DataContext";
-import { DeadTableProcess } from '../../Feauters';
-import './signout_table.css';
+import { DateFormatting } from '../../Feauters';
+import DataContext from '../../DataContext';
+import { DeadsOarTable } from '../../Feauters';
+import '../signout_detail_board/signout_table.css';
 
-const SignOutDetailTable = () => {
-  let kisDeads = useContext(DataContext).kis;
-  kisDeads = (kisDeads[0].deads);
 
-  const readyRuData = DeadTableProcess(kisDeads);
 
-  // Define columns
-  const columns = Object.keys(readyRuData[0]).map(key => ({
+const DeadsOARDetailTable = ({ departament }) => {
+  const oars = useContext(DataContext).kis[0];
+
+
+  let deads = oars.oar_deads;
+  deads = DeadsOarTable(deads);
+
+  const filteredData = deads
+  .filter(dict => dict['Отделение'] === departament)
+  .map(({ Отделение, ...rest }) => rest);
+
+  // Applying foramtting datetime field 
+  const formattedArray = filteredData.map(item => ({
+    ...item,
+    'Дата поступления': DateFormatting(item['Дата поступления']),
+  }));
+
+  const columns = Object.keys(deads[0])
+  .filter(key => key !== 'Отделение')
+  .map(key => ({
     Header: key,
     accessor: key,
   }));
@@ -19,12 +34,12 @@ const SignOutDetailTable = () => {
   // Create a table instance
   const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } = useTable({
     columns,
-    data: readyRuData, // Wrap readyRuData in an array to use with react-table
+    data: formattedArray, // Use filteredData directly
   });
 
   return (
     <div className='deads-table-container'>
-      <h2 className='detail_block_header'> Детализация по умершим </h2>
+      <h2 className='detail_block_header'> Детализация по отделению </h2>
       <table className='deads-table' {...getTableProps()} >
         <thead>
           {headerGroups.map(headerGroup => (
@@ -52,4 +67,4 @@ const SignOutDetailTable = () => {
   );
 };
 
-export default SignOutDetailTable;
+export default DeadsOARDetailTable;

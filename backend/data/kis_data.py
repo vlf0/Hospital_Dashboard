@@ -230,11 +230,9 @@ class DataForDMK(DataProcessing):
         :return: *list*: List containing total, positive, and negative amounts.
         """
         data = self.filter_dataset(dataset, ind, value)
-        print(data)
         total_amount = self.count_dataset_total(dataset)
         print(total_amount)
         positive_amount = len(data)
-        print(positive_amount)
         negative_amount = total_amount - positive_amount
         print(negative_amount)
         if ind == 1:
@@ -281,7 +279,7 @@ class DataForDMK(DataProcessing):
         :param dh_dataset: Raw dataset from db.
         :return:
         """
-        profiles_queryset = Profiles.objects.all()
+        profiles_queryset = Profiles.objects.filter(active=True)
         profiles = [{profile.name: profile.id} for profile in profiles_queryset]
         # Here we are checking profile name from each row given dataset so that it accords
         # profiles added into Profiles model and get list of ready to serializing dicts.
@@ -538,22 +536,29 @@ class KISDataProcessing(DataProcessing):
         """
         Process and serialize data related to signouts.
 
+         This method responsible for all data related to patient death. 
+         It is mean that it will return dict containing both counted numbers of deads
+         and serialized data of deads by each reanimation dept for table building.
+
         :param deads_dataset: Dataset from DB as a list of tuples.
         :return: Serialized data.
         """
-        # Counting deads patients in OARs
-        if oars_filtered := [len(self.filter_dataset(deads_dataset, 6, oar))
-                             for oar in ['Отделение реанимации и интенсивной терапии № 1', 
-                                         'Отделение реанимации и интенсивной терапии № 2',
-                                         'Отделение реанимации и интенсивной терапии для больных с ОНМК',
-                                         'Отделение реанимации и интенсивной терапии для больных с острым инфарктом миокарда',
-                                         'Отделение анестезиологии-реанимации'
-                                         ]]:
-            self.deads_oar = [tuple(oars_filtered)]
-        # Processing table data for serializing.
         columns = self.qs.COLUMNS['deads_t']
-        ready_dataset = self.__result_for_sr(columns, deads_dataset)
-        return self.__serialize(ready_dataset, data_serializer=False)
+        # Process and serializing common deads.
+        ready_common_dataset = self.__result_for_sr(columns, deads_dataset)
+        ready_sr_common_deads = self.__serialize(ready_common_dataset, data_serializer=False)
+        # Process and serializing oars deads.
+        oar_dataset = [row for row in deads_dataset if row[6] in self.qs.oar_depts]
+        ready_oar_dataset = self.__result_for_sr(columns, oar_dataset)
+        ready_sr_oar_deads = self.__serialize(ready_oar_dataset, data_serializer=False)
+        summary_dict = {'deads': ready_sr_common_deads, 'oar_deads': ready_sr_oar_deads}
+        # Counting deads patients in OARs
+        if oars_filtered := [len(self.filter_dataset(deads_dataset, 6, oar)) 
+                             for oar in self.qs.oar_depts]: 
+            self.deads_oar = [tuple(oars_filtered)]
+        return summary_dict
+    
+
 
     def oar_process(self, dataset: list[tuple], columns: list[str]) -> dict[str, Any]:
         """
@@ -564,12 +569,7 @@ class KISDataProcessing(DataProcessing):
         :return: Dict of serialized data.
         """
         # Creating list of calculating lens of each separated datasets that filtered by oar number
-        if oar_nums := [len(self.filter_dataset(dataset, 3, oar)) for oar in ['Отделение реанимации и интенсивной терапии № 1', 
-                                                                              'Отделение реанимации и интенсивной терапии № 2',
-                                                                              'Отделение реанимации и интенсивной терапии для больных с ОНМК',
-                                                                              'Отделение реанимации и интенсивной терапии для больных с острым инфарктом миокарда',
-                                                                              'Отделение анестезиологии-реанимации'
-                                                                              ]]:
+        if oar_nums := [len(self.filter_dataset(dataset, 3, oar)) for oar in self.qs.oar_depts]:
             self.counted_oar.append([tuple(oar_nums)])
         ready_dataset = self.__result_for_sr(columns, dataset)
         return self.__serialize(ready_dataset, data_serializer=False)
@@ -617,7 +617,10 @@ class KISDataProcessing(DataProcessing):
         oar_current = self.oar_process(next(gen), self.qs.COLUMNS['oar_current_t'])
         oar_numbers = self.oar_count()
         # Creating list of ready processed datasets.
-        ready_dataset = [arrived, signout, deads, oar_arrived, oar_moved, oar_current, oar_numbers]
+        oar_deads = deads.get('oar_deads')
+        common_deads = deads.get('deads')
+        ready_dataset = [arrived, signout, common_deads, oar_deads,
+                         oar_arrived, oar_moved, oar_current, oar_numbers]
         # Creating list of dicts where keys takes from query class
         # and values are ready dataset iterating list of them one by one.
         result = [{keywords[ready_dataset.index(dataset)]: dataset for dataset in ready_dataset}]
@@ -629,7 +632,7 @@ def collect_model() -> dict:
     data = Profiles.objects \
         .select_related() \
         .annotate(total=Sum('accumulationofincoming__number')) \
-        .values('name', 'total', 'plannumbers__plan')
+        .values('name', 'total', 'plannumbers__plan').filter(active=True)   
     accum_sr = ProfilesSerializer(data, many=True)
     return accum_sr.data
 
