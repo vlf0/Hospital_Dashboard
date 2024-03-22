@@ -1,4 +1,7 @@
-"""Provided functions-decorators for "data" app."""
+"""
+Provided functions-decorators for "data" app.
+If you don't want using cache system - just add decorator to the viewset.
+"""
 from rest_framework.response import Response
 from .models import MainData
 from .serializers import MainDataSerializer

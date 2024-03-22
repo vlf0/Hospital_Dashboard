@@ -8,7 +8,6 @@ import DeadsOARDetailTable from "./DeadsOARDetailTable";
 
 const OARDetailBoard = ({ dept, values, deads }) => {
 
-
   const [isOARTableVisible, setIsOARTableVisible] = useState(false);
   const [tableType, setTableType] = useState(null);
   const [selectedValue, setSelectedValue] = useState(null);

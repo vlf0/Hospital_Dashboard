@@ -7,7 +7,7 @@ import '../signout_detail_board/signout_table.css';
 
 const InOARDetailTable = ({ departament }) => {
 
-  const oars = useContext(DataContext).kis[0];
+  const oars = useContext(DataContext).kis;
 
   let current = oars.oar_current;
   current = CurrentOarTable(current);

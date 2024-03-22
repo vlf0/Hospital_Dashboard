@@ -8,7 +8,7 @@ import '../signout_detail_board/signout_table.css';
 
 
 const DeadsOARDetailTable = ({ departament }) => {
-  const oars = useContext(DataContext).kis[0];
+  const oars = useContext(DataContext).kis;
 
 
   let deads = oars.oar_deads;

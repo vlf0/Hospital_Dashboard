@@ -6,7 +6,7 @@ import DataContext from '../../DataContext';
 import '../signout_detail_board/signout_table.css';
 
 const InOARDetailTable = ({ departament }) => {
-  const oars = useContext(DataContext).kis[0];
+  const oars = useContext(DataContext).kis;
 
   let moved = oars.oar_moved;
   moved = MovedOarTable(moved);
