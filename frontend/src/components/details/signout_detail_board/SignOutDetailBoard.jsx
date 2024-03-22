@@ -21,9 +21,6 @@ const SignOutDetailBoard = () => {
   kis = kis[0].signout[0]
 
 
-  // console.log(dmk)
-  // console.log(kis)
-
   const [isDeadTableVisible, setIsDeadTableVisible] = useState(false);
   const toggleDeadTableVisibility = () => {
     setIsDeadTableVisible(!isDeadTableVisible);

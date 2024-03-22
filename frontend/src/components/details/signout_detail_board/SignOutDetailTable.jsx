@@ -10,7 +10,6 @@ const SignOutDetailTable = () => {
 
   const readyRuData = DeadTableProcess(kisDeads);
 
-
   // Define columns
   const columns = Object.keys(readyRuData[0]).map(key => ({
     Header: key,

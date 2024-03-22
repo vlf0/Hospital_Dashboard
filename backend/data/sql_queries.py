@@ -57,7 +57,7 @@ class QuerySets:
     OAR_CURRENT_QUERY = """SELECT pat_fio, ib_num, ages, dept, doc_fio, days, diag_start FROM mm.oar_current;"""
 
     # Each string of this list is a keyword of dict where value is a serialized data.
-    DICT_KEYWORDS = ['arrived', 'signout', 'deads',
+    DICT_KEYWORDS = ['arrived', 'signout', 'deads', 'oar_deads',
                      'oar_arrived', 'oar_moved', 'oar_current', 'oar_numbers']
 
     # Lists of columns for mapping with values to creating CleanData class instances.
@@ -79,6 +79,7 @@ class QuerySets:
     channels = ['103', 'Поликлиника', '103 Поликлиника', 'самотек', 'план']
     statuses = ['ЗЛ', 'Иногородний', 'НР', 'НИЛ', 'ДМС', 'Не указано'] 
     signout = ['Умер', 'Переведен', 'Выписан']
+    oar_depts = ['ОРИТ №1', 'ОРИТ №2', 'ОРИТ №3']
 
     # Dict for mapping with serializer fields (relates to "план/факт по профилям" table).
     # All english names is fields of serializer.

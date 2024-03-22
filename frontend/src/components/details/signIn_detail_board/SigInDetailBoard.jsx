@@ -44,7 +44,7 @@ const SignInDetailBoard = () => {
     };
   }, [reload]);
   
-console.log(kis)
+
   
   return (
     <div className='detail_block'>

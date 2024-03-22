@@ -34,7 +34,6 @@ const DeadsChartDetail = ({ data }) => {
           .filter(([key, value]) => key.endsWith('_d'))
       );
 
-    console.log(deptsOut)
     const endDepts = Object.keys(deptsOut)
     const ruDepts = endDepts.map(index => chartMap[index])
     const nums = Object.values(deptsOut) 

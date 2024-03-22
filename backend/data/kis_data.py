@@ -525,21 +525,29 @@ class KISDataProcessing(DataProcessing):
         """
         Process and serialize data related to signouts.
 
+         This method responsible for all data related to patient death. 
+         It is mean that it will return dict containing both counted numbers of deads
+         and serialized data of deads by each reanimation dept for table building.
+
         :param deads_dataset: Dataset from DB as a list of tuples.
         :return: Serialized data.
         """
-        # Getting separated datasets of deads pats by each reanimation for details.
-        deads_datasets = tuple({oar: self.filter_dataset(deads_dataset, 6, oar)} for oar in ['ОРИТ №1', 'ОРИТ №2', 'ОРИТ №3'])
-        print(deads_datasets)
-
-        # Processing table data for serializing.
         columns = self.qs.COLUMNS['deads_t']
-        ready_dataset = self.__result_for_sr(columns, deads_dataset)
+        # Process and serializing common deads.
+        ready_common_dataset = self.__result_for_sr(columns, deads_dataset)
+        ready_sr_common_deads = self.__serialize(ready_common_dataset, data_serializer=False)
+        # Process and serializing oars deads.
+        oar_dataset = [row for row in deads_dataset if row[6] in self.qs.oar_depts]
+        ready_oar_dataset = self.__result_for_sr(columns, oar_dataset)
+        ready_sr_oar_deads = self.__serialize(ready_oar_dataset, data_serializer=False)
+        summary_dict = {'deads': ready_sr_common_deads, 'oar_deads': ready_sr_oar_deads}
         # Counting deads patients in OARs
         if oars_filtered := [len(self.filter_dataset(deads_dataset, 6, oar)) 
-                             for oar in ['ОРИТ №1', 'ОРИТ №2', 'ОРИТ №3']]:  # Need change orits names
+                             for oar in self.qs.oar_depts]: 
             self.deads_oar = [tuple(oars_filtered)]
-        return self.__serialize(ready_dataset, data_serializer=False)
+        return summary_dict
+    
+
 
     def oar_process(self, dataset: list[tuple], columns: list[str]) -> dict[str, Any]:
         """
@@ -550,7 +558,7 @@ class KISDataProcessing(DataProcessing):
         :return: Dict of serialized data.
         """
         # Creating list of calculating lens of each separated datasets that filtered by oar number
-        if oar_nums := [len(self.filter_dataset(dataset, 3, oar)) for oar in ['ОРИТ №1', 'ОРИТ №2', 'ОРИТ №3']]:
+        if oar_nums := [len(self.filter_dataset(dataset, 3, oar)) for oar in self.qs.oar_depts]:
             self.counted_oar.append([tuple(oar_nums)])
         ready_dataset = self.__result_for_sr(columns, dataset)
         return self.__serialize(ready_dataset, data_serializer=False)
@@ -598,7 +606,10 @@ class KISDataProcessing(DataProcessing):
         oar_current = self.oar_process(next(gen), self.qs.COLUMNS['oar_current_t'])
         oar_numbers = self.oar_count()
         # Creating list of ready processed datasets.
-        ready_dataset = [arrived, signout, deads, oar_arrived, oar_moved, oar_current, oar_numbers]
+        oar_deads = deads.get('oar_deads')
+        common_deads = deads.get('deads')
+        ready_dataset = [arrived, signout, common_deads, oar_deads,
+                         oar_arrived, oar_moved, oar_current, oar_numbers]
         # Creating list of dicts where keys takes from query class
         # and values are ready dataset iterating list of them one by one.
         result = [{keywords[ready_dataset.index(dataset)]: dataset for dataset in ready_dataset}]

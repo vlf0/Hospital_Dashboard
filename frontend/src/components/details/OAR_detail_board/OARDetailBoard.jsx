@@ -3,12 +3,12 @@ import { useSpring, animated } from "react-spring";
 import InOARDetailTable from "./InOARDetailTable";
 import MoveOARDetailTable from "./MoveOARDetailTable";
 import OnTreatmentOARDetailTable from "./OnTreatmentOARDetailTable";
+import DeadsOARDetailTable from "./DeadsOARDetailTable";
 
 
 const OARDetailBoard = ({ dept, values, deads }) => {
 
 
-  console.log(values)
   const [isOARTableVisible, setIsOARTableVisible] = useState(false);
   const [tableType, setTableType] = useState(null);
   const [selectedValue, setSelectedValue] = useState(null);
@@ -63,7 +63,7 @@ const OARDetailBoard = ({ dept, values, deads }) => {
 
         <div
           className="separated_detail_block_X"
-          onClick={(event) => toggleDeadTableVisibility("onTreatment", event)}
+          onClick={(event) => toggleDeadTableVisibility("deads", event)}
           orit-name={dept}
         >
           <p> Умерли в отделении </p> {deads}
@@ -73,7 +73,7 @@ const OARDetailBoard = ({ dept, values, deads }) => {
         {isOARTableVisible && tableType === "in" && <InOARDetailTable departament={selectedValue} />}
         {isOARTableVisible && tableType === "move" && <MoveOARDetailTable departament={selectedValue} />}
         {isOARTableVisible && tableType === "onTreatment" && <OnTreatmentOARDetailTable departament={selectedValue} />}
-        {/* Add more conditions for other table types */}
+        {isOARTableVisible && tableType === "deads" && <DeadsOARDetailTable departament={selectedValue} />}
       </animated.div> 
     </>
   ); 
