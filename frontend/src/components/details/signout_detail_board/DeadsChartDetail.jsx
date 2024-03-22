@@ -39,7 +39,11 @@ const chartMap = {
     'pulmonology_d': 'Пульмонологическое'
 }
 
-const deptsOrder = ['therapy_d', 'surgery_d', 'cardio_d', 'oar1_d'];
+const deptsOrder = ['emer_d', 'dp_d', 'oar_d', 'oar1_d', 'oar2_d', 'oaronmk_d', 'oaroim_d',
+                    'surgery_d', 'neurosurgery_d', 'trauma_d', 'cardio_d', 'cardio2_d', 'therapy_d',
+                    'endo_d', 'neuroonmk_d', 'urology_d', 'pursurgery_d', 'pulmonology_d',
+                    'combine_d', 'gynecology_d', 'skp_d', 'apc_d', 'multi_pay_d'];
+                    
 
 const DeadsChartDetail = ({ data }) => {
 
