@@ -621,9 +621,7 @@ class KISDataProcessing(DataProcessing):
         common_deads = deads.get('deads')
         ready_dataset = [arrived, signout, common_deads, oar_deads,
                          oar_arrived, oar_moved, oar_current, oar_numbers]
-        # Creating list of dicts where keys takes from query class
-        # and values are ready dataset iterating list of them one by one.
-        result = [{keywords[ready_dataset.index(dataset)]: dataset for dataset in ready_dataset}]
+        result = dict(zip(keywords, ready_dataset))
         return result
 
 
