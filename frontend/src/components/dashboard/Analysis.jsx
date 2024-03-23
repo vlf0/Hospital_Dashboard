@@ -1,5 +1,4 @@
 import React, { useContext } from 'react';
-import { useLocation } from 'react-router-dom';
 import { useSpring, animated } from 'react-spring';
 import ArrivedChart from '../charts/ArrivedChart';
 import SignOutChart from '../charts/SignOutChart';
@@ -20,19 +19,16 @@ function GetAnalysis() {
   const today = new Date();
   const yesterDay = getYesterdayDate();
 
-
   const props = useSpring({
     from: { opacity: 0 },
     to: { opacity: 1 },
     config: { duration: 700 },
   });
-
-  const location = useLocation();
   
   const main_dmk = useContext(DataContext).dmk.main_dmk;
 
-  const currentDay = getMainDMK(main_dmk, today, 1);
-  const yesterday = getMainDMK(main_dmk, yesterDay, 2);
+  const currentDay = getMainDMK(main_dmk, today);
+  const yesterday = getMainDMK(main_dmk, yesterDay);
 
 
   const arrived = CustomMap(currentDay, yesterday, 'arrived')

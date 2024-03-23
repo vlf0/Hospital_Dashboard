@@ -4,6 +4,9 @@ import { ArrivedOarTable } from '../../Feauters';
 import DataContext from '../../DataContext';
 import '../signout_detail_board/signout_table.css';
 
+
+
+
 const InOARDetailTable = ({ departament }) => {
   const oars = useContext(DataContext).kis;
 

@@ -21,6 +21,7 @@
     "websocket": "^1.0.34"
   },
   "devDependencies": {
+    "@babel/plugin-transform-private-property-in-object": "^7.24.1",
     "react-scripts": "5.0.1"
   },
   "scripts": {
