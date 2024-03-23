@@ -14,7 +14,7 @@ Chart.defaults.color = '#090b1f';
 
 // Depts map
 const chartMap = {
-    'oaronmk_d': 'ОРИТ ОИМ',
+    'oaronmk_d': 'ОРИТ ОНМК',
     'surgery_d': 'Хирургическое',
     'oar1_d': 'ОРИТ № 1',
     'dp_d': 'Приемное ДП',
