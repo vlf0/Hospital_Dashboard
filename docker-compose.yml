@@ -1,12 +1,6 @@
 version: '3'
 
 services:
-  nginx:
-    build: ./nginx/.
-    ports:
-      - "8080:80"
-    networks:
-      - one_net
   redis:
     build: ./redis/.
     ports:
@@ -17,10 +11,24 @@ services:
     build: ./backend/.
     ports:
       - "8000:8000"
+    volumes:
+      - "static:/usr/src/Dashboard/static"
     networks:
       - one_net
+  nginx:
+    build: ./nginx/.
+    ports:
+      - "8080:80"
+    volumes:
+      - "static:/static"
     depends_on:
-      - nginx
+      - backend
+    links:
+      - "backend:backend"
+    networks:
+      - one_net
+volumes:
+  static:
 networks:
   one_net:
     driver: bridge

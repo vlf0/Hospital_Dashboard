@@ -24,11 +24,9 @@ class ProfilesAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change) -> None:
         """Override method so that perform renewing data in cache."""
         super().save_model(request, obj, form, change)
-        profile_plan, created = PlanNumbers.objects.get_or_create(profile=obj, defaults={'active': obj.active,
-                                                                                         'plan': 0})
-        if not created:
-            profile_plan.active = obj.active
-            profile_plan.save()
+        cache.delete('dmk')
+        Cacher().dmk_cache()
+        trigger_notification()
 
 
 class PlanNumbersAdmin(admin.ModelAdmin):
@@ -39,7 +37,7 @@ class PlanNumbersAdmin(admin.ModelAdmin):
         """Override method so that perform renewing data in cache."""
         super().save_model(request, obj, form, change)
         cache.delete('dmk')
-        Cacher().plans_caching()
+        Cacher().dmk_cache()
         trigger_notification()
 
 
