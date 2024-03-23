@@ -14,16 +14,14 @@ function DetailBoard({ sign }) {
 
 
   const data = useContext(DataContext).kis;
-  const kis = data[0].oar_numbers;
+
+  const kis = data.oar_numbers;
   const deads = kis[3].deads_nums[0];
-
-
-  
   // Zipping and mapping data to pass as a props
   const arrived = Object.values(kis[0].arrived_nums[0]);
   const moved = Object.values(kis[1].moved_nums[0]);
   const current = Object.values(kis[2].current_nums[0]);
-  
+
   const oar1 = [arrived[0],moved[0], current[0]];
   const oar2 = [arrived[1],moved[1], current[1]];
   const oar3 = [arrived[2],moved[2], current[2]];

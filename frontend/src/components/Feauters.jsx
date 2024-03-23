@@ -75,6 +75,7 @@ export function ensureArrayLength(array, desiredLength) {
 };
 
 export function DeadTableProcess(dataset) {
+  console.log(dataset)
   // Using map to transform each item in the dataset
   const modifiedObjects = dataset.map(item => {
     return {
@@ -82,6 +83,7 @@ export function DeadTableProcess(dataset) {
       '№ ИБ': item.ib_num,
       'Пол': item.sex,
       'Возраст': item.age,
+      'Отделение': item.dept,
       'Дата поступления': DateFormatting(item.arriving_dt),
       'Состояние при поступлении': item.state,
       'Кол-во койко дней': item.days,
@@ -122,7 +124,7 @@ export function MovedOarTable(dataset) {
       'Отделение': item.dept,
       'Лечащий врач': item.doc_fio,
       'Дигноз при поступлении': item.diag_start,
-      'Дата перевода': item.move_date,
+      'Дата перевода': DateFormatting(item.move_date),
       'Переведен из': item.from_dept
     };
   });
@@ -148,6 +150,27 @@ export function CurrentOarTable(dataset) {
 };
 
 
+export function DeadsOarTable(dataset) {
+
+  const modifiedObjects = dataset.map(item => {
+    return {
+      'ФИО': item.pat_fio,
+      '№ ИБ': item.ib_num,
+      'Пол': item.sex,
+      'Возраст': item.age,
+      'Отделение': item.dept,
+      'Дата поступления': DateFormatting(item.arriving_dt),
+      'Состояние при поступлении': item.state,
+      'Кол-во койко дней': item.days,
+      'Дигноз при поступлении': item.diag_arr,
+      'Дигноз при выписке': item.diag_dead
+    };
+  });
+
+  return modifiedObjects;
+};
+
+
 export function GetNameOfDay(dateString) {
   return ['Вск', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб']
   [new Date(dateString).getDay()];
@@ -163,13 +186,13 @@ export function getYesterdayDate() {
 
 
 
-export function getMainDMK(dmkData, day, nums) {
+export function getMainDMK(dmkData, day) {
 
   let mainDMK;
+  const index = dmkData.findIndex(item => item.dates === formatDate(day));
 
-
-  if (dmkData.length > 1 && dmkData[dmkData.length - nums]['dates'] === formatDate(day)) {
-    mainDMK = dmkData[dmkData.length - nums];
+  if (index !== -1) {
+    mainDMK = dmkData[index];
   } else {
     mainDMK = { dates: formatDate(day), arrived: null, hosp: null, refused: null,
                 signout: null, deads: null, reanimation: null };

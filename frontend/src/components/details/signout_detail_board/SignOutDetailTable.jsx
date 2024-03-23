@@ -4,18 +4,29 @@ import DataContext from "../../DataContext";
 import { DeadTableProcess } from '../../Feauters';
 import './signout_table.css';
 
+
+const deadsColumns = ['ФИО', '№ ИБ', 'Пол', 'Возраст', 'Отделение', 'Дата поступления',
+                      'Состояние при поступлении', 'Кол-во койко дней',
+                      'Дигноз при поступлении', 'Дигноз при выписке']
+
 const SignOutDetailTable = () => {
   let kisDeads = useContext(DataContext).kis;
-  kisDeads = (kisDeads[0].deads);
-
+  kisDeads = kisDeads.deads;
   const readyRuData = DeadTableProcess(kisDeads);
 
+  let columns;
 
+  if (readyRuData.length !== 0) {
   // Define columns
-  const columns = Object.keys(readyRuData[0]).map(key => ({
-    Header: key,
-    accessor: key,
-  }));
+    columns = Object.keys(readyRuData[0]).map(key => ({
+      Header: key,
+      accessor: key,
+    }))} else {
+    columns = deadsColumns.map(key => ({
+      Header: key,
+      accessor: key,
+    }))
+  }
 
   // Create a table instance
   const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } = useTable({

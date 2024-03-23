@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useLocation } from 'react-router-dom';
+import React from 'react';
 import GetData from '../../GetData';
 import ArrivedDetailPie from './ArrivedPieChart';
 import SignoutDetailPie from './SignoutPieChart';
@@ -7,7 +6,6 @@ import NoConnection from '../../no_data/NoConnection';
 
 
 const ArrivedDetails = () => {
-    const location = useLocation();
 
     const srcUrl = window.location.href;
     const date = srcUrl.split('=').pop();

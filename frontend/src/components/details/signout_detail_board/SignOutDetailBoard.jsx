@@ -13,16 +13,13 @@ const SignOutDetailBoard = () => {
   const today = new Date();
   
   const data = useContext(DataContext);
-  const dmkData = data.dmk.main_dmk
+  const dmkData = data.dmk.main_dmk;
   let dmk;
-  dmk = getMainDMK(dmkData, today, 1)
+  dmk = getMainDMK(dmkData, today, 1);
 
-  let kis = data.kis
-  kis = kis[0].signout[0]
+  let kis = data.kis;
+  kis = kis.signout[0];
 
-
-  // console.log(dmk)
-  // console.log(kis)
 
   const [isDeadTableVisible, setIsDeadTableVisible] = useState(false);
   const toggleDeadTableVisibility = () => {

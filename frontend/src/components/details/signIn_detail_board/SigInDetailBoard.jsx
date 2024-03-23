@@ -14,7 +14,7 @@ const SignInDetailBoard = () => {
 
 
   const data = useContext(DataContext);
-  const kis = data.kis[0].arrived[0];
+  const kis = data.kis.arrived[0];
   const dmkData = data.dmk.main_dmk;
 
   let main_dmk;
@@ -44,7 +44,7 @@ const SignInDetailBoard = () => {
     };
   }, [reload]);
   
-console.log(kis)
+
   
   return (
     <div className='detail_block'>
@@ -77,11 +77,11 @@ console.log(kis)
         <div className='separated_detail_block'>
           <p> Иногородние </p> {kis.foreign} </div>
         <div className='separated_detail_block'> 
-          <p> НР </p> {kis.singly} </div>
+          <p> НР </p> {kis.nr} </div>
         <div className='separated_detail_block'>  
-          <p> НИЛ </p> {'STUB'} </div>
+          <p> НИЛ </p> {kis.nil} </div>
         <div className='separated_detail_block'>  
-          <p> ДМС </p> {'STUB'} </div>
+          <p> ДМС </p> {kis.dms} </div>
         <div className='separated_detail_block'>  
           <p> Не указано </p> {kis.undefined} </div>
       </div>

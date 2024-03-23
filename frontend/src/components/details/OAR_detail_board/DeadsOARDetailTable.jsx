@@ -1,26 +1,48 @@
 import React, { useContext } from 'react';
 import { useTable } from 'react-table';
-import { MovedOarTable } from '../../Feauters';
 import DataContext from '../../DataContext';
+import { DeadsOarTable } from '../../Feauters';
 import '../signout_detail_board/signout_table.css';
 
-const InOARDetailTable = ({ departament }) => {
+
+
+const oarDeadsColumns = ['ФИО', '№ ИБ', 'Пол', 'Возраст', 'Дата поступления',
+                      'Состояние при поступлении', 'Кол-во койко дней',
+                      'Дигноз при поступлении', 'Дигноз при выписке']
+
+
+const DeadsOARDetailTable = ({ departament }) => {
   const oars = useContext(DataContext).kis;
 
-  let moved = oars.oar_moved;
-  moved = MovedOarTable(moved);
 
-  const filteredData = moved
-  .filter(dict => dict['Отделение'] === departament)
-  .map(({ Отделение, ...rest }) => rest);
+  let deads = oars.oar_deads;
+  deads = DeadsOarTable(deads);
 
 
-  const columns = Object.keys(moved[0])
-  .filter(key => key !== 'Отделение')
-  .map(key => ({
-    Header: key,
-    accessor: key,
-  }));
+
+  let filteredData;
+  let columns;
+
+  if (deads.length !== 0) {
+
+    filteredData = deads
+    .filter(dict => dict['Отделение'] === departament)
+    .map(({ Отделение, ...rest }) => rest);
+
+    columns = Object.keys(deads[0])
+    .filter(key => key !== 'Отделение')
+    .map(key => ({
+      Header: key,
+      accessor: key,
+    }));
+  } else {
+    filteredData = [];
+    columns = oarDeadsColumns.map(key => ({
+      Header: key,
+      accessor: key,
+    }));
+  }
+
 
   // Create a table instance
   const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } = useTable({
@@ -58,4 +80,4 @@ const InOARDetailTable = ({ departament }) => {
   );
 };
 
-export default InOARDetailTable;
+export default DeadsOARDetailTable;
