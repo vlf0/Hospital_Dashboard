@@ -1,7 +1,6 @@
 import React from 'react';
 import { Pie } from 'react-chartjs-2';
 import NoData from '../../no_data/NoData';
-import Header from '../Header';
 import TopBlock from '../../menu/TopBlock';
 import './details.css';
 import '../../parent.css';

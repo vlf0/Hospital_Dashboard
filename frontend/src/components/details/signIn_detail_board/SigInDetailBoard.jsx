@@ -14,7 +14,7 @@ const SignInDetailBoard = () => {
 
 
   const data = useContext(DataContext);
-  const kis = data.kis.arrived;
+  const kis = data.kis.arrived[0];
   const dmkData = data.dmk.main_dmk;
 
   let main_dmk;

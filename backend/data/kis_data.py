@@ -616,6 +616,8 @@ class KISDataProcessing(DataProcessing):
         oar_moved = self.oar_process(next(gen), self.qs.COLUMNS['oar_moved_t'])
         oar_current = self.oar_process(next(gen), self.qs.COLUMNS['oar_current_t'])
         oar_numbers = self.oar_count()
+        self.counted_oar.clear()
+        self.deads_oar.clear()
         # Creating list of ready processed datasets.
         oar_deads = deads.get('oar_deads')
         common_deads = deads.get('deads')

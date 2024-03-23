@@ -1,10 +1,14 @@
 import React, { useContext } from 'react';
 import { useTable } from 'react-table';
-import { DateFormatting } from '../../Feauters';
 import DataContext from '../../DataContext';
 import { DeadsOarTable } from '../../Feauters';
 import '../signout_detail_board/signout_table.css';
 
+
+
+const oarDeadsColumns = ['ФИО', '№ ИБ', 'Пол', 'Возраст', 'Дата поступления',
+                      'Состояние при поступлении', 'Кол-во койко дней',
+                      'Дигноз при поступлении', 'Дигноз при выписке']
 
 
 const DeadsOARDetailTable = ({ departament }) => {
@@ -14,27 +18,36 @@ const DeadsOARDetailTable = ({ departament }) => {
   let deads = oars.oar_deads;
   deads = DeadsOarTable(deads);
 
-  const filteredData = deads
-  .filter(dict => dict['Отделение'] === departament)
-  .map(({ Отделение, ...rest }) => rest);
 
-  // Applying foramtting datetime field 
-  const formattedArray = filteredData.map(item => ({
-    ...item,
-    'Дата поступления': DateFormatting(item['Дата поступления']),
-  }));
 
-  const columns = Object.keys(deads[0])
-  .filter(key => key !== 'Отделение')
-  .map(key => ({
-    Header: key,
-    accessor: key,
-  }));
+  let filteredData;
+  let columns;
+
+  if (deads.length !== 0) {
+
+    filteredData = deads
+    .filter(dict => dict['Отделение'] === departament)
+    .map(({ Отделение, ...rest }) => rest);
+
+    columns = Object.keys(deads[0])
+    .filter(key => key !== 'Отделение')
+    .map(key => ({
+      Header: key,
+      accessor: key,
+    }));
+  } else {
+    filteredData = [];
+    columns = oarDeadsColumns.map(key => ({
+      Header: key,
+      accessor: key,
+    }));
+  }
+
 
   // Create a table instance
   const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } = useTable({
     columns,
-    data: formattedArray, // Use filteredData directly
+    data: filteredData, 
   });
 
   return (
