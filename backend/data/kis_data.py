@@ -282,13 +282,15 @@ class DataForDMK(DataProcessing):
                         for row in dh_dataset for o in profiles if o.get(row[0]) is not None]
         return result_dicts
 
-    def __collect_data(self) -> dict[str, dict]:
+    def __collect_data(self, chosen_date: Union[date, None]) -> dict[str, dict]:
         """
         Get calculated main values for detail boards on the front-end for saving to DMK DB.
 
         The method calculates data from a set of datasets obtained one by one through iteration of the generator
         and then concatenates it into one common dictionary.
 
+        :param chosen_date: If date parameter passed changes source "today" date in according field
+         at the start of dict to chosen date. Default is set to None.
         :raises StopIteration: If the generator is already empty. This point also will writen to logs.
 
         :return: Main data for saving to DMK DB.
@@ -304,6 +306,8 @@ class DataForDMK(DataProcessing):
             main_data = arrived | signout | deads
         # Add dates key-value pair to collected data dict.
         today_dict = {'dates': today()}
+        if chosen_date is not None:
+            today_dict = {'dates': chosen_date}
         ready_main_data = today_dict | main_data
         return {'main_data': ready_main_data, 'accum_data': dh_dataset}
 
@@ -343,9 +347,12 @@ class DataForDMK(DataProcessing):
                                         )
         return err_text
 
-    def save_to_dmk(self) -> list[Union[MainData, None], AccumulationOfIncoming]:
+    def save_to_dmk(self, chosen_date: date = None) -> list[Union[MainData, None], AccumulationOfIncoming]:
         """
         Save the prepared data to the DMK DB using the MainData model and its serializer.
+
+        :param chosen_date: If date parameter passed changes source "today" date in __collect_data method
+         to chosen date. Default is set to None.
 
         :raises ValidationError: If the serializer validation fails.
         :raises SyntaxError: If there is a syntax error in the serializer.
@@ -354,7 +361,7 @@ class DataForDMK(DataProcessing):
         :return: List containing one MainData instance or None as a first list element and list of AccumulatedData instances
          as a second element. If any error occurs - it write the logs to log-file.
         """
-        common_dict = self.__collect_data()
+        common_dict = self.__collect_data(chosen_date)
         main = common_dict['main_data']
         accum = common_dict['accum_data']
         main_res = self.save_main(main)
@@ -378,7 +385,7 @@ class DataForDMK(DataProcessing):
             en_error = self.__translate(e)
             logger.error(en_error)
 
-    def save_accumulated(self, accum_data: list[dict]) -> list[Union[MainData, Any], list[AccumulationOfIncoming]]:
+    def save_accumulated(self, accum_data: dict) -> list[Union[MainData, Any], list[AccumulationOfIncoming]]:
         """
         Iterate through given Serializer and save a few new model instances.
 
