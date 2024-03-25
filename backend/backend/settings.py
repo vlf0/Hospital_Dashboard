@@ -17,6 +17,7 @@ DEBUG = env.bool('DEBUG', default=False)
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
+    '10.123.8.17',
 ]
 
 CORS_ALLOWED_ORIGINS = [
@@ -24,6 +25,8 @@ CORS_ALLOWED_ORIGINS = [
     'http://127.0.0.1:3000',
     'http://0.0.0.0:3000',
 ]
+
+CSRF_TRUSTED_ORIGINS = ['http://10.123.8.17']
 
 CORS_ALLOW_CREDENTIALS = True
 
@@ -103,7 +106,7 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("127.0.0.1", 6379)],
+            "hosts": [('0.0.0.0', 6379)],
         },
     },
 }
@@ -116,7 +119,7 @@ DB_CREDS = {
     'host': env.str('HOST'),
     'port': env.str('PORT'),
     'dbname': env.str('DBNAME'),
-    'user': env.str('USER'),
+    'user': env.str('PGUSER'),
     'password': env.str('PASSWORD'),
 }
 
@@ -167,14 +170,14 @@ LOGGING = {
     'handlers': {
         'conn_errs': {
             'class': 'logging.FileHandler',
-            'filename': SITE_ROOT + r'\backend\data\pg_logs.log',
+            'filename': SITE_ROOT + '/backend/data/pg_logs.log',
             'formatter': 'conn_errs',
             'level': 'ERROR',
             # 'mode': 'w'
             },
         'dmk': {
             'class': 'logging.FileHandler',
-            'filename': SITE_ROOT + r'\backend\data\pg_logs.log',
+            'filename': SITE_ROOT + '/backend/data/pg_logs.log',
             'formatter': 'dmk',
             'level': 'INFO',
             # 'mode': 'w'
@@ -213,7 +216,7 @@ CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.redis.RedisCache',
-        'LOCATION': 'redis://127.0.0.1:6379/2',
+        'LOCATION': 'redis://0.0.0.0:6379/2',
     }
 }
 
