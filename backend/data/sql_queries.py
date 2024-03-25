@@ -1,5 +1,6 @@
 """This module defines class responsible for giving whole query set of separated queries."""
 from datetime import date
+from typing import Union
 
 
 class QuerySets:
@@ -336,15 +337,18 @@ class QuerySets:
         result = dmk_queries + [self.OAR_MOVED_QUERY, self.OAR_CURRENT_QUERY]
         return result
 
-    def chosen_date_query(self, query: str, chosen_date: str) -> list:
+    def chosen_date_query(self, queryset: Union[str, list], chosen_date: str) -> list:
         """
         Replace date in the given query to passed and return query with needed date.
 
-        :param query: *str*: Original class attribute query contains today date filter.
+        :param queryset: *str*: Original class attribute query contains today date filter.
         :param chosen_date: Date for filtering that was chose users.
         :return: *str*: Changed query contains actual chosen date.
         """
-        new_query = query.replace(str(self.today()), chosen_date)
+        if type(queryset) is list:
+            new_query = [query.replace(str(self.today()), chosen_date) for query in queryset]
+            return new_query
+        new_query = queryset.replace(str(self.today()), chosen_date)
         return [new_query]
 
 
