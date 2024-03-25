@@ -1,7 +1,6 @@
 import React, { useContext } from 'react';
 import { useTable } from 'react-table';
 import { MovedOarTable } from '../../Feauters';
-import { DateFormatting } from '../../Feauters';
 import DataContext from '../../DataContext';
 import '../signout_detail_board/signout_table.css';
 
@@ -15,11 +14,6 @@ const InOARDetailTable = ({ departament }) => {
   .filter(dict => dict['Отделение'] === departament)
   .map(({ Отделение, ...rest }) => rest);
 
-  // Applying foramtting datetime field 
-  const formattedArray = filteredData.map(item => ({
-    ...item,
-    'Дата перевода': DateFormatting(item['Дата перевода']),
-  }));
 
   const columns = Object.keys(moved[0])
   .filter(key => key !== 'Отделение')
@@ -31,7 +25,7 @@ const InOARDetailTable = ({ departament }) => {
   // Create a table instance
   const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } = useTable({
     columns,
-    data: formattedArray, // Use filteredData directly
+    data: filteredData, 
   });
 
   return (
