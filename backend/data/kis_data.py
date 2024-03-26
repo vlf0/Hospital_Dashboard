@@ -495,7 +495,6 @@ class KISDataProcessing(DataProcessing):
         :param arrived_dataset: Dataset from DB as a list of tuples.
         :return: Serialized data.
         """
-        print(arrived_dataset)
         # Defining columns for serializer and values for filtering datasets.
         columns, channels, statuses = self.qs.COLUMNS['arrived'], self.qs.channels, self.qs.statuses
         # Getting first dataset by generator.

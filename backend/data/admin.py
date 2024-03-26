@@ -26,9 +26,6 @@ class ProfilesAdmin(admin.ModelAdmin):
         super().save_model(request, obj, form, change)
         profile_plan, created = PlanNumbers.objects.get_or_create(profile=obj, defaults={'active': obj.active,
                                                                                          'plan': 0})
-        if not created:
-            profile_plan.active = obj.active
-            profile_plan.save()
         cache.delete('dmk')
         Cacher().dmk_cache()
         trigger_notification()

@@ -18,17 +18,21 @@ ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
     '10.123.8.17',
+    '0.0.0.0',
 ]
 
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
+    'http://localhost:9000',
     'http://127.0.0.1:3000',
     'http://0.0.0.0:3000',
+    'http://10.123.8.17:9000'
 ]
 
-CSRF_TRUSTED_ORIGINS = ['http://10.123.8.17']
+CSRF_TRUSTED_ORIGINS = ['http://10.123.8.17:90']
 
 CORS_ALLOW_CREDENTIALS = True
+CORS_ORIGIN_ALLOW_ALL = True
 
 ROOT_URLCONF = 'backend.urls'
 
@@ -145,19 +149,16 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 LANGUAGE_CODE = 'ru-RU'
 
-LOCALE_PATHS = [
-    SITE_ROOT + r'\backend\locales'
-]
-
 TIME_ZONE = 'Europe/Moscow'
 
 USE_I18N = True
 
 USE_TZ = True
 
+STATIC_ROOT = f'{SITE_ROOT}/backend/static'
 
 # Static files (CSS, JavaScript, Images)
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

@@ -98,7 +98,7 @@ class QuerySets:
 #Добавить mm.emp_get_fio_by_id (h.doctor_emp_id) - Лечащий врач
     DEADS = f"""
              SELECT
-	         COALESCE (m.surname, ' ')||' '||COALESCE (m.name,' ')||' '|| COALESCE (m.patron,' ') AS ФИО_пациента ,
+	         mm.famaly_io(m.surname,m.name,m.patron) AS ФИО_Пациента,
              m.num||'-'||m.YEAR AS №ИБ,
                  CASE m.sex
 	         		WHEN '1' THEN 'Муж'
@@ -129,7 +129,7 @@ class QuerySets:
 
     OAR_ARRIVED_QUERY = f"""
                          SELECT 
-                         	   COALESCE (m.surname, ' ')||' '||COALESCE (m.name,' ')||' '|| COALESCE (m.patron,' ') AS ФИО_пациента ,
+                         	    mm.famaly_io(m.surname,m.name,m.patron) AS ФИО_Пациента,
                                 m.num||'-'||m.YEAR AS №ИБ,
                          	   EXTRACT(YEAR from age(m.beg_dt, p.birth)) as Возраст,
                          	   mm.dept_get_name(h.dept_id) AS Отделение,
@@ -154,8 +154,8 @@ class QuerySets:
 
     OAR_MOVED_QUERY = f"""
                        SELECT 
-                       	   COALESCE (m.surname, ' ')||' '||COALESCE (m.name,' ')||' '|| COALESCE (m.patron,' ') AS ФИО_пациента ,
-                              m.num||'-'||m.YEAR AS №ИБ,
+                       	    mm.famaly_io(m.surname,m.name,m.patron) AS ФИО_Пациента,
+                            m.num||'-'||m.YEAR AS №ИБ,
                        	   EXTRACT(YEAR from age(m.beg_dt, p.birth)) as Возраст,
                        	   mm.dept_get_name(h.dept_id) AS Отделение,
                        	   mm.emp_get_fio_by_id (h.doctor_emp_id) AS Лечащий_врач,
@@ -184,8 +184,8 @@ class QuerySets:
 
     OAR_CURRENT_QUERY = f"""
                          SELECT 
-                         	   COALESCE (m.surname, ' ')||' '||COALESCE (m.name,' ')||' '|| COALESCE (m.patron,' ') AS ФИО_пациента ,
-                                m.num||'-'||m.YEAR AS №ИБ,
+                         	   mm.famaly_io(m.surname,m.name,m.patron) AS ФИО_Пациента,
+                               m.num||'-'||m.YEAR AS №ИБ,
                          	   EXTRACT(YEAR from age(m.beg_dt, p.birth)) as Возраст,
                          	   mm.dept_get_name(h.dept_id) AS Отделение,
                          	   mm.emp_get_fio_by_id (h.doctor_emp_id) AS Лечащий_врач,
