@@ -142,19 +142,16 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 LANGUAGE_CODE = 'ru-RU'
 
-LOCALE_PATHS = [
-    SITE_ROOT + r'\backend\locales'
-]
-
 TIME_ZONE = 'Europe/Moscow'
 
 USE_I18N = True
 
 USE_TZ = True
 
+STATIC_ROOT = rf'{SITE_ROOT}/backend/static/'
 
 # Static files (CSS, JavaScript, Images)
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
