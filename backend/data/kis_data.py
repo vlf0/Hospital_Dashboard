@@ -231,10 +231,8 @@ class DataForDMK(DataProcessing):
         """
         data = self.filter_dataset(dataset, ind, value)
         total_amount = self.count_dataset_total(dataset)
-        print(total_amount)
         positive_amount = len(data)
         negative_amount = total_amount - positive_amount
-        print(negative_amount)
         if ind == 1:
             return [total_amount, positive_amount]
         return [total_amount, positive_amount, negative_amount]
@@ -256,10 +254,8 @@ class DataForDMK(DataProcessing):
         :return: Dictionary containing signout and deaths data.
         """
         result_keys = self.dmk_cols[3:5]
-        print()
-        print(result_keys)
+        
         ready_values = self.count_data(signout_dataset, 1, 'Умер в стационаре')
-        print(ready_values)
         return dict(zip(result_keys, ready_values))
 
     def get_reanimation_data(self, reanimation_dataset: list[tuple]) -> dict[str, int]:
