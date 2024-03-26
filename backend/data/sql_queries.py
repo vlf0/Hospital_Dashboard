@@ -96,7 +96,7 @@ class QuerySets:
                WHERE h.leave_dt BETWEEN DATE('{today()}') - INTERVAL '1 day, -6 hours' AND DATE('{today()}') - INTERVAL '-6 hours'
                ORDER BY h.hosp_outcome_id;  
                """
-#Добавить mm.emp_get_fio_by_id (h.doctor_emp_id) - Лечащий врач
+
     DEADS = f"""
              SELECT
 	         mm.famaly_io(m.surname,m.name,m.patron) AS ФИО_Пациента,
@@ -117,7 +117,8 @@ class QuerySets:
                        	  AND ds.ehr_case_id = h.ehr_case_id
                            ORDER BY ds.create_dt DESC
                            LIMIT 1) AS Диаг_поступление,
-             	    	h.final_diag_text AS Диаг_выписка
+             	    	h.final_diag_text AS Диаг_выписка,
+                        mm.emp_get_fio_by_id (h.doctor_emp_id) AS Лечащий_врач
              	    	
              FROM mm.mdoc m
              JOIN mm.hospdoc h ON h.mdoc_id = m.id
@@ -237,7 +238,8 @@ class QuerySets:
         'arrived': ['ch103', 'clinic_only', 'ch103_clinic', 'singly', 'plan',
                     'ZL', 'foreign', 'nr', 'nil', 'dms', 'undefined'],
         'signout': ['deads', 'moved', 'signout'],
-        'deads_t': ['pat_fio', 'ib_num', 'sex', 'age', 'arriving_dt', 'state', 'dept', 'days', 'diag_arr', 'diag_dead'],
+        'deads_t': ['pat_fio', 'ib_num', 'sex', 'age', 'arriving_dt', 'state', 'dept', 'days', 'diag_arr',
+                    'diag_dead', 'doc_fio'],
         'oar_arrived_t': ['pat_fio', 'ib_num', 'age', 'dept', 'doc_fio', 'diag_start'],
         'oar_moved_t': ['pat_fio', 'ib_num', 'age', 'dept', 'doc_fio', 'move_date', 'from_dept', 'diag_start'],
         'oar_current_t': ['pat_fio', 'ib_num', 'age', 'dept', 'doc_fio', 'days', 'diag_start'],

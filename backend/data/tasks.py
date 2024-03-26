@@ -8,8 +8,8 @@ from .models import AccumulationOfIncoming
 
 # Schedule for main logic - inserting data to DMK
 schedule1, _ = CrontabSchedule.objects.get_or_create(
-    minute='0',
-    hour='7',
+    minute='45',
+    hour='*',
     day_of_week='*',
     day_of_month='*',
     month_of_year='*',
@@ -18,7 +18,7 @@ schedule1, _ = CrontabSchedule.objects.get_or_create(
 # Schedule for acuumulativing logic - inserting data to DMK
 schedule2, _ = CrontabSchedule.objects.get_or_create(
     minute='0',
-    hour='7',
+    hour='6',
     day_of_week='*',
     day_of_month='1',
     month_of_year='*',
@@ -43,7 +43,7 @@ def insert_data():
     Remove all day caches, process and insert data into DMK.
 
      Update the MainData model with the collected data.
-     Do this everyday at 7:00 AM by schedule.
+     Do this everyday at 6:00 AM by schedule.
     """
     cache.delete_many(['dmk', 'kis'])
     ready_data = DataForDMK(KISData(QuerySets().queryset_for_dmk()))
