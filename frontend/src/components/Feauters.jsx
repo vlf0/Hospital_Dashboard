@@ -75,7 +75,6 @@ export function ensureArrayLength(array, desiredLength) {
 };
 
 export function DeadTableProcess(dataset) {
-  console.log(dataset)
   // Using map to transform each item in the dataset
   const modifiedObjects = dataset.map(item => {
     return {
@@ -88,7 +87,8 @@ export function DeadTableProcess(dataset) {
       'Состояние при поступлении': item.state,
       'Кол-во койко дней': item.days,
       'Дигноз при поступлении': item.diag_arr,
-      'Дигноз при выписке': item.diag_dead
+      'Дигноз при выписке': item.diag_dead,
+      'Лечащий врач': item.doc_fio
     };
   });
 
@@ -172,7 +172,7 @@ export function DeadsOarTable(dataset) {
 
 
 export function GetNameOfDay(dateString) {
-  return ['Вск', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб']
+  return ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб']
   [new Date(dateString).getDay()];
 }
 

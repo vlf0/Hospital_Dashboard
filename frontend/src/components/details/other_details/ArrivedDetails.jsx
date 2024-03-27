@@ -18,9 +18,8 @@ const ArrivedDetails = () => {
     if (data !== null) {
       data = JSON.parse(data)
     } else {
-      const fetchedData = GetData(`http://localhost:8000/api/v1/${urlParams}`);
+      const fetchedData = GetData(`http://10.123.8.17:9000/api/v1/${urlParams}`);
       if (fetchedData) {
-        console.log(fetchedData)
         sessionStorage.setItem(`${dataType}_${date}`, JSON.stringify(fetchedData));
         data = fetchedData;
       }
