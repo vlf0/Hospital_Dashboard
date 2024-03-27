@@ -35,10 +35,9 @@ def insert_data():
      Update the MainData model with the collected data.
      Do this everyday at 7:00 AM by schedule.
     """
-    print('main task')
-    # cache.delete_many(['dmk', 'kis'])
-    # ready_data = DataForDMK(KISData(QuerySets().queryset_for_dmk()))
-    # ready_data.save_to_dmk()
+    cache.delete_many(['dmk', 'kis'])
+    ready_data = DataForDMK(KISData(QuerySets().queryset_for_dmk()))
+    ready_data.save_to_dmk()
 
 
 @shared_task
@@ -53,14 +52,23 @@ tasks_settings = {
 
 
 def get_or_create_tasks(tasks_list):
+
     for options in tasks_list.values():
+        name = options[0]
+        task = options[1]
+        schedule = options[2]
         try:
-            PeriodicTask.objects.get(name=options[0])
+            task = PeriodicTask.objects.get(name=name)
+            if task.crontab_id != schedule.id:
+                task.crontab_id = schedule.id
+                task.save()
+            continue
         except:
-            PeriodicTask.objects.create(crontab=options[2],
-                                        name=options[0],
-                                        task=options[1],
+            PeriodicTask.objects.create(crontab=schedule,
+                                        name=name,
+                                        task=task,
                                         )
+
 
 
 get_or_create_tasks(tasks_settings)
