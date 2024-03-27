@@ -8,8 +8,8 @@ from .models import AccumulationOfIncoming
 
 # Schedule for main logic - inserting data to DMK
 schedule1, _ = CrontabSchedule.objects.get_or_create(
-    minute='*',
-    hour='*',
+    minute='0',
+    hour='6',
     day_of_week='*',
     day_of_month='*',
     month_of_year='*',
@@ -18,7 +18,7 @@ schedule1, _ = CrontabSchedule.objects.get_or_create(
 # Schedule for acuumulativing logic - inserting data to DMK
 schedule2, _ = CrontabSchedule.objects.get_or_create(
     minute='0',
-    hour='7',
+    hour='6',
     day_of_week='*',
     day_of_month='1',
     month_of_year='*',
@@ -33,7 +33,6 @@ def insert_data():
      Update the MainData model with the collected data.
      Do this everyday at 7:00 AM by schedule.
     """
-    # print('main task')
     cache.delete_many(['dmk', 'kis'])
     ready_data = DataForDMK(KISData(QuerySets().queryset_for_dmk()))
     ready_data.save_to_dmk()
@@ -46,20 +45,26 @@ def remove_accum():
 
 tasks_settings = {
     'collect_task': ('Saving data to DMK', insert_data.name, schedule1),
-    'remove_task': ('Removing accumulated data from DMK', remove_accum.name, schedule2),
+    'remove_task': ('Removing accumulated data from DMK', insert_data.name, schedule2),
 }
 
 
 def get_or_create_tasks(tasks_list):
+
     for options in tasks_list.values():
-        print(options)
+        name = options[0]
+        task = options[1]
+        schedule = options[2]
         try:
-            a =  PeriodicTask.objects.get(name=options[0])
-            print(a)
+            task = PeriodicTask.objects.get(name=name)
+            if task.crontab_id != schedule.id:
+                task.crontab_id = schedule.id
+                task.save()
+            continue
         except:
-            PeriodicTask.objects.create(crontab=options[2],
-                                        name=options[0],
-                                        task=options[1],
+            PeriodicTask.objects.create(crontab=schedule,
+                                        name=name,
+                                        task=task,
                                         )
 
 
