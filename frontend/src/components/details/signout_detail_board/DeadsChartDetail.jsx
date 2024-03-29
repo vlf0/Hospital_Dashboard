@@ -47,7 +47,6 @@ const deptsOrder = ['emer_d', 'dp_d', 'oar_d', 'oar1_d', 'oar2_d', 'oaronmk_d', 
 
 const DeadsChartDetail = ({ data }) => {
 
-
     const deptsOut = Object.fromEntries(
         Object.entries(data)
           .filter(([key, value]) => key.endsWith('_d'))
@@ -59,7 +58,7 @@ const DeadsChartDetail = ({ data }) => {
     const endDepts = Object.keys(orderedData)
 
     const ruDepts = endDepts.map(index => chartMap[index])
-    const nums = Object.values(orderedData) 
+    const nums = Object.values(orderedData).map(value => value === undefined ? null : value);
 
 
     const arrived_data = {
@@ -118,6 +117,12 @@ const DeadsChartDetail = ({ data }) => {
                           },
                         anchor: 'end',
                         align: 'end',
+                        formatter: (title, context) => {
+                            if (context.dataset.data[context.dataIndex] === null) {
+                              return 'Н/Д';
+                            }
+                            return title; // Use the default title if the value is not null
+                        },
                     },
                 },
             },

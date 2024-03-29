@@ -114,7 +114,7 @@ const ArrivedChart = () => {
                         align: 'end',
                           formatter: (title, context) => {
                             if (context.dataset.data[context.dataIndex] === null) {
-                              return 'N/A';
+                              return 'Н/Д';
                             }
                             return title; // Use the default title if the value is not null
                           },

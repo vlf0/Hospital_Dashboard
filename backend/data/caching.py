@@ -30,6 +30,8 @@ class Cacher:
             cache.set(f'{kind}_{dates}', result_dict)
             additional_kis = cache.get(f'{kind}_{dates}')
             return {f'{kind}_{dates}': additional_kis}
+        additional_kis = cache.get(f'{kind}_{dates}')
+        return {f'{kind}_{dates}': additional_kis}
 
     def main_caching(self) -> dict:
         """
