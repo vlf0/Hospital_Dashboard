@@ -1,6 +1,4 @@
 """Here is described schedule and tasks for executing it using CELERY."""
-from datetime import datetime
-
 from celery import shared_task
 from django.core.cache import cache
 from django_celery_beat.models import PeriodicTask, CrontabSchedule
@@ -10,8 +8,8 @@ from .models import AccumulationOfIncoming
 
 # Schedule for main logic - inserting data to DMK
 schedule1, _ = CrontabSchedule.objects.get_or_create(
-    minute='*',
-    hour='*',
+    minute='0',
+    hour='6',
     day_of_week='*',
     day_of_month='*',
     month_of_year='*',
@@ -20,7 +18,7 @@ schedule1, _ = CrontabSchedule.objects.get_or_create(
 # Schedule for acuumulativing logic - inserting data to DMK
 schedule2, _ = CrontabSchedule.objects.get_or_create(
     minute='0',
-    hour='7',
+    hour='6',
     day_of_week='*',
     day_of_month='1',
     month_of_year='*',
@@ -47,12 +45,11 @@ def remove_accum():
 
 tasks_settings = {
     'collect_task': ('Saving data to DMK', insert_data.name, schedule1),
-    'remove_task': ('Removing accumulated data from DMK', insert_data.name, schedule2),
+    'remove_task': ('Removing accumulated data from DMK', remove_accum.name, schedule2),
 }
 
 
 def get_or_create_tasks(tasks_list):
-
     for options in tasks_list.values():
         name = options[0]
         task = options[1]
@@ -70,6 +67,4 @@ def get_or_create_tasks(tasks_list):
                                         )
 
 
-
 get_or_create_tasks(tasks_settings)
-
