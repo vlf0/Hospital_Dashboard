@@ -45,12 +45,11 @@ def remove_accum():
 
 tasks_settings = {
     'collect_task': ('Saving data to DMK', insert_data.name, schedule1),
-    'remove_task': ('Removing accumulated data from DMK', insert_data.name, schedule2),
+    'remove_task': ('Removing accumulated data from DMK', remove_accum.name, schedule2),
 }
 
 
 def get_or_create_tasks(tasks_list):
-
     for options in tasks_list.values():
         name = options[0]
         task = options[1]

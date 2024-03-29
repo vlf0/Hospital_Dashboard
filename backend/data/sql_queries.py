@@ -35,7 +35,7 @@ class QuerySets:
                JOIN mm.ehr_case ec ON ec.id = h.ehr_case_id
                JOIN mm.ehr_case_title ect ON ect.caseid  = ec.id 
                
-               WHERE ec.create_dt BETWEEN DATE('{today()}') - INTERVAL '1 day, -6 hours' AND DATE('{today()}') - INTERVAL '-6 hours'
+               WHERE ec.create_dt BETWEEN CURRENT_DATE - INTERVAL '18 hours' AND CURRENT_DATE + INTERVAL '6 hours'
                
                UNION ALL 									
                
@@ -58,7 +58,7 @@ class QuerySets:
                		JOIN mm.hosp_refuse hr ON hr.ambticket_id = a.id 
                		JOIN mm.ehr_case_title ect2 ON ect2.caseid  = a.ehr_case_id
                
-               WHERE ec.create_dt BETWEEN DATE('{today()}') - INTERVAL '1 day, -6 hours' AND DATE('{today()}') - INTERVAL '-6 hours';
+               WHERE ec.create_dt BETWEEN CURRENT_DATE - INTERVAL '18 hours' AND CURRENT_DATE + INTERVAL '6 hours'
                """
 
     DEPT_HOSP = f"""
@@ -76,7 +76,7 @@ class QuerySets:
                  JOIN mm.dept d ON d.id = h.dept_id
                  JOIN mm.profile_med pm ON pm.id = d.profile_med_id 
 
-                 WHERE ec.create_dt BETWEEN current_date - INTERVAL '1 day, -6 hours' AND current_date - INTERVAL '-6 hours'
+                 WHERE ec.create_dt BETWEEN CURRENT_DATE - INTERVAL '18 hours' AND CURRENT_DATE + INTERVAL '6 hours'
 
                  GROUP BY d.name, pm.name
                  ORDER BY cnt DESC;
@@ -93,7 +93,7 @@ class QuerySets:
                FROM mm.mdoc m
                JOIN mm.hospdoc h ON h.mdoc_id = m.id
                
-               WHERE h.leave_dt BETWEEN DATE('{today()}') - INTERVAL '1 day, -6 hours' AND DATE('{today()}') - INTERVAL '-6 hours'
+               WHERE h.leave_dt BETWEEN CURRENT_DATE - INTERVAL '18 hours' AND CURRENT_DATE + INTERVAL '6 hours'
                ORDER BY h.hosp_outcome_id;  
                """
 
@@ -125,7 +125,7 @@ class QuerySets:
              JOIN mm.people p ON p.id = m.people_id
              JOIN mm.ehr_case ec ON ec.id = h.ehr_case_id
  
-             WHERE h.leave_dt BETWEEN current_date - INTERVAL '1 day, -6 hours' AND current_date - INTERVAL '-6 hours'
+             WHERE h.leave_dt BETWEEN CURRENT_DATE - INTERVAL '18 hours' AND CURRENT_DATE + INTERVAL '6 hours'
              AND h.hosp_outcome_id ='5' -- 5, умер в стационаре;
              """
 
@@ -148,8 +148,8 @@ class QuerySets:
                          JOIN mm.hospdoc h ON h.mdoc_id = m.id
                          JOIN mm.people p ON p.id = m.people_id
                          
-                         WHERE h.hosp_dt BETWEEN current_date - INTERVAL '1 day, -6 hours' AND current_date - INTERVAL '-6 hours'
-                         AND h.dept_dt BETWEEN current_date - INTERVAL '1 day, -6 hours' AND current_date - INTERVAL '-6 hours'
+                         WHERE h.hosp_dt BETWEEN CURRENT_DATE - INTERVAL '18 hours' AND CURRENT_DATE + INTERVAL '6 hours'
+                         AND h.dept_dt BETWEEN CURRENT_DATE - INTERVAL '18 hours' AND CURRENT_DATE + INTERVAL '6 hours'
                          AND h.dept_id IN (SELECT d.id from mm.dept d WHERE d.dept_med_type_id = 10220)
                          ORDER BY h.dept_id DESC;
                          """
@@ -177,8 +177,8 @@ class QuerySets:
                        JOIN mm.hospdoc h ON h.mdoc_id = m.id
                        JOIN mm.people p ON p.id = m.people_id
 
-                       WHERE h.hosp_dt <=current_date - INTERVAL '1 day, -6 hours'
-                       AND h.dept_dt BETWEEN current_date - INTERVAL '1 day, -6 hours' AND current_date - INTERVAL '-6 hours'
+                       WHERE h.hosp_dt <=current_date - INTERVAL '18 hours'
+                       AND h.dept_dt BETWEEN CURRENT_DATE - INTERVAL '18 hours' AND CURRENT_DATE + INTERVAL '6 hours'
                        AND h.dept_id IN (SELECT d.id from mm.dept d WHERE d.dept_med_type_id = 10220)
 
                        ORDER BY h.dept_id DESC;
@@ -348,9 +348,9 @@ class QuerySets:
         :return: *str*: Changed query contains actual chosen date.
         """
         if type(queryset) is list:
-            new_query = [query.replace(str(self.today()), chosen_date) for query in queryset]
+            new_query = [query.replace('CURRENT_DATE', f'DATE \'{chosen_date}\'') for query in queryset]
             return new_query
-        new_query = queryset.replace(str(self.today()), chosen_date)
+        new_query = queryset.replace('CURRENT_DATE', f'DATE \'{chosen_date}\'')
         return [new_query]
 
 

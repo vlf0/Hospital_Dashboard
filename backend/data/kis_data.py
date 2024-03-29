@@ -5,7 +5,6 @@ from datetime import date
 from collections import Counter
 from itertools import chain
 from rest_framework.exceptions import ValidationError
-from rest_framework.response import Response
 from django.conf import settings
 from django.db.utils import IntegrityError
 from django.db.models import Sum
@@ -275,18 +274,19 @@ class DataForDMK(DataProcessing):
         :param dh_dataset: Raw dataset from db.
         :return:
         """
+        result = Counter()
         profiles_queryset = Profiles.objects.filter(active=True)
-        profiles = [{profile.name: profile.id} for profile in profiles_queryset]
-        # Here we are checking profile name from each row given dataset so that it accords
-        # profiles added into Profiles model and get list of ready to serializing dicts.
-        result_dicts = [{'number': row[1], 'profile_id': o.get(row[0])}
-                        for row in dh_dataset for o in profiles if o.get(row[0]) is not None]
-        result = []
-        for row in dh_dataset:
-            for o in profiles:
-                if o.get(row[0]) is not None:
-                    result.append({'number': row[1], 'profile_id': o.get(row[0])})
-
+        # Creating dict with dept names and ids.
+        profiles = {profile.name: profile.id for profile in profiles_queryset}
+        # Summ common amount of patients by all depts with the same name.
+        for dept, value in dh_dataset:
+            result[dept] += value
+        summed_depts = [(k.title(), v,) for k, v in result.items()]
+        # Create list and filling it separated resulting dicts mapping with current active profiles.
+        result_dicts = []
+        for row in summed_depts:
+            if dept_id := profiles.get(row[0]):
+                result_dicts.append({'profile_id': dept_id, 'number': row[1]})
         return result_dicts
 
     def __collect_data(self, chosen_date: Union[date, None]) -> dict[str, dict]:
@@ -354,7 +354,7 @@ class DataForDMK(DataProcessing):
                                         )
         return err_text
 
-    def save_to_dmk(self, chosen_date: date = None) -> list[Union[MainData, None], AccumulationOfIncoming]:
+    def save_to_dmk(self, chosen_date: str = None) -> list[Union[MainData, None], AccumulationOfIncoming]:
         """
         Save the prepared data to the DMK DB using the MainData model and its serializer.
 
@@ -560,8 +560,6 @@ class KISDataProcessing(DataProcessing):
                              for oar in self.qs.oar_depts]: 
             self.deads_oar = [tuple(oars_filtered)]
         return summary_dict
-    
-
 
     def oar_process(self, dataset: list[tuple], columns: list[str]) -> dict[str, Any]:
         """
@@ -596,7 +594,7 @@ class KISDataProcessing(DataProcessing):
                   ]
         return result
 
-    def create_ready_dicts(self) -> list[dict]:
+    def create_ready_dicts(self) -> Union[list, dict]:
         """
         Create an ordered list of dictionaries containing processed and serialized datasets.
 
@@ -656,10 +654,10 @@ def get_chosen_date(kind: Union[str, None], dates: Union[str, None]) -> Union[di
 
     if kind == 'arrived':
         query = queries.ARRIVED
-        processing = kis(1).arrived_process
+        processing = kis(KISData([query])).arrived_process
     elif kind == 'signout':
         query = queries.SIGNOUT
-        processing = kis(1).signout_process
+        processing = kis(KISData([query])).signout_process
     else:
         return
     kisdata_obj = gen(queries.chosen_date_query(query, dates))
