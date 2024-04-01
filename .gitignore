@@ -15,7 +15,6 @@ settings_prod.py
 KIS_queries/
 envs/
 
-
 # Distribution / packaging
 .Python
 build/

@@ -21,7 +21,7 @@ class QuerySets:
                ar.channel,
                ar.patient_type 
                FROM mm.arrived ar
-               WHERE DATE(dates) = '{today()}';
+               WHERE dates BETWEEN CURRENT_DATE - INTERVAL '18 hours' and CURRENT_DATE + INTERVAL '6 hours';
                """
 
     DEPT_HOSP = """SELECT med_profile, amount FROM mm.dept_hosp;"""
@@ -31,7 +31,7 @@ class QuerySets:
                sg.dept,
                sg.status
                FROM mm.signout sg
-               WHERE DATE(dates) = '{today()}';  
+               WHERE dates BETWEEN CURRENT_DATE - INTERVAL '18 hours' and CURRENT_DATE + INTERVAL '6 hours';
                """
 
     DEADS = f"""
@@ -47,10 +47,19 @@ class QuerySets:
              dd.diag_arr,
              dd.diag_dead
              FROM mm.deads dd
-             where date(dates) = '{today()}';
+             WHERE dates BETWEEN CURRENT_DATE - INTERVAL '18 hours' and CURRENT_DATE + INTERVAL '6 hours';
              """
 
-    OAR_ARRIVED_QUERY = """SELECT pat_fio, ib_num, ages, dept, doc_fio, diag_start FROM mm.oar_arrived;"""
+    OAR_ARRIVED_QUERY = f"""
+                         SELECT 
+                         pat_fio,
+                         ib_num, 
+                         ages, 
+                         dept,
+                         doc_fio, 
+                         diag_start FROM mm.oar_arrived
+                         WHERE dates BETWEEN CURRENT_DATE - INTERVAL '18 hours' and CURRENT_DATE + INTERVAL '6 hours';
+                         """
 
     OAR_MOVED_QUERY = """SELECT pat_fio, ib_num, ages, dept, doc_fio, move_date, from_dept, diag_start
                          FROM mm.oar_moved;"""
@@ -132,8 +141,8 @@ class QuerySets:
         :return: *str*: Changed query contains actual chosen date.
         """
         if type(queryset) is list:
-            new_query = [query.replace(str(self.today()), chosen_date) for query in queryset]
+            new_query = [query.replace('CURRENT_DATE', f'DATE \'{chosen_date}\'') for query in queryset]
             return new_query
-        new_query = queryset.replace(str(self.today()), chosen_date)
+        new_query = queryset.replace('CURRENT_DATE', f'DATE \'{chosen_date}\'')
         return [new_query]
 

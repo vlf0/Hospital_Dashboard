@@ -9,7 +9,7 @@ from .models import AccumulationOfIncoming
 # Schedule for main logic - inserting data to DMK
 schedule1, _ = CrontabSchedule.objects.get_or_create(
     minute='0',
-    hour='7',
+    hour='6',
     day_of_week='*',
     day_of_month='*',
     month_of_year='*',
@@ -18,22 +18,10 @@ schedule1, _ = CrontabSchedule.objects.get_or_create(
 # Schedule for acuumulativing logic - inserting data to DMK
 schedule2, _ = CrontabSchedule.objects.get_or_create(
     minute='0',
-    hour='7',
+    hour='6',
     day_of_week='*',
     day_of_month='1',
     month_of_year='*',
-)
-
-PeriodicTask.objects.get_or_create(
-    crontab=schedule1,
-    name='Saving data to DMK',
-    task='data.tasks.insert_data'
-)
-
-PeriodicTask.objects.get_or_create(
-    crontab=schedule2,
-    name='Removing accumulated data from DMK',
-    task='data.tasks.remove_accum'
 )
 
 
@@ -55,3 +43,28 @@ def remove_accum():
     AccumulationOfIncoming.objects.truncate_data()
 
 
+tasks_settings = {
+    'collect_task': ('Saving data to DMK', insert_data.name, schedule1),
+    'remove_task': ('Removing accumulated data from DMK', remove_accum.name, schedule2),
+}
+
+
+def get_or_create_tasks(tasks_list):
+    for options in tasks_list.values():
+        name = options[0]
+        task = options[1]
+        schedule = options[2]
+        try:
+            task = PeriodicTask.objects.get(name=name)
+            if task.crontab_id != schedule.id:
+                task.crontab_id = schedule.id
+                task.save()
+            continue
+        except:
+            PeriodicTask.objects.create(crontab=schedule,
+                                        name=name,
+                                        task=task,
+                                        )
+
+
+get_or_create_tasks(tasks_settings)
