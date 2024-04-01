@@ -1,3 +1,29 @@
+@font-face {
+  font-family: 'nbold';
+  src: url('./fonts/Nunito-Bold.ttf');
+  font-size: 50px;
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+          
+@font-face {
+  font-family: 'nregular';
+  src: url('./fonts/Nunito-Regular.ttf');
+  font-size: 50px;
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'nmed';
+  src: url('./fonts/Nunito-Medium.ttf');
+  font-size: 50px;
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
  body {
   min-height: 100vh;
   margin: 0;
@@ -17,7 +43,7 @@ div#root {
 }
 
 p {
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'nbold', Helvetica, sans-serif;
   font-weight: bold;
   font-size: 15px;
   margin-bottom: 30px;

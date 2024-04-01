@@ -289,7 +289,7 @@ class DataForDMK(DataProcessing):
                 result_dicts.append({'profile_id': dept_id, 'number': row[1]})
         return result_dicts
 
-    def __collect_data(self, chosen_date: Union[date, None]) -> dict[str, dict]:
+    def collect_data(self, chosen_date: Union[date, None]) -> dict[str, dict]:
         """
         Get calculated main values for detail boards on the front-end for saving to DMK DB.
 

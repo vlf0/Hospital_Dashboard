@@ -26,8 +26,7 @@ function App() {
     };
   }
 
-
-  if (data) {
+  if (data !== null) {
 
     return (
       <DataContext.Provider value={data}>
