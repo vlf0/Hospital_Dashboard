@@ -290,7 +290,7 @@ class DataForDMK(DataProcessing):
                 result_dicts.append({'profile_id': dept_id, 'number': row[1]})
         return result_dicts
 
-    def collect_data(self, chosen_date: Union[date, None]) -> dict[str, dict]:
+    def __collect_data(self, chosen_date: Union[date, None]) -> dict[str, dict]:
         """
         Get calculated main values for detail boards on the front-end for saving to DMK DB.
 
@@ -627,7 +627,6 @@ class KISDataProcessing(DataProcessing):
 
     @staticmethod
     def get_week_kis_data(query: str, kind: str):
-
         kis = KISDataProcessing
         last_week = [str(today() - timedelta(days=days)) for days in range(7)]
         ready_queries = [QuerySets.chosen_date_query(query, day)[0] for day in last_week]

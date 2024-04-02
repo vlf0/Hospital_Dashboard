@@ -12,7 +12,6 @@ const ArrivedDetails = () => {
     const urlParams = srcUrl.split('/').pop();
     const dataType = srcUrl.split('=')[1].split('&')[0];  
 
-
     let data = sessionStorage.getItem(`${dataType}_${date}`);
 
     if (data !== null) {
@@ -26,8 +25,6 @@ const ArrivedDetails = () => {
     }
 
 
-
-    
     let pie;
 
     if (data) {
@@ -35,8 +32,8 @@ const ArrivedDetails = () => {
       const fk = Object.keys(data)[0]
       data = data[fk]
       
-      const keys = Object.keys(data[0])
-      const values = Object.values(data[0])
+      const keys = Object.keys(data)
+      const values = Object.values(data)
 
         if (keys[0] === 'deads') {
           pie = <SignoutDetailPie labels={keys} data={values} />
