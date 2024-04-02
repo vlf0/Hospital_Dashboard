@@ -22,6 +22,7 @@ ALLOWED_HOSTS = [
 
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
+    'http://localhost:3030',
     'http://127.0.0.1:3000',
     'http://0.0.0.0:3000',
 ]
@@ -214,6 +215,7 @@ CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.redis.RedisCache',
         'LOCATION': 'redis://redis:6379/2',
+        'TIMEOUT': None
     }
 }
 

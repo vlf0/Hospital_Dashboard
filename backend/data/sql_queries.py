@@ -132,7 +132,8 @@ class QuerySets:
         result = dmk_queries + [self.OAR_MOVED_QUERY, self.OAR_CURRENT_QUERY]
         return result
 
-    def chosen_date_query(self, queryset: Union[str, list], chosen_date: str) -> list:
+    @staticmethod
+    def chosen_date_query(queryset: Union[str, list], chosen_date: str) -> list:
         """
         Replace date in the given query to passed and return query with needed date.
 

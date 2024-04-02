@@ -67,7 +67,6 @@ class PlanNumbers(models.Model):
 
     profile = models.OneToOneField(Profiles, on_delete=models.CASCADE, verbose_name='Профиль', primary_key=True)
     plan = models.IntegerField(verbose_name='План')
-    active = models.BooleanField(verbose_name='Статус')
 
     class Meta:
         indexes = [
@@ -78,6 +77,5 @@ class PlanNumbers(models.Model):
         ordering = ['profile']
 
     def __str__(self):
-        return f'Profile_id: {self.profile.id}, Профиль: {self.profile.name},' \
-               f' текущий план: {self.plan}, статус: {"Активен" if self.active else "Не активен"}'
+        return f'Profile_id: {self.profile.id}, Профиль: {self.profile.name}, Текущий план: {self.plan}'
 

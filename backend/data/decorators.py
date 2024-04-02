@@ -5,7 +5,7 @@ If you don't want using cache system - just add decorator to the viewset.
 from rest_framework.response import Response
 from .models import MainData
 from .serializers import MainDataSerializer
-from .kis_data import KISDataProcessing, KISData, QuerySets, collect_model, get_chosen_date
+from .kis_data import KISDataProcessing, KISData, QuerySets, collect_model
 
 
 def main_cache_disable(func):
@@ -24,16 +24,3 @@ def main_cache_disable(func):
     return wrapper
 
 
-def additional_cache_disable(func):
-    """
-    Wrap list method of second additional viewset: skip caching and get data by API directly.
-
-    Provided kis data for chosen date.
-    """
-    def wrapper(*args, **kwargs):
-        kind = args[1].query_params.get('type', None)
-        dates = args[1].query_params.get('date', None)
-        result_dict = get_chosen_date(kind, dates)
-        data = {f'{kind}_{dates}': result_dict}
-        return Response(data)
-    return wrapper

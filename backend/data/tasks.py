@@ -4,6 +4,7 @@ from django.core.cache import cache
 from django_celery_beat.models import PeriodicTask, CrontabSchedule
 from .kis_data import DataForDMK, KISData, QuerySets
 from .models import AccumulationOfIncoming
+from .caching import Cacher
 
 
 # Schedule for main logic - inserting data to DMK
@@ -26,16 +27,17 @@ schedule2, _ = CrontabSchedule.objects.get_or_create(
 
 
 @shared_task
-def insert_data():
+def cache_all_data():
     """
     Remove all day caches, process and insert data into DMK.
 
      Update the MainData model with the collected data.
      Do this everyday at 7:00 AM by schedule.
     """
-    cache.delete_many(['dmk', 'kis'])
+    cache.clear()
     ready_data = DataForDMK(KISData(QuerySets().queryset_for_dmk()))
     ready_data.save_to_dmk()
+    Cacher().main_caching()
 
 
 @shared_task
@@ -44,7 +46,7 @@ def remove_accum():
 
 
 tasks_settings = {
-    'collect_task': ('Saving data to DMK', insert_data.name, schedule1),
+    'cache_task': ('Saving data to DMK', cache_all_data.name, schedule1),
     'remove_task': ('Removing accumulated data from DMK', remove_accum.name, schedule2),
 }
 
