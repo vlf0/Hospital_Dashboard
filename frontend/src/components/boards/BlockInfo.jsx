@@ -21,7 +21,7 @@ const BlockInfo = ({data, headerText}) => {
       <>
         <span className='headers'>{headerText}</span>
         <p className='text_data'>{data[0]}</p>
-          {headerText === 'Отказано' ? (
+          {['Отказано', 'Умершие', 'ОАР'].includes(headerText) ? (
             <img src={reverseImagePath} className='logo' alt=''/>
             ) : (
             <img src={imagePath} className='logo' alt=''/>

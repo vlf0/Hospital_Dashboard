@@ -1,50 +1,72 @@
 """Provided class """
 from django.core.cache import cache
-from .kis_data import QuerySets, KISData, KISDataProcessing, collect_model, get_chosen_date
+from .kis_data import QuerySets, KISData, KISDataProcessing, collect_model
 from .serializers import MainDataSerializer
 from .models import MainData
 
 
 class Cacher:
+    """Utility class for caching data to improve performance by reducing database queries."""
 
     @staticmethod
     def dmk_cache() -> None:
-        if cache.get('dmk') is None:
-            main_dmk = MainDataSerializer(MainData.objects.custom_filter(), many=True).data
-            accum_dmk = collect_model()
-            dmk = {'main_dmk': main_dmk, 'accum_dmk': accum_dmk}
-            cache.set('dmk', dmk)
+        """
+        Cache main DMK data.
+
+        Retrieves main DMK data from the database, serializes it, and stores it in the cache.
+        """
+        main_dmk = MainDataSerializer(MainData.objects.custom_filter(), many=True).data
+        accum_dmk = collect_model()
+        dmk = {'main_dmk': main_dmk, 'accum_dmk': accum_dmk}
+        cache.set('dmk', dmk)
 
     @staticmethod
     def kis_cache() -> None:
-        if cache.get('kis') is None:
-            p_kis = KISDataProcessing(KISData(QuerySets().queryset_for_kis())).create_ready_dicts()
-            cache.set('kis', p_kis)
+        """
+        Cache KIS data.
+
+        Processes data from KIS DB, creates ready dictionaries, and stores them in the cache.
+        """
+        p_kis = KISDataProcessing(KISData(QuerySets().queryset_for_kis())).create_ready_dicts()
+        cache.set('kis', p_kis)
 
     @staticmethod
-    def additional_caching(request):
-        kind = request.query_params.get('type', None)
-        dates = request.query_params.get('date', None)
-        if cache.get(f'{kind}_{dates}') is None:
-            result_dict = get_chosen_date(kind, dates)
-            cache.set(f'{kind}_{dates}', result_dict)
-            additional_kis = cache.get(f'{kind}_{dates}')
-            return {f'{kind}_{dates}': additional_kis}
-
-    def main_caching(self) -> dict:
+    def week_kis_cache() -> None:
         """
-        Check redis cash and write data into if storage is empty.
+        Cache weekly KIS data.
 
-         We are calling this func in the main view to avoid unnecessary calls to the database.
-         First call of the day provides writing data into cache and use
-         the cache during the day new call to db instead.
+        Retrieves weekly KIS data for arrivals and signouts, combines them into a common dictionary,
+        and stores each row in the cache.
+        """
+        q = QuerySets
+        arrived = KISDataProcessing.get_week_kis_data(q.ARRIVED, 'arrived')
+        signout = KISDataProcessing.get_week_kis_data(q.SIGNOUT, 'signout')
+        common_dict = arrived | signout
+        for row in common_dict.items():
+            cache.set(f'{row[0]}', row[1])
+
+    def main_caching(self) -> None:
+        """
+        Cache main data.
+
+        Calls all static methods to set ready data to cache.
         """
         self.dmk_cache()
         self.kis_cache()
-        dmk = cache.get('dmk')
-        kis = cache.get('kis')
-        return {'dmk': dmk, 'kis': kis}
+        self.week_kis_cache()
 
+    @staticmethod
+    def get_chosen_date_cache(request):
+        kind = request.query_params.get('type', None)
+        dates = request.query_params.get('date', None)
+        result = cache.get(f'{kind}_{dates}')
+        return result
+
+    @staticmethod
+    def get_main_cache():
+        dmk, kis = cache.get('dmk'), cache.get('kis')
+        today_data = {'dmk': dmk, 'kis': kis}
+        return today_data
 
 
 

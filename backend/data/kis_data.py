@@ -1,7 +1,7 @@
 """Responsible for classes defining non-model query-sets from another DB."""
 import logging
 from typing import Generator, Any, Union
-from datetime import date
+from datetime import date, timedelta
 from collections import Counter
 from itertools import chain
 from rest_framework.exceptions import ValidationError
@@ -21,6 +21,7 @@ from .models import Profiles, MainData, AccumulationOfIncoming
 creds = settings.DB_CREDS
 logger = logging.getLogger('data.kis_data.DataForDMK')
 today = date.today
+
 
 
 class CleanData:
@@ -253,7 +254,8 @@ class DataForDMK(DataProcessing):
         :return: Dictionary containing signout and deaths data.
         """
         result_keys = self.dmk_cols[3:5]
-        ready_values = self.count_data(signout_dataset, 1, 'Умер')
+        
+        ready_values = self.count_data(signout_dataset, 1, 'Умер в стационаре')
         return dict(zip(result_keys, ready_values))
 
     def get_reanimation_data(self, reanimation_dataset: list[tuple]) -> dict[str, int]:
@@ -303,6 +305,7 @@ class DataForDMK(DataProcessing):
         """
         if self.kisdata_obj.db_conn.conn is None:
             main_data = {i: None for i in self.dmk_cols}
+            dh_dataset = None
         else:
             gen = self.kisdata_obj.get_data_generator()
             arrived = self.get_arrived_data(next(gen))
@@ -353,7 +356,7 @@ class DataForDMK(DataProcessing):
                                         )
         return err_text
 
-    def save_to_dmk(self, chosen_date: str = None) -> list[Union[MainData, None], AccumulationOfIncoming]:
+    def save_to_dmk(self, chosen_date: Union[str, None] = None) -> list[Union[Union[MainData, None], Union[list[AccumulationOfIncoming], None]]]:
         """
         Save the prepared data to the DMK DB using the MainData model and its serializer.
 
@@ -391,7 +394,7 @@ class DataForDMK(DataProcessing):
             en_error = self.__translate(e)
             logger.error(en_error)
 
-    def save_accumulated(self, accum_data: dict) -> list[Union[MainData, Any], list[AccumulationOfIncoming]]:
+    def save_accumulated(self, accum_data: dict) -> Union[list[AccumulationOfIncoming], None]:
         """
         Iterate through given Serializer and save a few new model instances.
 
@@ -443,9 +446,6 @@ class KISDataProcessing(DataProcessing):
       - create_ready_dicts() -> list[dict]: Create a list of dictionaries containing processed and serialized datasets.
     """
 
-    deads_oar = []
-    counted_oar = []
-
     def __init__(self, kisdata_obj: KISData):
         """
         Initialize the KISDataProcessing instance.
@@ -453,6 +453,8 @@ class KISDataProcessing(DataProcessing):
         :param kisdata_obj: The `KISData` instance.
         """
         super().__init__(kisdata_obj)
+        self.deads_oar = []
+        self.counted_oar = []
 
     def __count_values(self, dataset: list[tuple], ind: int, keywords: list[str]) -> list[int]:
         """
@@ -616,8 +618,6 @@ class KISDataProcessing(DataProcessing):
         oar_moved = self.oar_process(next(gen), self.qs.COLUMNS['oar_moved_t'])
         oar_current = self.oar_process(next(gen), self.qs.COLUMNS['oar_current_t'])
         oar_numbers = self.oar_count()
-        self.counted_oar.clear()
-        self.deads_oar.clear()
         # Creating list of ready processed datasets.
         oar_deads = deads.get('oar_deads')
         common_deads = deads.get('deads')
@@ -626,40 +626,26 @@ class KISDataProcessing(DataProcessing):
         result = dict(zip(keywords, ready_dataset))
         return result
 
+    @staticmethod
+    def get_week_kis_data(query: str, kind: str):
+        kis = KISDataProcessing
+        last_week = [str(today() - timedelta(days=days)) for days in range(7)]
+        ready_queries = [QuerySets.chosen_date_query(query, day)[0] for day in last_week]
+        processing = kis(KISData([query])).arrived_process
+        if kind == 'signout':
+            processing = kis(KISData([query])).signout_process
+        generator = KISData(ready_queries).get_data_generator()
+        result = {f'{kind}_{day}': processing(next(generator)) for day in last_week}
+        return result
+
 
 def collect_model() -> dict:
     """Create postgres view contains all needed data of month plans table and return serialized data."""
     data = Profiles.objects \
         .select_related() \
         .annotate(total=Sum('accumulationofincoming__number')) \
-        .values('name', 'total', 'plannumbers__plan').filter(active=True)   
+        .values('name', 'total', 'plannumbers__plan') \
+        .filter(active=True) \
+        .filter(plannumbers__isnull=False)
     accum_sr = ProfilesSerializer(data, many=True)
     return accum_sr.data
-
-
-def get_chosen_date(kind: Union[str, None], dates: Union[str, None]) -> Union[dict, None]:
-    """
-    Make hit to KIS DB for getting chosen date details data and return serialized data.
-
-    :param kind: Part of URL-params that is responsible for the type of details data.
-     None If URL-params not passed by default.
-    :param dates: Part of URL-params that is responsible for the date of details data.
-     None If URL-params not passed by default.
-    :return: Dict of serialized data if URL-params passed, otherwise None.
-    """
-    queries = QuerySets()
-    gen = KISData
-    kis = KISDataProcessing
-
-    if kind == 'arrived':
-        query = queries.ARRIVED
-        processing = kis(KISData([query])).arrived_process
-    elif kind == 'signout':
-        query = queries.SIGNOUT
-        processing = kis(KISData([query])).signout_process
-    else:
-        return
-    kisdata_obj = gen(queries.chosen_date_query(query, dates))
-    dataset = next(kisdata_obj.get_data_generator())
-    result = processing(dataset)
-    return result

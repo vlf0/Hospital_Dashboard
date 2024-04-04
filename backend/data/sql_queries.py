@@ -91,16 +91,6 @@ class QuerySets:
     signout = ['Умер', 'Переведен', 'Выписан']
     oar_depts = ['ОРИТ №1', 'ОРИТ №2', 'ОРИТ №3']
 
-    # Dict for mapping with serializer fields (relates to "план/факт по профилям" table).
-    # All english names is fields of serializer.
-    profiles_mapping = {
-        'Терапия': 'therapy',
-        'Хирургия': 'surgery',
-        'Кардиология': 'cardiology',
-        'Урология': 'urology',
-        'Неврология': 'neurology'
-    }
-
     # Dict for mapping columns on russian language with serializer fields (relates to "выписанные по отделениям" table).
     # All english names is fields of serializer.
     depts_mapping = {
@@ -132,7 +122,8 @@ class QuerySets:
         result = dmk_queries + [self.OAR_MOVED_QUERY, self.OAR_CURRENT_QUERY]
         return result
 
-    def chosen_date_query(self, queryset: Union[str, list], chosen_date: str) -> list:
+    @staticmethod
+    def chosen_date_query(queryset: Union[str, list], chosen_date: str) -> list:
         """
         Replace date in the given query to passed and return query with needed date.
 
