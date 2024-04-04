@@ -80,3 +80,9 @@ class PlanNumbers(models.Model):
         return f'Profile_id: {self.profile.id}, Профиль: {self.profile.name}, Текущий план: {self.plan}'
 
 
+class KISProfiles(models.Model):
+
+    name = models.CharField(max_length=255)
+
+    class Meta:
+        db_table = 'profile_med'

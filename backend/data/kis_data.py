@@ -18,10 +18,9 @@ from .serializers import (
      ProfilesSerializer)
 from .models import Profiles, MainData, AccumulationOfIncoming
 
-creds = settings.DB_CREDS
+KIS_DB = settings.DATABASES.get('kis_db')
 logger = logging.getLogger('data.kis_data.DataForDMK')
 today = date.today
-
 
 
 class CleanData:
@@ -71,10 +70,10 @@ class KISData:
          and queries of its columns. Each query pair is a list.
         """
         self.query_sets = query_sets
-        self.db_conn = BaseConnectionDB(dbname=creds['dbname'],
-                                        host=creds['host'],
-                                        user=creds['user'],
-                                        password=creds['password']
+        self.db_conn = BaseConnectionDB(dbname=KIS_DB['NAME'],
+                                        host=KIS_DB['HOST'],
+                                        user=KIS_DB['USER'],
+                                        password=KIS_DB['PASSWORD']
                                         )
         self.cursor = self.db_conn.execute_query
 

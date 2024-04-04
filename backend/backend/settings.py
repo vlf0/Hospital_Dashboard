@@ -33,7 +33,7 @@ ROOT_URLCONF = 'backend.urls'
 AUTH_USER_MODEL = 'users.CustomUser'
 
 INSTALLED_APPS = [
-    'daphne',
+    # 'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -109,15 +109,19 @@ CHANNEL_LAYERS = {
 }
 
 # Get the DB creds from .env file
-DATABASES = {'default': env.db('DMK_URL')}
-
-# External DB data
-DB_CREDS = {
-    'host': env.str('HOST'),
-    'port': env.str('PORT'),
-    'dbname': env.str('DBNAME'),
-    'user': env.str('USER'),
-    'password': env.str('PASSWORD'),
+DATABASES = {
+    'default': env.db('DMK_URL'),
+    'kis_db': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': env.db('KIS_URL')['NAME'],
+        'USER': env.db('KIS_URL')['USER'],
+        'PASSWORD': env.db('KIS_URL')['PASSWORD'],
+        'HOST': env.db('KIS_URL')['HOST'],
+        'PORT': env.db('KIS_URL')['PORT'],
+        'OPTIONS': {
+            'options': '-c search_path=mm'  # Specify the schema here
+        },
+    }
 }
 
 # Password validation
