@@ -19,6 +19,14 @@ admin.site.unregister(CrontabSchedule)
 
 class ProfilesAdmin(admin.ModelAdmin):
 
+    change_list_template = 'data/admin/change_list.html'
+    change_form_template = 'data/admin/change_form.html'
+
+    # def change_view(self, request, object_id, form_url="", extra_context=None):
+    #     extra_context = extra_context or {}
+    #     extra_context['kis_profiles'] = KISProfileChosingForm(initial={'id': 1, 'name': 'test'})
+    #     return super().change_view(request, object_id, form_url, extra_context=extra_context)
+
     def save_model(self, request, obj, form, change) -> None:
         """Override method so that perform renewing data in cache."""
         super().save_model(request, obj, form, change)
@@ -48,3 +56,4 @@ class PlanNumbersAdmin(admin.ModelAdmin):
 
 admin.site.register(Profiles, ProfilesAdmin)
 admin.site.register(PlanNumbers, PlanNumbersAdmin)
+

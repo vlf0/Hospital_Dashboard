@@ -1,6 +1,6 @@
 """Responsible for serializers."""
 from rest_framework import serializers
-from .models import MainData, AccumulationOfIncoming, Profiles, KISProfiles
+from .models import MainData, AccumulationOfIncoming, Profiles
 
 
 class MainDataSerializer(serializers.ModelSerializer):
@@ -31,11 +31,11 @@ class AccumulativeDataSerializerSave(serializers.ModelSerializer):
         fields = ['id', 'dates', 'number', 'profile_id']
 
 
-class KISProfilesSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = KISProfiles
-        fields = ['id', 'name']
+# class KISProfilesSerializer(serializers.ModelSerializer):
+#
+#     class Meta:
+#         model = KISProfiles
+#         fields = ['id', 'name']
 
 
 class KISDataSerializer(serializers.Serializer):

@@ -46,7 +46,9 @@ INSTALLED_APPS = [
     'users',
     'data',
     'django_filters',
-    'channels'
+    'channels',
+    'external_kis',
+
 ]
 
 MIDDLEWARE = [
@@ -81,7 +83,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            f'{SITE_ROOT}\\backend\\templates'
+            f'{SITE_ROOT}/backend/data/templates'
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -123,6 +125,8 @@ DATABASES = {
         },
     }
 }
+
+DATABASE_ROUTERS = ['backend.db_router.ExternalDatabaseRouter']
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
