@@ -16,5 +16,10 @@ class KISProfilesAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         return False
 
+    # Override method for get filtered queryset
+    # def get_queryset(self, request):
+    #     queryset = super().get_queryset(request)
+    #     return queryset.filter()
+
 
 admin.site.register(KISProfiles, KISProfilesAdmin)
