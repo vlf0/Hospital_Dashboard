@@ -24,7 +24,7 @@ class QuerySets:
                WHERE dates BETWEEN CURRENT_DATE - INTERVAL '18 hours' and CURRENT_DATE + INTERVAL '6 hours';
                """
 
-    DEPT_HOSP = """SELECT med_profile, amount FROM mm.dept_hosp;"""
+    DEPT_HOSP = """SELECT id, amount FROM mm.dept_hosp;"""
 
     SIGNOUT = f"""
                SELECT 

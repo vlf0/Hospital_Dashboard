@@ -20,7 +20,7 @@ class ProfilesSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Profiles
-        fields = ['id', 'name', 'active', 'current_date', 'fact', 'plan', 'total']
+        fields = ['name', 'active', 'current_date', 'fact', 'plan', 'total']
 
 
 class AccumulativeDataSerializerSave(serializers.ModelSerializer):

@@ -9,11 +9,6 @@ class ExternalDatabaseRouter:
             return 'kis_db'
         return None
 
-    def db_for_write(self, model, **hints):
-        if model._meta.app_label == 'external_kis' and model._meta.model_name == 'kisprofiles':
-            return 'kis_db'
-        return None
-
     def allow_migrate(self, db, app_label, model_name=None, **hints):
         if app_label == 'external_kis' and model_name == 'kisprofiles':
             return False

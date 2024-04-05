@@ -277,16 +277,19 @@ class DataForDMK(DataProcessing):
         result = Counter()
         profiles_queryset = Profiles.objects.filter(active=True)
         # Creating dict with dept names and ids.
-        profiles = {profile.name: profile.id for profile in profiles_queryset}
+        profiles = [profile.profile_id for profile in profiles_queryset]
         # Summ common amount of patients by all depts with the same name.
         for dept, value in dh_dataset:
             result[dept] += value
-        summed_depts = [(k.title(), v,) for k, v in result.items()]
+        summed_depts = [(k, v,) for k, v in result.items()]
+        print(summed_depts)
         # Create list and filling it separated resulting dicts mapping with current active profiles.
         result_dicts = []
         for row in summed_depts:
-            if dept_id := profiles.get(row[0]):
-                result_dicts.append({'profile_id': dept_id, 'number': row[1]})
+            profile_id = row[0]
+            number = row[1]
+            if profile_id in profiles:
+                result_dicts.append({'profile_id': profile_id, 'number': number})
         return result_dicts
 
     def __collect_data(self, chosen_date: Union[date, None]) -> dict[str, dict]:

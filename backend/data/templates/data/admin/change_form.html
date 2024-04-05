@@ -47,10 +47,10 @@
 
 {% block field_sets %}
 {% for fieldset in adminform %}
-  {% include "admin/includes/fieldset.html" %}
+  {% include "./includes/fieldset.html" %}
 {% endfor %}
+
 {% endblock %}
-  {{ kis_profiles }}
 {% block after_field_sets %}{% endblock %}
 
 {% block inline_field_sets %}
