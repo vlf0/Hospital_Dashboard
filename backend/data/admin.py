@@ -1,9 +1,12 @@
+from django.contrib import messages
+from django.urls import reverse
 from django.contrib import admin
 from django.shortcuts import redirect
+from .kis_data import KISData, QuerySets
 from .models import Profiles, PlanNumbers
 from .caching import Cacher
 from .consumers import trigger_notification
-from external_kis.forms import KISProfileChosingForm
+from .forms import KISProfileChosingForm
 from django_celery_beat.models import (
     IntervalSchedule,
     CrontabSchedule,
@@ -45,13 +48,21 @@ class ProfilesAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change) -> None:
         """Override method so that perform renewing data in cache."""
         obj_id = request.POST.get('id')
+        change_url = reverse('admin:data_profiles_change', args=(obj_id,))
         method_type = request.path.split('/')[-2]
-        profile, created = Profiles.objects.get_or_create(profile_id=obj_id,
-                                                          defaults={'name': obj.name,
-                                                                    'active': True}
-                                                          )
-        if method_type == 'add' and not created:
-            return redirect(request.path)
+        query = [QuerySets.KIS_PROFILES]
+        kis_profiles_dataset = next(KISData(query).get_data_generator())
+        existing_profiles = Profiles.objects.all()
+        profiles_ids = [profile.profile_id for profile in existing_profiles]
+        try:
+            obj_id = int(obj_id)
+        except ValueError:
+            self.send_message(request, obj_id)
+            return redirect(change_url)
+        print(obj.profile_id)
+        if method_type == 'add' and int(obj_id) in profiles_ids:
+            self.send_message(request, obj_id)
+            return redirect(change_url)
         obj.profile_id = obj_id
         super().save_model(request, obj, form, change)
         PlanNumbers.objects.get_or_create(profile=obj, defaults={'profile': obj, 'plan': 0})
@@ -59,11 +70,15 @@ class ProfilesAdmin(admin.ModelAdmin):
         trigger_notification()
 
     def delete_model(self, request, obj) -> None:
-        print(request)
-        print(obj)
         super().delete_model(request, obj)
         Cacher().dmk_cache()
         trigger_notification()
+
+    @staticmethod
+    def send_message(request, obj_id):
+        message = messages.error(request, f"A profile with ID {obj_id} already exists.")
+        return message
+
 
 
 class PlanNumbersAdmin(admin.ModelAdmin):

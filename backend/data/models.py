@@ -1,7 +1,6 @@
 """Responsible for models (tables in DMK BD)."""
 from django.db import models
 from .models_managers import CustomManager
-from external_kis.models import KISProfiles
 
 
 class MainData(models.Model):

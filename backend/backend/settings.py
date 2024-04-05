@@ -46,9 +46,7 @@ INSTALLED_APPS = [
     'users',
     'data',
     'django_filters',
-    'channels',
-    'external_kis',
-
+    'channels'
 ]
 
 MIDDLEWARE = [

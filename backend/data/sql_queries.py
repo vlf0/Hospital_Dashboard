@@ -14,6 +14,11 @@ class QuerySets:
 
     today = date.today
 
+    KIS_PROFILES = """
+                   SELECT id, name
+                   FROM mm.profile_med;
+                   """
+
     ARRIVED = f"""
                SELECT 
                ar.status,
