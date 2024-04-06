@@ -21,6 +21,7 @@ from .models import Profiles, MainData, AccumulationOfIncoming
 KIS_DB = settings.DATABASES.get('kis_db')
 logger = logging.getLogger('data.kis_data.DataForDMK')
 today = date.today
+last_week = [str(today() - timedelta(days=days)) for days in range(7)]
 
 
 class CleanData:
@@ -282,7 +283,6 @@ class DataForDMK(DataProcessing):
         for dept, value in dh_dataset:
             result[dept] += value
         summed_depts = [(k, v,) for k, v in result.items()]
-        print(summed_depts)
         # Create list and filling it separated resulting dicts mapping with current active profiles.
         result_dicts = []
         for row in summed_depts:
@@ -292,7 +292,7 @@ class DataForDMK(DataProcessing):
                 result_dicts.append({'profile_id': profile_id, 'number': number})
         return result_dicts
 
-    def __collect_data(self, chosen_date: Union[date, None]) -> dict[str, dict]:
+    def __collect_data(self, chosen_date: Union[date, None]) -> dict[str, list[dict]]:
         """
         Get calculated main values for detail boards on the front-end for saving to DMK DB.
 
@@ -379,7 +379,7 @@ class DataForDMK(DataProcessing):
         accum_res = self.save_accumulated(accum)
         return [main_res, accum_res]
 
-    def save_main(self, main_data: dict) -> Union[MainData, None]:
+    def save_main(self, main_data: list[dict]) -> Union[MainData, None]:
         """
         Serialize and save a new model instance.
 
@@ -396,7 +396,7 @@ class DataForDMK(DataProcessing):
             en_error = self.__translate(e)
             logger.error(en_error)
 
-    def save_accumulated(self, accum_data: dict) -> Union[list[AccumulationOfIncoming], None]:
+    def save_accumulated(self, accum_data: list[dict]) -> Union[list[AccumulationOfIncoming], None]:
         """
         Iterate through given Serializer and save a few new model instances.
 
@@ -631,7 +631,6 @@ class KISDataProcessing(DataProcessing):
     @staticmethod
     def get_week_kis_data(query: str, kind: str):
         kis = KISDataProcessing
-        last_week = [str(today() - timedelta(days=days)) for days in range(7)]
         ready_queries = [QuerySets.chosen_date_query(query, day)[0] for day in last_week]
         processing = kis(KISData([query])).arrived_process
         if kind == 'signout':

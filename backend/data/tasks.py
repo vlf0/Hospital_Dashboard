@@ -34,7 +34,6 @@ def cache_all_data():
      Update the MainData model with the collected data.
      Do this everyday at 7:00 AM by schedule.
     """
-    cache.clear()
     ready_data = DataForDMK(KISData(QuerySets().queryset_for_dmk()))
     ready_data.save_to_dmk()
     Cacher().main_caching()

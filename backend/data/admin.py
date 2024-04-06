@@ -47,11 +47,9 @@ class ProfilesAdmin(admin.ModelAdmin):
 
     def save_model(self, request, obj, form, change) -> None:
         """Override method so that perform renewing data in cache."""
-        obj_id = request.POST.get('id')
+        obj_id, obj_name = request.POST.get('id'), request.POST.get('name')
         change_url = reverse('admin:data_profiles_change', args=(obj_id,))
         method_type = request.path.split('/')[-2]
-        query = [QuerySets.KIS_PROFILES]
-        kis_profiles_dataset = next(KISData(query).get_data_generator())
         existing_profiles = Profiles.objects.all()
         profiles_ids = [profile.profile_id for profile in existing_profiles]
         try:
@@ -59,11 +57,14 @@ class ProfilesAdmin(admin.ModelAdmin):
         except ValueError:
             self.send_message(request, obj_id)
             return redirect(change_url)
-        print(obj.profile_id)
-        if method_type == 'add' and int(obj_id) in profiles_ids:
-            self.send_message(request, obj_id)
-            return redirect(change_url)
-        obj.profile_id = obj_id
+
+        if method_type == 'add':
+            if obj_id in profiles_ids:
+                self.send_message(request, obj_id)
+                return redirect(change_url)
+            obj.profile_id = obj_id
+        elif method_type == 'change':
+            obj.name = obj_name
         super().save_model(request, obj, form, change)
         PlanNumbers.objects.get_or_create(profile=obj, defaults={'profile': obj, 'plan': 0})
         Cacher().dmk_cache()
@@ -78,7 +79,6 @@ class ProfilesAdmin(admin.ModelAdmin):
     def send_message(request, obj_id):
         message = messages.error(request, f"A profile with ID {obj_id} already exists.")
         return message
-
 
 
 class PlanNumbersAdmin(admin.ModelAdmin):
