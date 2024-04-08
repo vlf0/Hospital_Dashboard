@@ -31,13 +31,6 @@ class AccumulativeDataSerializerSave(serializers.ModelSerializer):
         fields = ['id', 'dates', 'number', 'profile_id']
 
 
-# class KISProfilesSerializer(serializers.ModelSerializer):
-#
-#     class Meta:
-#         model = KISProfiles
-#         fields = ['id', 'name']
-
-
 class KISDataSerializer(serializers.Serializer):
     """
     Serializer for non-model data getting from external DB.

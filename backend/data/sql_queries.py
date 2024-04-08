@@ -19,52 +19,55 @@ class QuerySets:
                    FROM mm.profile_med;
                    """
 
-    ARRIVED = f"""
-               SELECT 
-               ar.status,
-               ar.dept,
-               ar.channel,
-               ar.patient_type 
-               FROM mm.arrived ar
-               WHERE dates BETWEEN CURRENT_DATE - INTERVAL '18 hours' and CURRENT_DATE + INTERVAL '6 hours';
-               """
+    ARRIVED = """
+              SELECT 
+              ar.status,
+              ar.dept,
+              ar.channel,
+              ar.patient_type 
+              FROM mm.arrived ar
+              WHERE dates BETWEEN CURRENT_DATE - INTERVAL '18 hours' and CURRENT_DATE + INTERVAL '6 hours';
+              """
 
-    DEPT_HOSP = """SELECT id, amount FROM mm.dept_hosp;"""
+    DEPT_HOSP = """
+                SELECT id, amount FROM mm.dept_hosp
+                WHERE dates BETWEEN CURRENT_DATE - INTERVAL '18 hours' and CURRENT_DATE + INTERVAL '6 hours';
+                """
 
-    SIGNOUT = f"""
-               SELECT 
-               sg.dept,
-               sg.status
-               FROM mm.signout sg
-               WHERE dates BETWEEN CURRENT_DATE - INTERVAL '18 hours' and CURRENT_DATE + INTERVAL '6 hours';
-               """
+    SIGNOUT = """
+              SELECT 
+              sg.dept,
+              sg.status
+              FROM mm.signout sg
+              WHERE dates BETWEEN CURRENT_DATE - INTERVAL '18 hours' and CURRENT_DATE + INTERVAL '6 hours';
+              """
 
-    DEADS = f"""
-             SELECT 
-             dd.pat_fio,
-             dd.ib_num,
-             dd.sex,
-             dd.agee,
-             dd.arriving_dt,
-             dd.state,
-             dd.dept,
-             dd.days,
-             dd.diag_arr,
-             dd.diag_dead
-             FROM mm.deads dd
-             WHERE dates BETWEEN CURRENT_DATE - INTERVAL '18 hours' and CURRENT_DATE + INTERVAL '6 hours';
-             """
+    DEADS = """
+            SELECT 
+            dd.pat_fio,
+            dd.ib_num,
+            dd.sex,
+            dd.agee,
+            dd.arriving_dt,
+            dd.state,
+            dd.dept,
+            dd.days,
+            dd.diag_arr,
+            dd.diag_dead
+            FROM mm.deads dd
+            WHERE dates BETWEEN CURRENT_DATE - INTERVAL '18 hours' and CURRENT_DATE + INTERVAL '6 hours';
+            """
 
-    OAR_ARRIVED_QUERY = f"""
-                         SELECT 
-                         pat_fio,
-                         ib_num, 
-                         ages, 
-                         dept,
-                         doc_fio, 
-                         diag_start FROM mm.oar_arrived
-                         WHERE dates BETWEEN CURRENT_DATE - INTERVAL '18 hours' and CURRENT_DATE + INTERVAL '6 hours';
-                         """
+    OAR_ARRIVED_QUERY = """
+                        SELECT 
+                        pat_fio,
+                        ib_num, 
+                        ages, 
+                        dept,
+                        doc_fio, 
+                        diag_start FROM mm.oar_arrived
+                        WHERE dates BETWEEN CURRENT_DATE - INTERVAL '18 hours' and CURRENT_DATE + INTERVAL '6 hours';
+                        """
 
     OAR_MOVED_QUERY = """SELECT pat_fio, ib_num, ages, dept, doc_fio, move_date, from_dept, diag_start
                          FROM mm.oar_moved;"""
@@ -141,4 +144,14 @@ class QuerySets:
             return new_query
         new_query = queryset.replace('CURRENT_DATE', f'DATE \'{chosen_date}\'')
         return [new_query]
+
+    @staticmethod
+    def insert_accum_query(dataset, dates, id_cnt):
+        profile_id, number = dataset[0], dataset[1]
+        raw_query = f"""
+                     INSERT INTO public.data_accumulationofincoming (id, dates, number, profile_id) 
+                     VALUES 
+                     ({id_cnt}, '{dates}', {number}, '{profile_id}');
+                     """
+        return raw_query
 

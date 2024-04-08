@@ -21,7 +21,11 @@ from .models import Profiles, MainData, AccumulationOfIncoming
 KIS_DB = settings.DATABASES.get('kis_db')
 logger = logging.getLogger('data.kis_data.DataForDMK')
 today = date.today
-last_week = [str(today() - timedelta(days=days)) for days in range(7)]
+
+
+def dates_period(days_amount):
+    period = [str(today() - timedelta(days=days)) for days in range(days_amount)]
+    return period
 
 
 class CleanData:
@@ -268,11 +272,13 @@ class DataForDMK(DataProcessing):
         return {self.dmk_cols[-1]: self.count_dataset_total(reanimation_dataset)}
 
     @staticmethod
-    def get_dept_hosps(dh_dataset: list[tuple]) -> list[dict[str, Union[int, str]]]:
+    def get_dept_hosps(dh_dataset: list[tuple], raw_rtype: bool = False) -> list[Union[tuple[int, int], dict[str, Union[int, str]]]]:
         """
         Get data related to hospitalized by depts patients.
 
         :param dh_dataset: Raw dataset from db.
+        :param raw_rtype: Feature that allow get result in a raw list of tuples format
+         for inserting data to db directly when needed.
         :return:
         """
         result = Counter()
@@ -283,6 +289,8 @@ class DataForDMK(DataProcessing):
         for dept, value in dh_dataset:
             result[dept] += value
         summed_depts = [(k, v,) for k, v in result.items()]
+        if raw_rtype:
+            return summed_depts
         # Create list and filling it separated resulting dicts mapping with current active profiles.
         result_dicts = []
         for row in summed_depts:
@@ -292,7 +300,7 @@ class DataForDMK(DataProcessing):
                 result_dicts.append({'profile_id': profile_id, 'number': number})
         return result_dicts
 
-    def __collect_data(self, chosen_date: Union[date, None]) -> dict[str, list[dict]]:
+    def collect_data(self, chosen_date: Union[date, None]) -> dict[str, list[dict]]:
         """
         Get calculated main values for detail boards on the front-end for saving to DMK DB.
 
@@ -372,7 +380,7 @@ class DataForDMK(DataProcessing):
         :return: List containing one MainData instance or None as a first list element and list of AccumulatedData instances
          as a second element. If any error occurs - it write the logs to log-file.
         """
-        common_dict = self.__collect_data(chosen_date)
+        common_dict = self.collect_data(chosen_date)
         main = common_dict['main_data']
         accum = common_dict['accum_data']
         main_res = self.save_main(main)
@@ -630,6 +638,7 @@ class KISDataProcessing(DataProcessing):
 
     @staticmethod
     def get_week_kis_data(query: str, kind: str):
+        last_week = dates_period(7)
         kis = KISDataProcessing
         ready_queries = [QuerySets.chosen_date_query(query, day)[0] for day in last_week]
         processing = kis(KISData([query])).arrived_process
