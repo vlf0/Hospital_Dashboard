@@ -1,6 +1,5 @@
 """Here is described schedule and tasks for executing it using CELERY."""
 from celery import shared_task
-from django.core.cache import cache
 from django_celery_beat.models import PeriodicTask, CrontabSchedule
 from .kis_data import DataForDMK, KISData, QuerySets
 from .models import AccumulationOfIncoming
@@ -9,8 +8,8 @@ from .caching import Cacher
 
 # Schedule for main logic - inserting data to DMK
 schedule1, _ = CrontabSchedule.objects.get_or_create(
-    minute='0',
-    hour='6',
+    minute='25',
+    hour='11',
     day_of_week='*',
     day_of_month='*',
     month_of_year='*',

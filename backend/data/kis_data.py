@@ -179,7 +179,8 @@ class DataProcessing:
         :param dataset: *list*: A list of lists, where each inner list contains
          data corresponding to a row in the database.
         :type dataset: list[tuple]
-        :return: *list[CleanData]*: A list of `CleanData` class instances, each instantiated with data from the provided dataset.
+        :return: *list[CleanData]*: A list of `CleanData` class instances, each instantiated with data from the provided
+         dataset.
         """
         instances_list = [CleanData(**dict(zip(columns, row))) for row in dataset]
         return instances_list
@@ -272,7 +273,8 @@ class DataForDMK(DataProcessing):
         return {self.dmk_cols[-1]: self.count_dataset_total(reanimation_dataset)}
 
     @staticmethod
-    def get_dept_hosps(dh_dataset: list[tuple], raw_rtype: bool = False) -> list[Union[tuple[int, int], dict[str, Union[int, str]]]]:
+    def get_dept_hosps(dh_dataset: list[tuple], raw_rtype: bool = False) \
+            -> Union[list[dict[str, Union[int, str]]], list[tuple]]:
         """
         Get data related to hospitalized by depts patients.
 
@@ -281,19 +283,16 @@ class DataForDMK(DataProcessing):
          for inserting data to db directly when needed.
         :return:
         """
-        result = Counter()
+        if raw_rtype:
+            return dh_dataset
         profiles_queryset = Profiles.objects.filter(active=True)
         # Creating dict with dept names and ids.
         profiles = [profile.profile_id for profile in profiles_queryset]
-        # Summ common amount of patients by all depts with the same name.
-        for dept, value in dh_dataset:
-            result[dept] += value
-        summed_depts = [(k, v,) for k, v in result.items()]
-        if raw_rtype:
-            return summed_depts
         # Create list and filling it separated resulting dicts mapping with current active profiles.
+        print(dh_dataset)
+        print(profiles)
         result_dicts = []
-        for row in summed_depts:
+        for row in dh_dataset:
             profile_id = row[0]
             number = row[1]
             if profile_id in profiles:
@@ -366,7 +365,8 @@ class DataForDMK(DataProcessing):
                                         )
         return err_text
 
-    def save_to_dmk(self, chosen_date: Union[str, None] = None) -> list[Union[Union[MainData, None], Union[list[AccumulationOfIncoming], None]]]:
+    def save_to_dmk(self, chosen_date: Union[str, None] = None) \
+            -> list[Union[Union[MainData, None], Union[list[AccumulationOfIncoming], None]]]:
         """
         Save the prepared data to the DMK DB using the MainData model and its serializer.
 
@@ -377,8 +377,8 @@ class DataForDMK(DataProcessing):
         :raises SyntaxError: If there is a syntax error in the serializer.
         :raises AssertionError: If there is an assertion error during saving.
 
-        :return: List containing one MainData instance or None as a first list element and list of AccumulatedData instances
-         as a second element. If any error occurs - it write the logs to log-file.
+        :return: List containing one MainData instance or None as a first list element and list of AccumulatedData
+         instances as a second element. If any error occurs - it write the logs to log-file.
         """
         common_dict = self.collect_data(chosen_date)
         main = common_dict['main_data']

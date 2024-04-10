@@ -30,7 +30,7 @@ class QuerySets:
               """
 
     DEPT_HOSP = """
-                SELECT id, amount FROM mm.dept_hosp
+                SELECT profile_id, amount FROM mm.dept_hosp
                 WHERE dates BETWEEN CURRENT_DATE - INTERVAL '18 hours' and CURRENT_DATE + INTERVAL '6 hours';
                 """
 
@@ -107,7 +107,7 @@ class QuerySets:
         'ОРИТ №3': 'oar3_d',
         'Кардиологическое отделение': 'cardio_d',
         'Хирургическое отделение': 'surgery_d',
-        'Терапевтическое отделение': 'therapy_d'
+        'Терапевтичecкое отделение': 'therapy_d'
     }
 
     def queryset_for_dmk(self):

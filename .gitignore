@@ -8,11 +8,13 @@ settings_prod.py
 /*.py
 # C extensions
 *.so
+
 *.xls
 *.xlsx
-
+*.sql
 *.ps1
 */initial_script.py
+
 
 # My dirs
 KIS_queries/

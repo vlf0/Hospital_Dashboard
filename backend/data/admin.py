@@ -29,14 +29,17 @@ class ProfilesAdmin(admin.ModelAdmin):
 
     fieldsets = (
         (None, {
-            'fields': ('name',),
+            'fields': ('name', 'active'),
         }),
     )
 
     def change_view(self, request, object_id, form_url="", extra_context=None):
         """Pass custom ModelForm of external model."""
         extra_context = extra_context or {}
-        extra_context['kis_profiles'] = KISProfileChosingForm()
+        kis_profiles_dataset = next(KISData([QuerySets.KIS_PROFILES]).get_data_generator())
+        chosen_profile = [f'[КИС] - ID: {row[0]}, Профиль {row[1]}'
+                          for row in kis_profiles_dataset if row[0] == int(object_id)]
+        extra_context['kis_profiles'] = chosen_profile[0]
         return super().change_view(request, object_id, form_url, extra_context=extra_context)
 
     def add_view(self, request, form_url="", extra_context=None):

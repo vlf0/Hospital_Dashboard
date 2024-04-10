@@ -11,6 +11,6 @@ class KISProfileChosingForm(forms.Form):
 
     def get_id_choices(self):
         query = [QuerySets.KIS_PROFILES]
-        kis_profiles_dataset = next(KISData(query).get_data_generator())
-        choices = [(profile[0], f'{str(profile[0])} - Профиль {profile[1]}') for profile in kis_profiles_dataset]
+        dept_hosp_dataset = next(KISData(query).get_data_generator())
+        choices = [(profile[0], f'{str(profile[0])} - Профиль {profile[1]}') for profile in dept_hosp_dataset]
         return choices

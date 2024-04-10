@@ -9,15 +9,11 @@ import DataContext from '../DataContext';
 import { CustomMap } from '../Feauters';
 import { currentDatetime } from '../Feauters';
 import { getMainDMK } from '../Feauters';
-import { getYesterdayDate } from '../Feauters';
 import "../parent.css" 
 import './dashboard_content.css'
 
 
 function GetAnalysis() {
-
-  const today = new Date();
-  const yesterDay = getYesterdayDate();
 
   const props = useSpring({
     from: { opacity: 0 },
@@ -27,8 +23,8 @@ function GetAnalysis() {
   
   const main_dmk = useContext(DataContext).dmk.main_dmk;
 
-  const currentDay = getMainDMK(main_dmk, today);
-  const yesterday = getMainDMK(main_dmk, yesterDay);
+  const currentDay = getMainDMK(main_dmk, 'today');
+  const yesterday = getMainDMK(main_dmk, 'yesterday');
 
 
   const arrived = CustomMap(currentDay, yesterday, 'arrived')

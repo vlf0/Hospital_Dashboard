@@ -124,8 +124,6 @@ DATABASES = {
     }
 }
 
-DATABASE_ROUTERS = ['backend.db_router.ExternalDatabaseRouter']
-
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
