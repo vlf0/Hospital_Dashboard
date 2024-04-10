@@ -20,7 +20,7 @@ class ProfilesSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Profiles
-        fields = ['id', 'name', 'active', 'current_date', 'fact', 'plan', 'total']
+        fields = ['name', 'active', 'current_date', 'fact', 'plan', 'total']
 
 
 class AccumulativeDataSerializerSave(serializers.ModelSerializer):
@@ -44,33 +44,43 @@ class KISDataSerializer(serializers.Serializer):
     ch103_clinic = serializers.IntegerField(required=False, allow_null=True)
     singly = serializers.IntegerField(required=False, allow_null=True)
     plan = serializers.IntegerField(required=False, allow_null=True)
+
     ZL = serializers.IntegerField(required=False, allow_null=True)
     foreign = serializers.IntegerField(required=False, allow_null=True)
-    nr = serializers.IntegerField(required=False, allow_null=True)
     nil = serializers.IntegerField(required=False, allow_null=True)
+    nr = serializers.IntegerField(required=False, allow_null=True)
     dms = serializers.IntegerField(required=False, allow_null=True)
     undefined = serializers.IntegerField(required=False, allow_null=True)
-    # Fields of hospitalized patients that counted by depts.
-    therapy = serializers.IntegerField(required=False, allow_null=True)
-    surgery = serializers.IntegerField(required=False, allow_null=True)
-    cardiology = serializers.IntegerField(required=False, allow_null=True)
-    urology = serializers.IntegerField(required=False, allow_null=True)
-    neurology = serializers.IntegerField(required=False, allow_null=True)
     # Fields of deads and signout patients.
     deads = serializers.IntegerField(required=False, allow_null=True)
     moved = serializers.IntegerField(required=False, allow_null=True)
     signout = serializers.IntegerField(required=False, allow_null=True)
-    cardio_d = serializers.IntegerField(required=False, allow_null=True)
-    surgery_d = serializers.IntegerField(required=False, allow_null=True)
-    therapy_d = serializers.IntegerField(required=False, allow_null=True)
-
-    oar1_d = serializers.IntegerField(required=False, allow_null=True)
-    oar2_d = serializers.IntegerField(required=False, allow_null=True)
-    oar3_d = serializers.IntegerField(required=False, allow_null=True)
-
     oar1 = serializers.IntegerField(required=False, allow_null=True)
     oar2 = serializers.IntegerField(required=False, allow_null=True)
     oar3 = serializers.IntegerField(required=False, allow_null=True)
+    oaronmk_d = serializers.IntegerField(required=False, allow_null=True)
+    surgery_d = serializers.IntegerField(required=False, allow_null=True)
+    oar1_d = serializers.IntegerField(required=False, allow_null=True)
+    dp_d = serializers.IntegerField(required=False, allow_null=True)
+    oar_d = serializers.IntegerField(required=False, allow_null=True)
+    trauma_d = serializers.IntegerField(required=False, allow_null=True)
+    neurosurgery_d = serializers.IntegerField(required=False, allow_null=True)
+    oaroim_d = serializers.IntegerField(required=False, allow_null=True)
+    oar2_d = serializers.IntegerField(required=False, allow_null=True)
+    cardio_d = serializers.IntegerField(required=False, allow_null=True)
+    therapy_d = serializers.IntegerField(required=False, allow_null=True)
+    endo_d = serializers.IntegerField(required=False, allow_null=True)
+    neuroonmk_d = serializers.IntegerField(required=False, allow_null=True)
+    urology_d = serializers.IntegerField(required=False, allow_null=True)
+    pursurgery_d = serializers.IntegerField(required=False, allow_null=True)
+    cardio2_d = serializers.IntegerField(required=False, allow_null=True)
+    skp_d = serializers.IntegerField(required=False, allow_null=True)
+    gynecology_d = serializers.IntegerField(required=False, allow_null=True)
+    emer_d = serializers.IntegerField(required=False, allow_null=True)
+    multi_pay_d = serializers.IntegerField(required=False, allow_null=True)
+    apc_d = serializers.IntegerField(required=False, allow_null=True)
+    combine_d = serializers.IntegerField(required=False, allow_null=True)
+    pulmonology_d = serializers.IntegerField(required=False, allow_null=True)
 
     def to_representation(self, instance):
         """
@@ -104,7 +114,6 @@ class KISTableSerializer(KISDataSerializer):
     diag_arr = serializers.CharField(required=False, allow_null=True)
     diag_dead = serializers.CharField(required=False, allow_null=True)
     # Fields to hospitalized in reanimation dataset related
-    # ages = serializers.IntegerField(required=False, allow_null=True)
     doc_fio = serializers.CharField(required=False, allow_null=True)
     diag_start = serializers.CharField(required=False, allow_null=True)
     # Fields to moved to reanimation dataset related

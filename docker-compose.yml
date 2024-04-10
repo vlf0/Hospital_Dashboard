@@ -1,12 +1,6 @@
 version: '3'
 
 services:
-  redis:
-    build: ./redis/.
-    ports:
-      - "6379:6379"
-    networks:
-      - one_net
   backend:
     build: ./backend/.
     ports:
@@ -15,6 +9,34 @@ services:
       - "static:/usr/src/Dashboard/static"
     networks:
       - one_net
+  database:
+    build: ./postgres/.
+    environment:
+      - POSTGRES_PASSWORD=root
+      - PGUSER=postgres  # just POSTGRES_USER does not working
+      - POSTGRES_DB=postgres
+      - PGDATABASE=postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgres/data/.:/var/lib/postgresql/data
+      - ./postgres/.:/docker-entrypoint-initdb.d
+    networks:
+      - one_net
+    depends_on:
+      - backend
+    links:
+      - "backend:backend"
+  redis:
+    build: ./redis/.
+    ports:
+      - "6379:6379"
+    networks:
+      - one_net
+    depends_on:
+      - backend
+    links:
+      - "backend:backend"
   nginx:
     build: ./nginx/.
     ports:

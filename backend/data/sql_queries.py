@@ -14,52 +14,60 @@ class QuerySets:
 
     today = date.today
 
-    ARRIVED = f"""
-               SELECT 
-               ar.status,
-               ar.dept,
-               ar.channel,
-               ar.patient_type 
-               FROM mm.arrived ar
-               WHERE dates BETWEEN CURRENT_DATE - INTERVAL '18 hours' and CURRENT_DATE + INTERVAL '6 hours';
-               """
+    KIS_PROFILES = """
+                   SELECT id, name
+                   FROM mm.profile_med;
+                   """
 
-    DEPT_HOSP = """SELECT med_profile, amount FROM mm.dept_hosp;"""
+    ARRIVED = """
+              SELECT 
+              ar.status,
+              ar.dept,
+              ar.channel,
+              ar.patient_type 
+              FROM mm.arrived ar
+              WHERE dates BETWEEN CURRENT_DATE - INTERVAL '18 hours' and CURRENT_DATE + INTERVAL '6 hours';
+              """
 
-    SIGNOUT = f"""
-               SELECT 
-               sg.dept,
-               sg.status
-               FROM mm.signout sg
-               WHERE dates BETWEEN CURRENT_DATE - INTERVAL '18 hours' and CURRENT_DATE + INTERVAL '6 hours';
-               """
+    DEPT_HOSP = """
+                SELECT profile_id, amount FROM mm.dept_hosp
+                WHERE dates BETWEEN CURRENT_DATE - INTERVAL '18 hours' and CURRENT_DATE + INTERVAL '6 hours';
+                """
 
-    DEADS = f"""
-             SELECT 
-             dd.pat_fio,
-             dd.ib_num,
-             dd.sex,
-             dd.agee,
-             dd.arriving_dt,
-             dd.state,
-             dd.dept,
-             dd.days,
-             dd.diag_arr,
-             dd.diag_dead
-             FROM mm.deads dd
-             WHERE dates BETWEEN CURRENT_DATE - INTERVAL '18 hours' and CURRENT_DATE + INTERVAL '6 hours';
-             """
+    SIGNOUT = """
+              SELECT 
+              sg.dept,
+              sg.status
+              FROM mm.signout sg
+              WHERE dates BETWEEN CURRENT_DATE - INTERVAL '18 hours' and CURRENT_DATE + INTERVAL '6 hours';
+              """
 
-    OAR_ARRIVED_QUERY = f"""
-                         SELECT 
-                         pat_fio,
-                         ib_num, 
-                         ages, 
-                         dept,
-                         doc_fio, 
-                         diag_start FROM mm.oar_arrived
-                         WHERE dates BETWEEN CURRENT_DATE - INTERVAL '18 hours' and CURRENT_DATE + INTERVAL '6 hours';
-                         """
+    DEADS = """
+            SELECT 
+            dd.pat_fio,
+            dd.ib_num,
+            dd.sex,
+            dd.agee,
+            dd.arriving_dt,
+            dd.state,
+            dd.dept,
+            dd.days,
+            dd.diag_arr,
+            dd.diag_dead
+            FROM mm.deads dd
+            WHERE dates BETWEEN CURRENT_DATE - INTERVAL '18 hours' and CURRENT_DATE + INTERVAL '6 hours';
+            """
+
+    OAR_ARRIVED_QUERY = """
+                        SELECT 
+                        pat_fio,
+                        ib_num, 
+                        ages, 
+                        dept,
+                        doc_fio, 
+                        diag_start FROM mm.oar_arrived
+                        WHERE dates BETWEEN CURRENT_DATE - INTERVAL '18 hours' and CURRENT_DATE + INTERVAL '6 hours';
+                        """
 
     OAR_MOVED_QUERY = """SELECT pat_fio, ib_num, ages, dept, doc_fio, move_date, from_dept, diag_start
                          FROM mm.oar_moved;"""
@@ -91,16 +99,6 @@ class QuerySets:
     signout = ['Умер', 'Переведен', 'Выписан']
     oar_depts = ['ОРИТ №1', 'ОРИТ №2', 'ОРИТ №3']
 
-    # Dict for mapping with serializer fields (relates to "план/факт по профилям" table).
-    # All english names is fields of serializer.
-    profiles_mapping = {
-        'Терапия': 'therapy',
-        'Хирургия': 'surgery',
-        'Кардиология': 'cardiology',
-        'Урология': 'urology',
-        'Неврология': 'neurology'
-    }
-
     # Dict for mapping columns on russian language with serializer fields (relates to "выписанные по отделениям" table).
     # All english names is fields of serializer.
     depts_mapping = {
@@ -109,7 +107,7 @@ class QuerySets:
         'ОРИТ №3': 'oar3_d',
         'Кардиологическое отделение': 'cardio_d',
         'Хирургическое отделение': 'surgery_d',
-        'Терапевтическое отделение': 'therapy_d'
+        'Терапевтичecкое отделение': 'therapy_d'
     }
 
     def queryset_for_dmk(self):
@@ -146,4 +144,14 @@ class QuerySets:
             return new_query
         new_query = queryset.replace('CURRENT_DATE', f'DATE \'{chosen_date}\'')
         return [new_query]
+
+    @staticmethod
+    def insert_accum_query(dataset, dates, id_cnt):
+        profile_id, number = dataset[0], dataset[1]
+        raw_query = f"""
+                     INSERT INTO public.data_accumulationofincoming (id, dates, number, profile_id) 
+                     VALUES 
+                     ({id_cnt}, '{dates}', {number}, '{profile_id}');
+                     """
+        return raw_query
 

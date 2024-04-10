@@ -1,4 +1,8 @@
 *Dockerfile
 
+open_shell_venv.ps1
+Dockerfile
+
 /.pytest_cache
+/envs
 

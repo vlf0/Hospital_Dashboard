@@ -22,7 +22,6 @@ ALLOWED_HOSTS = [
 
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
-    'http://localhost:3030',
     'http://127.0.0.1:3000',
     'http://0.0.0.0:3000',
 ]
@@ -85,7 +84,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            f'{SITE_ROOT}\\backend\\templates'
+            f'{SITE_ROOT}/backend/data/templates'
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -113,15 +112,19 @@ CHANNEL_LAYERS = {
 }
 
 # Get the DB creds from .env file
-DATABASES = {'default': env.db('DMK_URL')}
-
-# External DB data
-DB_CREDS = {
-    'host': env.str('HOST'),
-    'port': env.str('PORT'),
-    'dbname': env.str('DBNAME'),
-    'user': env.str('USER'),
-    'password': env.str('PASSWORD'),
+DATABASES = {
+    'default': env.db('DMK_URL'),
+    'kis_db': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': env.db('KIS_URL')['NAME'],
+        'USER': env.db('KIS_URL')['USER'],
+        'PASSWORD': env.db('KIS_URL')['PASSWORD'],
+        'HOST': env.db('KIS_URL')['HOST'],
+        'PORT': env.db('KIS_URL')['PORT'],
+        'OPTIONS': {
+            'options': '-c search_path=mm'  # Specify the schema here
+        },
+    }
 }
 
 # Password validation

@@ -11,9 +11,14 @@ settings_prod.py
 *.xls
 *.xlsx
 
+*.ps1
+*/initial_script.py
+
 # My dirs
 KIS_queries/
 envs/
+postgres/data/
+!frontend/build/
 
 # Distribution / packaging
 .Python

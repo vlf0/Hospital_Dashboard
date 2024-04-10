@@ -18,10 +18,14 @@ from .serializers import (
      ProfilesSerializer)
 from .models import Profiles, MainData, AccumulationOfIncoming
 
-creds = settings.DB_CREDS
+KIS_DB = settings.DATABASES.get('kis_db')
 logger = logging.getLogger('data.kis_data.DataForDMK')
 today = date.today
 
+
+def dates_period(days_amount):
+    period = [str(today() - timedelta(days=days)) for days in range(days_amount)]
+    return period
 
 
 class CleanData:
@@ -71,10 +75,10 @@ class KISData:
          and queries of its columns. Each query pair is a list.
         """
         self.query_sets = query_sets
-        self.db_conn = BaseConnectionDB(dbname=creds['dbname'],
-                                        host=creds['host'],
-                                        user=creds['user'],
-                                        password=creds['password']
+        self.db_conn = BaseConnectionDB(dbname=KIS_DB['NAME'],
+                                        host=KIS_DB['HOST'],
+                                        user=KIS_DB['USER'],
+                                        password=KIS_DB['PASSWORD']
                                         )
         self.cursor = self.db_conn.execute_query
 
@@ -175,7 +179,8 @@ class DataProcessing:
         :param dataset: *list*: A list of lists, where each inner list contains
          data corresponding to a row in the database.
         :type dataset: list[tuple]
-        :return: *list[CleanData]*: A list of `CleanData` class instances, each instantiated with data from the provided dataset.
+        :return: *list[CleanData]*: A list of `CleanData` class instances, each instantiated with data from the provided
+         dataset.
         """
         instances_list = [CleanData(**dict(zip(columns, row))) for row in dataset]
         return instances_list
@@ -254,7 +259,8 @@ class DataForDMK(DataProcessing):
         :return: Dictionary containing signout and deaths data.
         """
         result_keys = self.dmk_cols[3:5]
-        ready_values = self.count_data(signout_dataset, 1, 'Умер')
+        
+        ready_values = self.count_data(signout_dataset, 1, 'Умер в стационаре')
         return dict(zip(result_keys, ready_values))
 
     def get_reanimation_data(self, reanimation_dataset: list[tuple]) -> dict[str, int]:
@@ -267,29 +273,33 @@ class DataForDMK(DataProcessing):
         return {self.dmk_cols[-1]: self.count_dataset_total(reanimation_dataset)}
 
     @staticmethod
-    def get_dept_hosps(dh_dataset: list[tuple]) -> list[dict[str, Union[int, str]]]:
+    def get_dept_hosps(dh_dataset: list[tuple], raw_rtype: bool = False) \
+            -> Union[list[dict[str, Union[int, str]]], list[tuple]]:
         """
         Get data related to hospitalized by depts patients.
 
         :param dh_dataset: Raw dataset from db.
+        :param raw_rtype: Feature that allow get result in a raw list of tuples format
+         for inserting data to db directly when needed.
         :return:
         """
-        result = Counter()
+        if raw_rtype:
+            return dh_dataset
         profiles_queryset = Profiles.objects.filter(active=True)
         # Creating dict with dept names and ids.
-        profiles = {profile.name: profile.id for profile in profiles_queryset}
-        # Summ common amount of patients by all depts with the same name.
-        for dept, value in dh_dataset:
-            result[dept] += value
-        summed_depts = [(k.title(), v,) for k, v in result.items()]
+        profiles = [profile.profile_id for profile in profiles_queryset]
         # Create list and filling it separated resulting dicts mapping with current active profiles.
+        print(dh_dataset)
+        print(profiles)
         result_dicts = []
-        for row in summed_depts:
-            if dept_id := profiles.get(row[0]):
-                result_dicts.append({'profile_id': dept_id, 'number': row[1]})
+        for row in dh_dataset:
+            profile_id = row[0]
+            number = row[1]
+            if profile_id in profiles:
+                result_dicts.append({'profile_id': profile_id, 'number': number})
         return result_dicts
 
-    def __collect_data(self, chosen_date: Union[date, None]) -> dict[str, dict]:
+    def collect_data(self, chosen_date: Union[date, None]) -> dict[str, list[dict]]:
         """
         Get calculated main values for detail boards on the front-end for saving to DMK DB.
 
@@ -304,6 +314,7 @@ class DataForDMK(DataProcessing):
         """
         if self.kisdata_obj.db_conn.conn is None:
             main_data = {i: None for i in self.dmk_cols}
+            dh_dataset = None
         else:
             gen = self.kisdata_obj.get_data_generator()
             arrived = self.get_arrived_data(next(gen))
@@ -354,7 +365,8 @@ class DataForDMK(DataProcessing):
                                         )
         return err_text
 
-    def save_to_dmk(self, chosen_date: str = None) -> list[Union[MainData, None], AccumulationOfIncoming]:
+    def save_to_dmk(self, chosen_date: Union[str, None] = None) \
+            -> list[Union[Union[MainData, None], Union[list[AccumulationOfIncoming], None]]]:
         """
         Save the prepared data to the DMK DB using the MainData model and its serializer.
 
@@ -365,17 +377,17 @@ class DataForDMK(DataProcessing):
         :raises SyntaxError: If there is a syntax error in the serializer.
         :raises AssertionError: If there is an assertion error during saving.
 
-        :return: List containing one MainData instance or None as a first list element and list of AccumulatedData instances
-         as a second element. If any error occurs - it write the logs to log-file.
+        :return: List containing one MainData instance or None as a first list element and list of AccumulatedData
+         instances as a second element. If any error occurs - it write the logs to log-file.
         """
-        common_dict = self.__collect_data(chosen_date)
+        common_dict = self.collect_data(chosen_date)
         main = common_dict['main_data']
         accum = common_dict['accum_data']
         main_res = self.save_main(main)
         accum_res = self.save_accumulated(accum)
         return [main_res, accum_res]
 
-    def save_main(self, main_data: dict) -> Union[MainData, None]:
+    def save_main(self, main_data: list[dict]) -> Union[MainData, None]:
         """
         Serialize and save a new model instance.
 
@@ -392,7 +404,7 @@ class DataForDMK(DataProcessing):
             en_error = self.__translate(e)
             logger.error(en_error)
 
-    def save_accumulated(self, accum_data: dict) -> list[Union[MainData, Any], list[AccumulationOfIncoming]]:
+    def save_accumulated(self, accum_data: list[dict]) -> Union[list[AccumulationOfIncoming], None]:
         """
         Iterate through given Serializer and save a few new model instances.
 
@@ -626,13 +638,11 @@ class KISDataProcessing(DataProcessing):
 
     @staticmethod
     def get_week_kis_data(query: str, kind: str):
-
+        last_week = dates_period(7)
         kis = KISDataProcessing
-        last_week = [str(today() - timedelta(days=days)) for days in range(7)]
         ready_queries = [QuerySets.chosen_date_query(query, day)[0] for day in last_week]
-        if kind == 'arrived':
-            processing = kis(KISData([query])).arrived_process
-        elif kind == 'signout':
+        processing = kis(KISData([query])).arrived_process
+        if kind == 'signout':
             processing = kis(KISData([query])).signout_process
         generator = KISData(ready_queries).get_data_generator()
         result = {f'{kind}_{day}': processing(next(generator)) for day in last_week}

@@ -1,7 +1,6 @@
 """This module provide work of main django functions - views."""
 from rest_framework import viewsets
 from rest_framework.response import Response
-from django.core.cache import cache
 from .caching import Cacher
 # from .decorators import main_cache_disable
 
