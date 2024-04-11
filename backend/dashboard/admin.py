@@ -25,7 +25,7 @@ admin.site.unregister(CrontabSchedule)
 class ProfilesAdmin(admin.ModelAdmin):
 
     # change_list_template = 'data/admin/change_list.html'
-    change_form_template = 'data/admin/change_form.html'
+    change_form_template = 'dashboard/admin/change_form.html'
 
     fieldsets = (
         (None, {
@@ -50,22 +50,17 @@ class ProfilesAdmin(admin.ModelAdmin):
 
     def save_model(self, request, obj, form, change) -> None:
         """Override method so that perform renewing data in cache."""
-        obj_id, obj_name = request.POST.get('id'), request.POST.get('name')
-        change_url = reverse('admin:data_profiles_change', args=(obj_id,))
+        obj_name = request.POST.get('name')
         method_type = request.path.split('/')[-2]
         existing_profiles = Profiles.objects.all()
-        profiles_ids = [profile.profile_id for profile in existing_profiles]
-        try:
-            obj_id = int(obj_id)
-        except ValueError:
-            self.send_message(request, obj_id)
-            return redirect(change_url)
-
+        profiles_ids = [profile.id for profile in existing_profiles]
         if method_type == 'add':
+            obj_id = request.POST.get('id')
+            change_url = reverse('admin:dashboard_profiles_change', args=(obj_id,))
             if obj_id in profiles_ids:
                 self.send_message(request, obj_id)
                 return redirect(change_url)
-            obj.profile_id = obj_id
+            obj.id = obj_id
         elif method_type == 'change':
             obj.name = obj_name
         super().save_model(request, obj, form, change)

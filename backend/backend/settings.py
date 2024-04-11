@@ -33,7 +33,7 @@ ROOT_URLCONF = 'backend.urls'
 AUTH_USER_MODEL = 'users.CustomUser'
 
 INSTALLED_APPS = [
-    'daphne',
+    # 'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -43,10 +43,11 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'django_celery_beat',
-    'users',
-    'data',
     'django_filters',
-    'channels'
+    'channels',
+    'users',
+    'dashboard',
+    'observer'
 ]
 
 MIDDLEWARE = [
@@ -81,7 +82,9 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            f'{SITE_ROOT}/backend/data/templates'
+            f'{SITE_ROOT}/backend/templates',
+            # f'{SITE_ROOT}/backend/templates/dashboard',
+            # f'{SITE_ROOT}/backend/templates/observer',
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -168,14 +171,14 @@ LOGGING = {
     'handlers': {
         'conn_errs': {
             'class': 'logging.FileHandler',
-            'filename': SITE_ROOT + r'\backend\data\pg_logs.log',
+            'filename': SITE_ROOT + r'\backend\dashboard\pg_logs.log',
             'formatter': 'conn_errs',
             'level': 'ERROR',
             # 'mode': 'w'
             },
         'dmk': {
             'class': 'logging.FileHandler',
-            'filename': SITE_ROOT + r'\backend\data\pg_logs.log',
+            'filename': SITE_ROOT + r'\backend\dashboard\pg_logs.log',
             'formatter': 'dmk',
             'level': 'INFO',
             # 'mode': 'w'
@@ -192,12 +195,12 @@ LOGGING = {
     },
 
     'loggers': {
-        'data.psycopg_module.BaseConnectionDB': {
+        'dashboard.psycopg_module.BaseConnectionDB': {
             'level': 'ERROR',
             'handlers': ['conn_errs'],
             'propagate': False
         },
-        'data.kis_data.DataForDMK': {
+        'dashboard.kis_data.DataForDMK': {
             'level': 'INFO',
             'handlers': ['dmk'],
             'propagate': False

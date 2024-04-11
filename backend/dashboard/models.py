@@ -27,20 +27,20 @@ class MainData(models.Model):
 
 class Profiles(models.Model):
 
-    profile_id = models.IntegerField(primary_key=True)
+    id = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=50, verbose_name='Название профиля')
     active = models.BooleanField(default=True, verbose_name='Статус')
-
-    def __str__(self):
-        return f'ID: {self.profile_id}, Профиль: {self.name}, Активен: {"Да" if self.active else "Нет"}'
-
-    def __repr__(self):
-        return f'Profile(profile_id=\'{self.profile_id}\', name=\'{self.name}\', active={self.active})'
 
     class Meta:
         verbose_name = 'Профиль'
         verbose_name_plural = 'Профили'
         ordering = ['name']
+
+    def __str__(self):
+        return f'ID: {self.id}, Профиль: {self.name}, Активен: {"Да" if self.active else "Нет"}'
+
+    def __repr__(self):
+        return f'Profile(profile_id=\'{self.id}\', name=\'{self.name}\', active={self.active})'
 
 
 class AccumulationOfIncoming(models.Model):
@@ -77,5 +77,5 @@ class PlanNumbers(models.Model):
         ordering = ['profile']
 
     def __str__(self):
-        return f'Profile_id: {self.profile.profile_id}, Профиль: {self.profile.name}, Текущий план: {self.plan}'
+        return f'Profile_id: {self.profile.id}, Профиль: {self.profile.name}, Текущий план: {self.plan}'
 

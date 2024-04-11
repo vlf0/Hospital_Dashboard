@@ -287,7 +287,7 @@ class DataForDMK(DataProcessing):
             return dh_dataset
         profiles_queryset = Profiles.objects.filter(active=True)
         # Creating dict with dept names and ids.
-        profiles = [profile.profile_id for profile in profiles_queryset]
+        profiles = [profile.id for profile in profiles_queryset]
         # Create list and filling it separated resulting dicts mapping with current active profiles.
         print(dh_dataset)
         print(profiles)

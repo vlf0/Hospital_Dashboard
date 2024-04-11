@@ -12,7 +12,7 @@ from django.urls import path
 from django.core.asgi import get_asgi_application
 from channels.routing import URLRouter, ProtocolTypeRouter
 from channels.auth import AuthMiddlewareStack
-from data.consumers import NotificationConsumer
+from dashboard.consumers import NotificationConsumer
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend.settings')
 
