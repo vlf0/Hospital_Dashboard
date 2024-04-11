@@ -75,7 +75,6 @@ export function ensureArrayLength(array, desiredLength) {
 };
 
 export function DeadTableProcess(dataset) {
-  console.log(dataset)
   // Using map to transform each item in the dataset
   const modifiedObjects = dataset.map(item => {
     return {
@@ -184,7 +183,7 @@ export function getMainDMK(dmkData, day) {
   yesterday.setDate(today.getDate() - 1)
 
   const currentTime = today.toLocaleTimeString();
-  const currentHour = currentTime.split(':')[0].slice(1);
+  const currentHour = currentTime.split(':')[0];
 
   if (day === 'yesterday') {
     today.setDate(today.getDate() - 1);

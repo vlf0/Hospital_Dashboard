@@ -4,7 +4,7 @@ function GetWeekDays() {
   
   const today = new Date();
   const currentTime = today.toLocaleTimeString();
-  const currentHour = currentTime.split(':')[0].slice(1);
+  const currentHour = currentTime.split(':')[0];
 
   if (currentHour < 6) {
     today.setDate(today.getDate() - 1);
@@ -32,7 +32,7 @@ export default GetWeekDays;
 export function GetDates() {
   const today = new Date();
   const currentTime = today.toLocaleTimeString();
-  const currentHour = currentTime.split(':')[0].slice(1);
+  const currentHour = currentTime.split(':')[0];
 
   if (currentHour < 6) {
     today.setDate(today.getDate() - 1);
