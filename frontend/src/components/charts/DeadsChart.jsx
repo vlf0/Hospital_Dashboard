@@ -14,10 +14,6 @@ Chart.register(AnnotationPlugin);
 Chart.register(ChartDataLabels);
 
 
-Chart.defaults.font.size = 12;
-Chart.defaults.color = '#090b1f';  
-
-
 const DeadsChart = () => {
 
     const dmk_charts = useContext(DataContext).dmk.main_dmk;
@@ -50,9 +46,12 @@ const DeadsChart = () => {
                   drawTicks: false
                 },
                 ticks: {
-
                     beginAtZero: true,
-                    color: '#090b1f',    
+                    font: {
+                        weight: 'bold',
+                        size: 13,
+                    },
+                    color: 'black'
                 },
             },
             y: {
@@ -61,9 +60,12 @@ const DeadsChart = () => {
                   drawOnChartArea: true,
                   drawTicks: false
                   },
-             
                 ticks: {
-                    font: {weight: 'bold'},
+                    font: {
+                        weight: 'bold',
+                        size: 13,
+                    },
+                    color: 'black'
                 },
             },
         },

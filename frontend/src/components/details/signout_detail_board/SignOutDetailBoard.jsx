@@ -47,16 +47,17 @@ const SignOutDetailBoard = () => {
       <div className='blocks_container'>
         <div className='separated_detail_block_X' onClick={toggleDeadTableVisibility}>
           <p> Смерть </p> { kis.deads } </div>
+
         <div className='separated_detail_block'> 
           <p> Перевод в другую МО </p> { kis.moved } </div>
         <div className='separated_detail_block'>
            <p> Выписка </p> { kis.signout } </div>
       </div>
+        <animated.div style={springProps}>
+          {isDeadTableVisible && <SignOutDetailTable />}
+        </animated.div>
       <span className='detail_block_header'> Выписка по отделениям </span>
       <DeadsChartDetail data={kis}/>
-      <animated.div style={springProps}>
-          {isDeadTableVisible && <SignOutDetailTable />}
-      </animated.div>
     </div>
   );
 };

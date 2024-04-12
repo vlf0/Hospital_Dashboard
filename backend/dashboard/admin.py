@@ -81,6 +81,8 @@ class ProfilesAdmin(admin.ModelAdmin):
 
 class PlanNumbersAdmin(admin.ModelAdmin):
 
+    change_form_template = 'dashboard/admin/change_form.html'
+
     def save_model(self, request, obj, form, change) -> None:
         """Override method so that perform renewing data in cache."""
         super().save_model(request, obj, form, change)

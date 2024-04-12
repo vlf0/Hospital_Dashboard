@@ -83,8 +83,6 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
             f'{SITE_ROOT}/backend/templates',
-            # f'{SITE_ROOT}/backend/templates/dashboard',
-            # f'{SITE_ROOT}/backend/templates/observer',
         ],
         'APP_DIRS': True,
         'OPTIONS': {

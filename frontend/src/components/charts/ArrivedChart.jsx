@@ -15,10 +15,6 @@ Chart.register(AnnotationPlugin);
 Chart.register(ChartDataLabels);
 
 
-Chart.defaults.font.size = 12;
-Chart.defaults.color = '#090b1f';  
-
-
 const ArrivedChart = () => {
     
     const navigate = useNavigate();
@@ -72,7 +68,11 @@ const ArrivedChart = () => {
                 },
                 ticks: {
                     beginAtZero: true,
-                    color: '#090b1f',   
+                    color: '#090b1f',
+                    font: {
+                        weight: 'bold',
+                        size: 13
+                    },
                 },
             },
             y: {
@@ -97,7 +97,11 @@ const ArrivedChart = () => {
                             return value; // Use the default tick label for other values
                         }
                     },
-                    font: {weight: 'bold'},
+                    font: {
+                        weight: 'bold',
+                        size: 13,
+                        color: 'black'
+                    },
                 },
             },
         },

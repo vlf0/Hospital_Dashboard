@@ -4,7 +4,8 @@ from .models import Departments
 
 class DepartmentsAdmin(admin.ModelAdmin):
 
-    # change_list_template = 'observer/admin/change_list.html'
+    change_form_template = 'dashboard/admin/change_form.html'
+
     pass
 
 

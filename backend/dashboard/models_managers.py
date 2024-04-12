@@ -9,6 +9,7 @@ class CustomManager(models.Manager):
 
     - Custom method: custom_filter() gives 7 last rows from model.
     """
+
     def custom_filter(self):
         """
         Get 7 last model objects and return as a queryset.
@@ -22,4 +23,4 @@ class CustomManager(models.Manager):
         """Truncate all rows from model that uses by manager."""
         model_name = self.model.__name__.lower()
         with connection.cursor() as cursor:
-            cursor.execute(f"""TRUNCATE public.data_{model_name} RESTART IDENTITY CASCADE;""")
+            cursor.execute(f"""TRUNCATE public.dashboard_{model_name} RESTART IDENTITY CASCADE;""")

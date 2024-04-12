@@ -9,8 +9,8 @@ class Departments(models.Model):
     active = models.BooleanField(default=True, verbose_name='Статус')
 
     class Meta:
-        verbose_name = 'Отделение'
         verbose_name_plural = 'Отделения'
+        verbose_name = 'Отделение'
         ordering = ['name']
 
     def __str__(self):
