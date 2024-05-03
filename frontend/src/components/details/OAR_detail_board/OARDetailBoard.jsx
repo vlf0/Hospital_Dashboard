@@ -41,7 +41,8 @@ const OARDetailBoard = ({ dept, values, deads }) => {
           onClick={(event) => toggleDeadTableVisibility("in", event)}
           orit-name={dept}
         >
-          <p> Поступило новых пациентов </p> {values[0]}
+          <div className='card_header'> Поступило новых пациентов </div> 
+          <div className='card_data'> {values[0]} </div>
         </div>
 
         <div
@@ -49,7 +50,8 @@ const OARDetailBoard = ({ dept, values, deads }) => {
           onClick={(event) => toggleDeadTableVisibility("move", event)}
           orit-name={dept}
         >
-          <p> Переводы из отделений </p> {values[1]}
+          <div className='card_header'> Переводы из отделений </div> 
+          <div className='card_data'> {values[1]} </div>
         </div>
 
         <div
@@ -57,7 +59,8 @@ const OARDetailBoard = ({ dept, values, deads }) => {
           onClick={(event) => toggleDeadTableVisibility("onTreatment", event)}
           orit-name={dept}
         >
-          <p> Находятся на лечении </p> {values[2]}
+          <div className='card_header'> Находятся на лечении </div> 
+          <div className='card_data'> {values[2]} </div>
         </div>
 
         <div
@@ -65,7 +68,8 @@ const OARDetailBoard = ({ dept, values, deads }) => {
           onClick={(event) => toggleDeadTableVisibility("deads", event)}
           orit-name={dept}
         >
-          <p> Умерли в отделении </p> {deads}
+          <div className='card_header'> Умерли в отделении </div> 
+          <div className='card_data'> {deads} </div>
         </div>
       </div>
       <animated.div style={springProps}>

@@ -9,9 +9,6 @@ Chart.register(AnnotationPlugin);
 Chart.register(ChartDataLabels);
 
 
-Chart.defaults.font.size = 12;
-Chart.defaults.color = '#090b1f';  
-
 // Depts map
 const chartMap = {
     'oaronmk_d': 'ОРИТ ОНМК',
@@ -32,14 +29,14 @@ const chartMap = {
     'cardio2_d': '2 кардиологическое (ОИМ)',
     'skp_d': 'СКП',
     'gynecology_d': 'Гинекологическое',
-    'emer_d': 'Приемное отделение',
+    'emer_d': 'Приемное',
     'multi_pay_d': 'МПО',
     'apc_d': 'ДС АПЦ',
     'combine_d': 'Сочетанной травмы',
     'pulmonology_d': 'Пульмонологическое'
 }
 
-const deptsOrder = ['emer_d', 'dp_d', 'oar_d', 'oar1_d', 'oar2_d', 'oaronmk_d', 'oaroim_d',
+const deptsOrder = ['dp_d', 'oar1_d', 'oar2_d', 'oaronmk_d', 'oaroim_d',
                     'surgery_d', 'neurosurgery_d', 'trauma_d', 'cardio_d', 'cardio2_d', 'therapy_d',
                     'endo_d', 'neuroonmk_d', 'urology_d', 'pursurgery_d', 'pulmonology_d',
                     'combine_d', 'gynecology_d', 'skp_d', 'apc_d', 'multi_pay_d'];
@@ -67,9 +64,9 @@ const DeadsChartDetail = ({ data }) => {
             {
               label: 'total',
               data: nums,
-              backgroundColor: ['#2d8587'],
-              borderColor: '#090b1f',
-              borderWidth: 1,
+              backgroundColor: ['#001a3f'],
+              borderColor: '#f7b9cd',
+              borderWidth: 2,
             },
         ],
     };
@@ -77,31 +74,36 @@ const DeadsChartDetail = ({ data }) => {
     const chartOptions = {
         barThickness: 'flex',
         barPercentage: 0.9, 
-        categoryPercentage: 0.8,
+        categoryPercentage: 0.9,
         scales: {
             x: {
-
                 grid: { 
                   drawOnChartArea: false,
                   drawTicks: false
                 },
                 ticks: {
                     beginAtZero: true,
-                    color: '#090b1f',   
                     font: {
-                        weight: 'bold' 
-                },},
+                        weight: 'bold',
+                        size: 18,
+                        family:'nbold'
+                    },
+                    color: '#001a3f',
+                },
             },
             y: {
+                beginAtZero: true,
                 grid: {
                   drawOnChartArea: true,
                   drawTicks: false
                   },
-             
                 ticks: {
                     font: {
-                      weight: 'bold'
+                        weight: 'bold',
+                        size: 20,
+                        family: 'nbold'
                     },
+                    color: '#001a3f'
                 },
             },
         },
@@ -111,9 +113,10 @@ const DeadsChartDetail = ({ data }) => {
                 display: true,
                 labels: {
                     title: {
-                        color: 'black',
+                        color: '#001a3f',
                         font: {
-                          size: 13,
+                          size: 20,
+                          family: 'nbold'
                           },
                         anchor: 'end',
                         align: 'end',
@@ -132,12 +135,13 @@ const DeadsChartDetail = ({ data }) => {
             title: {
                 display: true,
                 text: 'Выписанные по отделениям',
-                color: '#090b1f',
+                color: '#001a3f',
                 font: {
-                    size: 13,
+                    size: 30, 
+                    family:'nbold',
             },                
             padding: {
-              bottom: 30,
+              bottom: 20,
             }
             },
     

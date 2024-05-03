@@ -20,7 +20,7 @@ class ProfilesSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Profiles
-        fields = ['id', 'name', 'active', 'current_date', 'fact', 'plan', 'total']
+        fields = ['name', 'active', 'current_date', 'fact', 'plan', 'total']
 
 
 class AccumulativeDataSerializerSave(serializers.ModelSerializer):
@@ -51,34 +51,6 @@ class KISDataSerializer(serializers.Serializer):
     nr = serializers.IntegerField(required=False, allow_null=True)
     dms = serializers.IntegerField(required=False, allow_null=True)
     undefined = serializers.IntegerField(required=False, allow_null=True)
-    
-    # Fields of hospitalized patients that counted by depts.
-    oar_p =serializers.IntegerField(required=False, allow_null=True)
-    surgery_p =serializers.IntegerField(required=False, allow_null=True)
-    therapy_p =serializers.IntegerField(required=False, allow_null=True)
-    emer1_p =serializers.IntegerField(required=False, allow_null=True)
-    gynekology_p =serializers.IntegerField(required=False, allow_null=True)
-    xray_p =serializers.IntegerField(required=False, allow_null=True)
-    emer2_p =serializers.IntegerField(required=False, allow_null=True)
-    transfusiology_p =serializers.IntegerField(required=False, allow_null=True)
-    gpractice_p =serializers.IntegerField(required=False, allow_null=True)
-    narkology_p =serializers.IntegerField(required=False, allow_null=True)
-    urology_p =serializers.IntegerField(required=False, allow_null=True)
-    lab_p =serializers.IntegerField(required=False, allow_null=True)
-    rean_p =serializers.IntegerField(required=False, allow_null=True)
-    truma_p =serializers.IntegerField(required=False, allow_null=True)
-    neuro_p =serializers.IntegerField(required=False, allow_null=True)
-    ultrasound_p =serializers.IntegerField(required=False, allow_null=True)
-    func_p =serializers.IntegerField(required=False, allow_null=True)
-    cardio_p =serializers.IntegerField(required=False, allow_null=True)
-    endo_p =serializers.IntegerField(required=False, allow_null=True)
-    neurology_p =serializers.IntegerField(required=False, allow_null=True)
-    static_p =serializers.IntegerField(required=False, allow_null=True)
-    epid_p =serializers.IntegerField(required=False, allow_null=True)
-    neon_p =serializers.IntegerField(required=False, allow_null=True)
-    gyst_p =serializers.IntegerField(required=False, allow_null=True)
-    endocop_p =serializers.IntegerField(required=False, allow_null=True)
-    pulmo_p =serializers.IntegerField(required=False, allow_null=True)
     # Fields of deads and signout patients.
     deads = serializers.IntegerField(required=False, allow_null=True)
     moved = serializers.IntegerField(required=False, allow_null=True)

@@ -13,6 +13,20 @@ class QuerySets:
     """
 
     today = date.today
+    
+    KIS_PROFILES = """
+	               SELECT pm.id,pm.name
+
+                   FROM mm.dept d
+                   JOIN mm.bed_fund bf ON bf.dept_id = d.id 
+                   JOIN mm.profile_med pm ON pm.id = d.profile_med_id
+       
+                   WHERE bf.bed_count >= 1
+                   AND d.end_dt ISNULL
+       
+                   GROUP BY pm.id,pm.name
+                   ORDER BY pm.id;
+				   """
 
     ARRIVED = f"""
                SELECT
@@ -63,11 +77,7 @@ class QuerySets:
 
     DEPT_HOSP = f"""
                  SELECT 
-                 CASE pm.name
-                 	WHEN  'акушерству и гинекологии (за исключением использования вспомогательных репродуктивных технологий)' THEN 'Гинекология'
-                 	ELSE pm.name
-                 END AS профиль,
-                 count (m.id) AS cnt
+                 pm.id,count (m.id) AS cnt
 
                  FROM mm.mdoc m
                  JOIN mm.hospdoc h ON h.mdoc_id = m.id
@@ -78,8 +88,8 @@ class QuerySets:
 
                  WHERE ec.create_dt BETWEEN CURRENT_DATE - INTERVAL '18 hours' AND CURRENT_DATE + INTERVAL '6 hours'
 
-                 GROUP BY d.name, pm.name
-                 ORDER BY cnt DESC;
+                 GROUP BY  pm.id,pm.name
+                 ORDER BY pm.id ASC;
                  """
 
     SIGNOUT = f"""
@@ -177,7 +187,7 @@ class QuerySets:
                        JOIN mm.hospdoc h ON h.mdoc_id = m.id
                        JOIN mm.people p ON p.id = m.people_id
 
-                       WHERE h.hosp_dt <=current_date - INTERVAL '18 hours'
+                       WHERE h.hosp_dt <=CURRENT_DATE - INTERVAL '18 hours'
                        AND h.dept_dt BETWEEN CURRENT_DATE - INTERVAL '18 hours' AND CURRENT_DATE + INTERVAL '6 hours'
                        AND h.dept_id IN (SELECT d.id from mm.dept d WHERE d.dept_med_type_id = 10220)
 
@@ -259,38 +269,7 @@ class QuerySets:
                  'Отделение реанимации и интенсивной терапии для больных с острым инфарктом миокарда',
                  'Отделение анестезиологии-реанимации'
                 ]
-
-    # Dict for mapping with serializer fields (relates to "план/факт по профилям" table).
-    # All english names is fields of serializer.
-    profiles_mapping = {
-        'анестезиологии и реаниматологии': 'oar_p',
-        'хирургии': 'surgery_p',
-        'терапии': 'therapy_p',
-        'неотложной медицинской помощи': 'emer1_p',
-        'акушерству и гинекологии (за исключением использованиявспомогательных репродуктивных технологий)': 'gynekology_p',
-        'рентгенологии': 'xray_p',
-        'скорой медицинской помощи': 'emer2_p',
-        'трансфузиологии': 'transfusiology_p',
-        'общей практике': 'gpractice_p',
-        'наркологии': 'narkology_p',
-        'урологии': 'urology_p',
-        'клинической лабораторной диагностике': 'lab_p',
-        'реаниматологии': 'rean_p',
-        'травматологии и ортопедии': 'truma_p',
-        'нейрохирургии': 'neuro_p',
-        'ультразвуковой диагностике': 'ultrasound_p',
-        'функциональной диагностике': 'func_p',
-        'кардиологии': 'cardio_p',
-        'эндокринологии': 'endo_p',
-        'неврологии': 'neurology_p',
-        'медицинской статистике': 'static_p',
-        'эпидемиологии': 'epid_p',
-        'неонатологии': 'neon_p',
-        'гистологии': 'gyst_p',
-        'эндоскопии': 'endocop_p',
-        'пульмонологии': 'pulmo_p'
-    }
-
+    
     # Dict for mapping columns on russian language with serializer fields (relates to "выписанные по отделениям" table).
     # All english names is fields of serializer.
     depts_mapping = {
@@ -354,4 +333,13 @@ class QuerySets:
         new_query = queryset.replace('CURRENT_DATE', f'DATE \'{chosen_date}\'')
         return [new_query]
 
+    @staticmethod
+    def insert_accum_query(dataset, dates, id_cnt):
+        profile_id, number = dataset[0], dataset[1]
+        raw_query = f"""
+                     INSERT INTO public.data_accumulationofincoming (id, dates, number, profile_id) 
+                     VALUES 
+                     ({id_cnt}, '{dates}', {number}, '{profile_id}');
+                     """
+        return raw_query
 

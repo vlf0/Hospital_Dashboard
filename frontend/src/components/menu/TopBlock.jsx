@@ -24,39 +24,30 @@ const TopBlock = ({ textContent, menu_point, date }) => {
     config: { duration: 700 },
   });
 
-  const dropdownProps = useSpring({
-    transform: `scale(${isHovered ? 1 : 0})`,
-    height: isHovered ? 90 : 0,
-    opacity: isHovered ? 1 : 0,
-    config: { tension: 200, friction: 25 },
-    delay: isHovered ? 30 : 0,
-  });
-
-
   return (
+
     <animated.div
-      className='top_block'
-      style={props}
-      onMouseEnter={handleToggleHover}
-      onMouseLeave={handleToggleHover}
-    >
-      {/* <p className='main_header'>{textContent}</p>
-      <span className='now_date'>по состоянию на {currentDatetime}</span> */}
-      <Header textHeader={textContent} date={date}/>
+      className='parent_block'
+      style={props}>
 
-      {/* Dropdown */}
-      <animated.div className='dropdown' style={dropdownProps}>
-        {point_list.includes(menu_point)  && (
-          <MenuUnit point={'Главная'} to='/' />
-        )}
-        <MenuUnit point={arrivedpoint} to='/arrived_detail' />
-        <MenuUnit point={outpoint} to='/signout_detail' />
-        <MenuUnit point={oarpoint} to='/OAR_detail' />
+      <div className='logo_with_header'>
+        <div className='empty_block'>
+          <img className='dmklogo' src='/images/gkblogo.png' alt=''></img>
+        </div>
+        <Header textHeader={textContent} date={date}/>
+        <div className='empty_block'> </div>
+      </div>
 
-
-
-
-      </animated.div>
+      <div className='top_block'>
+        <div className='dropdown' >
+          {point_list.includes(menu_point)  && (
+            <MenuUnit point={'Главная'} to='/' />
+          )}
+          <MenuUnit point={arrivedpoint} to='/arrived_detail' />
+          <MenuUnit point={outpoint} to='/signout_detail' />
+          <MenuUnit point={oarpoint} to='/OAR_detail' />
+        </div>
+      </div>
     </animated.div>
   );
 };

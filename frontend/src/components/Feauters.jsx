@@ -177,26 +177,32 @@ export function GetNameOfDay(dateString) {
 }
 
 
-
-export function getYesterdayDate() {
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-  return yesterday
-}
-
-
-
 export function getMainDMK(dmkData, day) {
 
-  let mainDMK;
-  const index = dmkData.findIndex(item => item.dates === formatDate(day));
-
-  if (index !== -1) {
-    mainDMK = dmkData[index];
-  } else {
-    mainDMK = { dates: formatDate(day), arrived: null, hosp: null, refused: null,
-                signout: null, deads: null, reanimation: null };
-  }
+    let today = new Date();
+    let yesterday = new Date();
+    yesterday.setDate(today.getDate() - 1)
   
-  return mainDMK;
+    const currentTime = today.toLocaleTimeString();
+    const currentHour = currentTime.split(':')[0];
+  
+    if (day === 'yesterday') {
+      today.setDate(today.getDate() - 1);
+      yesterday.setDate(yesterday.getDate() - 1);
+    } 
+  
+    let formattedDate;
+    currentHour >= 6 ? formattedDate = formatDate(today) : formattedDate = formatDate(yesterday);
+  
+    let mainDMK;
+    const index = dmkData.findIndex(item => item.dates === formattedDate);
+  
+    if (index !== -1) {
+      mainDMK = dmkData[index];
+    } else {
+      mainDMK = { dates: formattedDate, arrived: null, hosp: null, refused: null,
+                  signout: null, deads: null, reanimation: null };
+    }
+    
+    return mainDMK;
 }

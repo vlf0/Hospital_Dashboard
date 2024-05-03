@@ -1,26 +1,27 @@
 
 .arrived_chart {
+  font-family: 'nbold', Courier, monospace;
   position: relative;
-  width: 620px;
-  height: 310px;
+  width: 900px;
+  height: 450px;
   padding: 10px;
   margin: 10px;
-  border: 1px solid black;
-  box-shadow: 4px 13px 20px 0px #434343;
-  border-radius: 10px;
-  background-color: #65985c;
+  border: 2px solid #e9306a;
+  box-shadow: 4px 13px 20px 0px #001a3f;
+  border-radius: 15px;
+  background-color: #ccd0d9;
 }
 
 
 .signout_by_depts_chart {
   position: relative;
-  width: 1000px;
-  height: 500px;
+  width: 1500px;
+  height: 700px;
   padding: 10px;
   margin: 10px;
-  border: 1px solid black;
-  box-shadow: 4px 13px 20px 0px #434343;
+  border: 2px solid #e9306a;
+  box-shadow: 4px 13px 20px 0px #001a3f;
   border-radius: 10px;
-  background-color: #65985c;
+  background-color: #ccd0d9;
 }
   

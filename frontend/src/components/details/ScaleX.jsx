@@ -2,7 +2,7 @@ import React from 'react';
 
 
 const ColoredLine = ({ percentage, plan, arrivedFact }) => {
-  const gradient = `linear-gradient(to right, #828cff ${percentage}%, #e785fc ${percentage}%)`;
+  const gradient = `linear-gradient(to right, #39486d ${percentage}%, #f0749b ${percentage}%)`;
 
   const lineStyle = {
     width: '-webkit-fill-available',
@@ -18,15 +18,16 @@ const ColoredLine = ({ percentage, plan, arrivedFact }) => {
   };
 
   const spanStyle = {
-    fontSize: '14px',
+    color: 'white',
+    fontSize: '20px',
     fontWeight: 'bold',
     marginLeft: '22px',
     marginRight: '22px',
   };
 
   return <div style={lineStyle}>
-    <span style={spanStyle}> факт { arrivedFact } </span>
-    <span style={spanStyle}> план { plan } </span>
+    <span style={spanStyle}> факт: { arrivedFact } </span>
+    <span style={spanStyle}> план: { plan } </span>
   </div>;
 };
 

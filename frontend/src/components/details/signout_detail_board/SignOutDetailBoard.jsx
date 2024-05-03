@@ -40,22 +40,31 @@ const SignOutDetailBoard = () => {
       <span className='detail_block_header'> Общее количество </span>
       <div className='blocks_container'>
         <div className='separated_detail_block'> 
-          <p> Выписано </p> { dmk.signout } </div>
+          <div className='card_header'> Выписано </div> 
+          <div className='card_data'> { dmk.signout } </div>
+        </div>
       </div>
+
       <span className='detail_block_header'> Исходы </span>
       <div className='blocks_container'>
-        <div className='separated_detail_block_X' onClick={toggleDeadTableVisibility}>
-          <p> Смерть </p> { kis.deads } </div>
+        <div className='separated_detail_block_X' onClick={toggleDeadTableVisibility}> 
+          <div className='card_header'> Смерть </div> 
+          <div className='card_data'> { kis.deads } </div>
+        </div>
         <div className='separated_detail_block'> 
-          <p> Перевод в другую МО </p> { kis.moved } </div>
+          <div className='card_header'> Перевод в другую МО </div>
+          <div className='card_data'> { kis.moved } </div>
+        </div>
         <div className='separated_detail_block'>
-           <p> Выписка </p> { kis.signout } </div>
+           <div className='card_header'> Выписка </div>
+           <div className='card_data'> { kis.signout }  </div>
+        </div>
       </div>
-      <span className='detail_block_header'> Выписка по отделениям </span>
-      <DeadsChartDetail data={kis}/>
       <animated.div style={springProps}>
           {isDeadTableVisible && <SignOutDetailTable />}
       </animated.div>
+      <span className='detail_block_header'> Выписка по отделениям </span>
+        <DeadsChartDetail data={kis}/>
     </div>
   );
 };
