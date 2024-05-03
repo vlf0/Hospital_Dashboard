@@ -15,13 +15,10 @@ Chart.register(AnnotationPlugin);
 Chart.register(ChartDataLabels);
 
 
-Chart.defaults.font.size = 12;
-Chart.defaults.color = '#090b1f';  
-
 
 const SignOutChart = () => {
 
-    const planValue = 60;
+    const planValue = 120;
 
     const navigate = useNavigate();
     const handleClick = (event, chartElements) => {
@@ -53,8 +50,8 @@ const SignOutChart = () => {
             {
               label: 'total',
               data: mappedData,
-              backgroundColor: ['#212e93b3'],
-              borderColor: '#090b1f',
+              backgroundColor: ['#1a2a56'],
+              borderColor: '#e9306a',
               borderWidth: 1,
               srtDates: dataWithDates
             },
@@ -69,9 +66,14 @@ const SignOutChart = () => {
             x: {
                 grid: { 
                   drawOnChartArea: false,
-                  drawTicks: false
+                  drawTicks: true
                 },
                 ticks: {
+                    font: {
+                        weight: 'bold',
+                        family: 'nbold',
+                        size: 20
+                    },
                     beginAtZero: true,
                     color: '#090b1f',   
                 },
@@ -79,7 +81,7 @@ const SignOutChart = () => {
             y: {
                 grid: {
                   drawOnChartArea: true,
-                  drawTicks: false
+                  drawTicks: true
                   },
              
                 ticks: {
@@ -87,7 +89,7 @@ const SignOutChart = () => {
                         if (context.tick.value === planValue) {
                             return '#860000'; // Customize the color of the custom grid lines
                         } else {
-                            return '#090b1f'; // Default tick color
+                            return '#001a3f'; // Default tick color
                         }
                     },
                     callback: (value, index, values) => {
@@ -97,7 +99,11 @@ const SignOutChart = () => {
                             return value; // Use the default tick label for other values
                         }
                     },
-                    font: {weight: 'bold'},
+                    font: {
+                        weight: 'bold',
+                        family: 'nbold',
+                        size: 20
+                    }
                 },
             },
         },
@@ -107,15 +113,16 @@ const SignOutChart = () => {
                 display: true,
                 labels: {
                     title: {
-                        color: 'black',
+                        color: '#001a3f',
                         font: {
-                          size: 13,
+                          size: 25,
+                          family:'nbold'
                           },
                         anchor: 'end',
                         align: 'end',
                         formatter: (title, context) => {
                             if (context.dataset.data[context.dataIndex] === null) {
-                              return 'N/A';
+                              return 'Н/Д';
                             }
                             return title; // Use the default title if the value is not null
                           },
@@ -129,14 +136,15 @@ const SignOutChart = () => {
                             return '\t' + percernts+'%';
                         },
                         font: {
-                          size: 12,
+                          size: 20,
                           weight: 'bold',
+                          family:'nbold'
                         },
                         color: (context) => {
                           const value = context.dataset.data[context.dataIndex];
                           const percent = ((value / planValue) * 100 - 100).toFixed(1);
 
-                          return percent < 0 ? '#b200ac' : '#049d00';
+                          return percent < 0 ? '#e9306a' : '#25c445';
                         },
                     },
                 },
@@ -149,8 +157,8 @@ const SignOutChart = () => {
                         type: 'line',
                         yMin: planValue,
                         yMax: planValue,
-                        borderColor: '#ff6384',
-                        borderWidth: 1,
+                        borderColor: '#e9306a',
+                        borderWidth: 2,
                       },
                     },
               },
@@ -160,9 +168,10 @@ const SignOutChart = () => {
             title: {
                 display: true,
                 text: 'Динамика выписанных за неделю',
-                color: '#090b1f',
+                color: '#001a3f',
                 font: {
-                    size: 13
+                    size: 30,
+                    family :'nbold'
                 },
                 padding: {
                     bottom: 30,

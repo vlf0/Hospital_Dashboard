@@ -24,7 +24,8 @@ function DetailBoard({ sign }) {
 
   const oar1 = [arrived[0],moved[0], current[0]];
   const oar2 = [arrived[1],moved[1], current[1]];
-  const oar3 = [arrived[2],moved[2], current[2]];
+  const oar4 = [arrived[3], moved[3], current[3]];
+  const oar5 = [arrived[4],moved[4], current[4]];
 
 
   const props = useSpring({
@@ -44,10 +45,11 @@ function DetailBoard({ sign }) {
     content = <SignOutDetailBoard />;
     topBlockHeader = 'Детализация выписанных';
   } else if (sign === 'oar') {
-    content = <div className='detail_block'>
-              <OARDetailBoard dept={'ОРИТ №1'} values={oar1} deads={deads.oar1} /> 
-              <OARDetailBoard dept={'ОРИТ №2'} values={oar2} deads={deads.oar2} />
-              <OARDetailBoard dept={'ОРИТ №3'} values={oar3} deads={deads.oar3} />              
+      content = <div className='detail_block'>
+                <OARDetailBoard dept={'Отделение реанимации и интенсивной терапии № 1'} values={oar2} deads={deads.oar1_d} />
+                <OARDetailBoard dept={'Отделение реанимации и интенсивной терапии № 2'} values={oar5} deads={deads.oar2_d} />          
+                <OARDetailBoard dept={'Отделение реанимации и интенсивной терапии для больных с ОНМК'} values={oar1} deads={deads.oaronmk_d} />
+                <OARDetailBoard dept={'Отделение реанимации и интенсивной терапии для больных с острым инфарктом миокарда'} values={oar4} deads={deads.oaroim_d} />
               </div>
     topBlockHeader = 'Детализация по реанимациям';
   };

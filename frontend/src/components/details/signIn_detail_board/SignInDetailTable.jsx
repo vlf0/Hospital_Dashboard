@@ -5,17 +5,17 @@ import ScaleX from '../ScaleX';
 
 const SignInDetailTable = () => {
 
-  let data = JSON.parse(sessionStorage.getItem('data')).dmk.accum_dmk
+    let data = JSON.parse(sessionStorage.getItem('data')).dmk.accum_dmk
 
   const columns = [
     { Header: 'Профиль', 
       accessor: 'name',
         Cell: ({ cell }) => (
           <div style={{ 
-            color: '#1a1a1a', // Text color
-            fontSize: 16,     // Font size
+            color: '#001a3f', // Text color
+            fontSize: 20,     // Font size
             fontWeight: 700,  // Font weight
-            fontFamily: 'sans-serif', // Font family
+            fontFamily: 'nbold', // Font family
           }}>{cell.value}</div>
     ) },
     {
@@ -24,14 +24,14 @@ const SignInDetailTable = () => {
       Cell: ({ cell, row }) => (<ScaleX hospFact={cell.value} hospPlan={row.original.plan} />), 
     },
     {
-      Header: 'Percents',
+      Header: '% выполнения',
       Cell: ({ row }) => {
         const percent = ((row.values.total / row.original.plan) * 100);
         const formattedPercent = percent.toFixed(0) + '%'; // Add "%" at the end
-        return <div style={{ color: percent > 100 ? '#12702b' : '#47010f',
-                             fontSize: 14,
+        return <div style={{ color: percent > 100 ? '#278f49' : '#e9306a',
+                             fontSize: 20,
                              fontWeight: 700,
-                             fontFamily: 'sans-serif'
+                             fontFamily: 'nbold'
                             }
                           }>{formattedPercent}</div>;
       }

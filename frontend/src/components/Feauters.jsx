@@ -87,7 +87,8 @@ export function DeadTableProcess(dataset) {
       'Состояние при поступлении': item.state,
       'Кол-во койко дней': item.days,
       'Дигноз при поступлении': item.diag_arr,
-      'Дигноз при выписке': item.diag_dead
+      'Дигноз при выписке': item.diag_dead,
+      'Лечащий врач': item.doc_fio
     };
   });
 
@@ -171,37 +172,37 @@ export function DeadsOarTable(dataset) {
 
 
 export function GetNameOfDay(dateString) {
-  return ['Вск', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб']
+  return ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб']
   [new Date(dateString).getDay()];
 }
 
 
 export function getMainDMK(dmkData, day) {
 
-  let today = new Date();
-  let yesterday = new Date();
-  yesterday.setDate(today.getDate() - 1)
-
-  const currentTime = today.toLocaleTimeString();
-  const currentHour = currentTime.split(':')[0];
-
-  if (day === 'yesterday') {
-    today.setDate(today.getDate() - 1);
-    yesterday.setDate(yesterday.getDate() - 1);
-  } 
-
-  let formattedDate;
-  currentHour >= 6 ? formattedDate = formatDate(today) : formattedDate = formatDate(yesterday);
-
-  let mainDMK;
-  const index = dmkData.findIndex(item => item.dates === formattedDate);
-
-  if (index !== -1) {
-    mainDMK = dmkData[index];
-  } else {
-    mainDMK = { dates: formattedDate, arrived: null, hosp: null, refused: null,
-                signout: null, deads: null, reanimation: null };
-  }
+    let today = new Date();
+    let yesterday = new Date();
+    yesterday.setDate(today.getDate() - 1)
   
-  return mainDMK;
+    const currentTime = today.toLocaleTimeString();
+    const currentHour = currentTime.split(':')[0];
+  
+    if (day === 'yesterday') {
+      today.setDate(today.getDate() - 1);
+      yesterday.setDate(yesterday.getDate() - 1);
+    } 
+  
+    let formattedDate;
+    currentHour >= 6 ? formattedDate = formatDate(today) : formattedDate = formatDate(yesterday);
+  
+    let mainDMK;
+    const index = dmkData.findIndex(item => item.dates === formattedDate);
+  
+    if (index !== -1) {
+      mainDMK = dmkData[index];
+    } else {
+      mainDMK = { dates: formattedDate, arrived: null, hosp: null, refused: null,
+                  signout: null, deads: null, reanimation: null };
+    }
+    
+    return mainDMK;
 }

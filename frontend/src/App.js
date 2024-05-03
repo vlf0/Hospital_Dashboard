@@ -19,15 +19,14 @@ function App() {
     data = JSON.parse(data)
   }
   else {
-    const fetchedData = GetData('http://localhost:8000/api/v1/main_data/')
+    const fetchedData = GetData('http://10.123.8.17:9000/api/v1/main_data/')
     if (fetchedData) {
       sessionStorage.setItem('data', JSON.stringify(fetchedData))
       data = JSON.parse(sessionStorage.getItem('data'))
     };
   }
 
-
-  if (data) {
+  if (data !== null) {
 
     return (
       <DataContext.Provider value={data}>

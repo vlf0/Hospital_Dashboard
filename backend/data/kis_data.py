@@ -25,6 +25,7 @@ today = date.today
 
 def dates_period(days_amount):
     period = [str(today() - timedelta(days=days)) for days in range(days_amount)]
+    period.reverse()
     return period
 
 
@@ -179,8 +180,7 @@ class DataProcessing:
         :param dataset: *list*: A list of lists, where each inner list contains
          data corresponding to a row in the database.
         :type dataset: list[tuple]
-        :return: *list[CleanData]*: A list of `CleanData` class instances, each instantiated with data from the provided
-         dataset.
+        :return: *list[CleanData]*: A list of `CleanData` class instances, each instantiated with data from the provided dataset.
         """
         instances_list = [CleanData(**dict(zip(columns, row))) for row in dataset]
         return instances_list
@@ -273,8 +273,7 @@ class DataForDMK(DataProcessing):
         return {self.dmk_cols[-1]: self.count_dataset_total(reanimation_dataset)}
 
     @staticmethod
-    def get_dept_hosps(dh_dataset: list[tuple], raw_rtype: bool = False) \
-            -> Union[list[dict[str, Union[int, str]]], list[tuple]]:
+    def get_dept_hosps(dh_dataset: list[tuple], raw_rtype: bool = False) -> list[dict[str, Union[int, str]]]:
         """
         Get data related to hospitalized by depts patients.
 
@@ -289,8 +288,6 @@ class DataForDMK(DataProcessing):
         # Creating dict with dept names and ids.
         profiles = [profile.profile_id for profile in profiles_queryset]
         # Create list and filling it separated resulting dicts mapping with current active profiles.
-        print(dh_dataset)
-        print(profiles)
         result_dicts = []
         for row in dh_dataset:
             profile_id = row[0]
@@ -299,7 +296,7 @@ class DataForDMK(DataProcessing):
                 result_dicts.append({'profile_id': profile_id, 'number': number})
         return result_dicts
 
-    def collect_data(self, chosen_date: Union[date, None]) -> dict[str, list[dict]]:
+    def collect_data(self, chosen_date: Union[date, None]) -> dict[str, dict]:
         """
         Get calculated main values for detail boards on the front-end for saving to DMK DB.
 
@@ -314,7 +311,6 @@ class DataForDMK(DataProcessing):
         """
         if self.kisdata_obj.db_conn.conn is None:
             main_data = {i: None for i in self.dmk_cols}
-            dh_dataset = None
         else:
             gen = self.kisdata_obj.get_data_generator()
             arrived = self.get_arrived_data(next(gen))
@@ -365,8 +361,7 @@ class DataForDMK(DataProcessing):
                                         )
         return err_text
 
-    def save_to_dmk(self, chosen_date: Union[str, None] = None) \
-            -> list[Union[Union[MainData, None], Union[list[AccumulationOfIncoming], None]]]:
+    def save_to_dmk(self, chosen_date: str = None) -> list[Union[MainData, None], AccumulationOfIncoming]:
         """
         Save the prepared data to the DMK DB using the MainData model and its serializer.
 
@@ -377,8 +372,8 @@ class DataForDMK(DataProcessing):
         :raises SyntaxError: If there is a syntax error in the serializer.
         :raises AssertionError: If there is an assertion error during saving.
 
-        :return: List containing one MainData instance or None as a first list element and list of AccumulatedData
-         instances as a second element. If any error occurs - it write the logs to log-file.
+        :return: List containing one MainData instance or None as a first list element and list of AccumulatedData instances
+         as a second element. If any error occurs - it write the logs to log-file.
         """
         common_dict = self.collect_data(chosen_date)
         main = common_dict['main_data']
@@ -387,7 +382,7 @@ class DataForDMK(DataProcessing):
         accum_res = self.save_accumulated(accum)
         return [main_res, accum_res]
 
-    def save_main(self, main_data: list[dict]) -> Union[MainData, None]:
+    def save_main(self, main_data: dict) -> Union[MainData, None]:
         """
         Serialize and save a new model instance.
 
@@ -404,7 +399,7 @@ class DataForDMK(DataProcessing):
             en_error = self.__translate(e)
             logger.error(en_error)
 
-    def save_accumulated(self, accum_data: list[dict]) -> Union[list[AccumulationOfIncoming], None]:
+    def save_accumulated(self, accum_data: dict) -> list[Union[MainData, Any], list[AccumulationOfIncoming]]:
         """
         Iterate through given Serializer and save a few new model instances.
 
@@ -641,8 +636,9 @@ class KISDataProcessing(DataProcessing):
         last_week = dates_period(7)
         kis = KISDataProcessing
         ready_queries = [QuerySets.chosen_date_query(query, day)[0] for day in last_week]
-        processing = kis(KISData([query])).arrived_process
-        if kind == 'signout':
+        if kind == 'arrived':
+            processing = kis(KISData([query])).arrived_process
+        elif kind == 'signout':
             processing = kis(KISData([query])).signout_process
         generator = KISData(ready_queries).get_data_generator()
         result = {f'{kind}_{day}': processing(next(generator)) for day in last_week}

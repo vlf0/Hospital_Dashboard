@@ -2,11 +2,11 @@ from django.contrib import messages
 from django.urls import reverse
 from django.contrib import admin
 from django.shortcuts import redirect
-from .kis_data import KISData, QuerySets
 from .models import Profiles, PlanNumbers
 from .caching import Cacher
 from .consumers import trigger_notification
-from .forms import KISProfileChosingForm
+from .forms import KISProfileChosingForm, QuerySets
+from .kis_data import KISData
 from django_celery_beat.models import (
     IntervalSchedule,
     CrontabSchedule,
@@ -36,10 +36,7 @@ class ProfilesAdmin(admin.ModelAdmin):
     def change_view(self, request, object_id, form_url="", extra_context=None):
         """Pass custom ModelForm of external model."""
         extra_context = extra_context or {}
-        kis_profiles_dataset = next(KISData([QuerySets.KIS_PROFILES]).get_data_generator())
-        chosen_profile = [f'[КИС] - ID: {row[0]}, Профиль {row[1]}'
-                          for row in kis_profiles_dataset if row[0] == int(object_id)]
-        extra_context['kis_profiles'] = chosen_profile[0]
+        extra_context['kis_profiles'] = KISProfileChosingForm()
         return super().change_view(request, object_id, form_url, extra_context=extra_context)
 
     def add_view(self, request, form_url="", extra_context=None):
@@ -60,7 +57,6 @@ class ProfilesAdmin(admin.ModelAdmin):
         except ValueError:
             self.send_message(request, obj_id)
             return redirect(change_url)
-
         if method_type == 'add':
             if obj_id in profiles_ids:
                 self.send_message(request, obj_id)
@@ -100,4 +96,3 @@ class PlanNumbersAdmin(admin.ModelAdmin):
 
 admin.site.register(Profiles, ProfilesAdmin)
 admin.site.register(PlanNumbers, PlanNumbersAdmin)
-

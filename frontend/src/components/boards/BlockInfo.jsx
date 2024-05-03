@@ -13,8 +13,8 @@ const BlockInfo = ({data, headerText}) => {
     config: { duration: 500 },
   });
 
-  const imagePath = data && data[0] > data[1] ? '/images/dynamic_high.png' : '/images/dynamic_low.png';
-  const reverseImagePath = data && data[1] > data[0] ? '/images/dynamic_high.png' : '/images/dynamic_low.png';
+  const imagePath = data && data[0] > data[1] ? '/images/a_up2.svg' : '/images/a_down2.svg';
+  const reverseImagePath = data && data[1] > data[0] ? '/images/a_up2.svg' : '/images/a_down2.svg';
 
   return (
     <animated.div className='boards' style={props}>
@@ -36,4 +36,8 @@ const BlockInfo = ({data, headerText}) => {
 
 };
 
+<<<<<<< HEAD
 export default BlockInfo;
+=======
+export default BlockInfo;
+>>>>>>> 07e3ae2a2bd5da94925016810338cd63f70ae8b8

@@ -15,10 +15,6 @@ Chart.register(AnnotationPlugin);
 Chart.register(ChartDataLabels);
 
 
-Chart.defaults.font.size = 12;
-Chart.defaults.color = '#090b1f';  
-
-
 const ArrivedChart = () => {
     
     const navigate = useNavigate();
@@ -32,7 +28,7 @@ const ArrivedChart = () => {
     };
 
 
-    const planValue = 120;
+    const planValue = 135;
 
     const dmk_charts = useContext(DataContext).dmk.main_dmk;
     const pairValues = extractProperties(dmk_charts, 'arrived');
@@ -52,8 +48,8 @@ const ArrivedChart = () => {
             {
               label: 'total',
               data: mappedData,
-              backgroundColor: ['#212e93b3'],
-              borderColor: '#090b1f',
+              backgroundColor: ['#1a2a56'],
+              borderColor: '#e9306a',
               borderWidth: 1,
               srtDates: dataWithDates
             },
@@ -68,25 +64,28 @@ const ArrivedChart = () => {
             x: {
                 grid: { 
                   drawOnChartArea: false,
-                  drawTicks: false
+                  drawTicks: true
                 },
                 ticks: {
                     beginAtZero: true,
-                    color: '#090b1f',   
+                    color: '#090b1f',  
+                    font: {
+                        weight: 'bold',
+                        family: 'nbold',
+                    }
                 },
             },
             y: {
                 grid: {
                   drawOnChartArea: true,
-                  drawTicks: false
-                  },
-             
+                  drawTicks: true,
+                },
                 ticks: {
                     color: (context) => {
                         if (context.tick.value === planValue) {
                             return '#860000'; // Customize the color of the custom grid lines
                         } else {
-                            return '#090b1f'; // Default tick color
+                            return '#001a3f'; // Default tick color
                         }
                     },
                     callback: (value, index, values) => {
@@ -97,7 +96,11 @@ const ArrivedChart = () => {
                             return value; // Use the default tick label for other values
                         }
                     },
-                    font: {weight: 'bold'},
+                    font: {
+                        weight: 'bold',
+                        family: 'nbold',
+                        size: 20
+                    },
                 },
             },
         },
@@ -106,15 +109,16 @@ const ArrivedChart = () => {
                 display: true,
                 labels: {
                     title: {
-                        color: 'black',
+                        color: '#001a3f',
                         font: {
-                          size: 13,
+                          size: 25,
+                          family:'nbold'
                           },
                         anchor: 'end',
                         align: 'end',
                           formatter: (title, context) => {
                             if (context.dataset.data[context.dataIndex] === null) {
-                              return 'N/A';
+                              return 'Н/Д';
                             }
                             return title; // Use the default title if the value is not null
                           },
@@ -125,19 +129,20 @@ const ArrivedChart = () => {
                                 return '';
                             }
                             const percernts = ((title / planValue  * 100) - 100).toFixed(1);
-                            const color = percernts < 0 ? '#b200ac' : 'blue';
+                            const color = percernts < 0 ? '#e9306a' : 'blue';
 
                             return '\t' + percernts+'%';
                         },
                         font: {
-                          size: 12,
+                          size: 20,
                           weight: 'bold',
+                          family: 'nbold'
                           },
                         color: (context) => {
                           const value = context.dataset.data[context.dataIndex];
                           const percent = ((value / planValue) * 100 - 100).toFixed(1);
   
-                          return percent < 0 ? '#b200ac' : '#00a318';
+                          return percent < 0 ? '#e9306a' : '#25c445';
                         },
                     },
                 },
@@ -150,8 +155,8 @@ const ArrivedChart = () => {
                         type: 'line',
                         yMin: planValue,
                         yMax: planValue,
-                        borderColor: '#ff6384',
-                        borderWidth: 1.5,
+                        borderColor: '#e9306a',
+                        borderWidth: 2,
                       },
                     },
               },
@@ -161,9 +166,11 @@ const ArrivedChart = () => {
             title: {
                 display: true,
                 text: 'Динамика обращений за неделю',
-                color: '#090b1f',
+                color: '#001a3f',
                 font: {
-                    size: 13,
+                    size: 30,
+                    family: 'nbold'
+                    
             },                
             padding: {
               bottom: 30,

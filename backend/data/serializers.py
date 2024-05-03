@@ -55,9 +55,7 @@ class KISDataSerializer(serializers.Serializer):
     deads = serializers.IntegerField(required=False, allow_null=True)
     moved = serializers.IntegerField(required=False, allow_null=True)
     signout = serializers.IntegerField(required=False, allow_null=True)
-    oar1 = serializers.IntegerField(required=False, allow_null=True)
-    oar2 = serializers.IntegerField(required=False, allow_null=True)
-    oar3 = serializers.IntegerField(required=False, allow_null=True)
+
     oaronmk_d = serializers.IntegerField(required=False, allow_null=True)
     surgery_d = serializers.IntegerField(required=False, allow_null=True)
     oar1_d = serializers.IntegerField(required=False, allow_null=True)
@@ -114,6 +112,7 @@ class KISTableSerializer(KISDataSerializer):
     diag_arr = serializers.CharField(required=False, allow_null=True)
     diag_dead = serializers.CharField(required=False, allow_null=True)
     # Fields to hospitalized in reanimation dataset related
+    # ages = serializers.IntegerField(required=False, allow_null=True)
     doc_fio = serializers.CharField(required=False, allow_null=True)
     diag_start = serializers.CharField(required=False, allow_null=True)
     # Fields to moved to reanimation dataset related

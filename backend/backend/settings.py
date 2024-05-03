@@ -17,15 +17,24 @@ DEBUG = env.bool('DEBUG', default=False)
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
+    '10.123.8.17',
+    '0.0.0.0',
 ]
 
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
-    'http://127.0.0.1:3000',
-    'http://0.0.0.0:3000',
+    'http://localhost:9000',
+    'http://10.123.8.17:3000',
+    'http://10.123.8.17:9000',
+    'http://10.123.8.17:90',
+    'http://10.123.8.17:30',
+    'http://10.123.8.17:6379',
 ]
 
+CSRF_TRUSTED_ORIGINS = ['http://10.123.8.17:90']
+
 CORS_ALLOW_CREDENTIALS = True
+CORS_ORIGIN_ALLOW_ALL = True
 
 ROOT_URLCONF = 'backend.urls'
 
@@ -81,7 +90,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            f'{SITE_ROOT}/backend/data/templates'
+            f'{SITE_ROOT}\\backend\\templates'
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -103,7 +112,7 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            'hosts': [('localhost', 6379)],
+            'hosts': [('0.0.0.0', 6379)],
         },
     },
 }
@@ -152,7 +161,7 @@ USE_I18N = True
 
 USE_TZ = True
 
-STATIC_ROOT = rf'{SITE_ROOT}/backend/static/'
+STATIC_ROOT = f'{SITE_ROOT}/backend/static'
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
@@ -168,14 +177,14 @@ LOGGING = {
     'handlers': {
         'conn_errs': {
             'class': 'logging.FileHandler',
-            'filename': SITE_ROOT + r'\backend\data\pg_logs.log',
+            'filename': SITE_ROOT + '/backend/data/pg_logs.log',
             'formatter': 'conn_errs',
             'level': 'ERROR',
             # 'mode': 'w'
             },
         'dmk': {
             'class': 'logging.FileHandler',
-            'filename': SITE_ROOT + r'\backend\data\pg_logs.log',
+            'filename': SITE_ROOT + '/backend/data/pg_logs.log',
             'formatter': 'dmk',
             'level': 'INFO',
             # 'mode': 'w'
@@ -214,7 +223,7 @@ CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.redis.RedisCache',
-        'LOCATION': 'redis://localhost:6379/2',
+        'LOCATION': 'redis://0.0.0.0:6379/2',
         'TIMEOUT': None
     }
 }

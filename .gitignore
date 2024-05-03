@@ -8,13 +8,8 @@ settings_prod.py
 /*.py
 # C extensions
 *.so
-
 *.xls
 *.xlsx
-*.sql
-*.ps1
-*/initial_script.py
-
 
 # My dirs
 KIS_queries/
@@ -41,7 +36,7 @@ share/python-wheels/
 MANIFEST
 pg_data/
 screenshots/
-
+Dashboard_env/
 # PyInstaller
 #  Usually these files are written by a python script from a template
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
