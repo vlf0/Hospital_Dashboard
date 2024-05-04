@@ -1,4 +1,8 @@
+<center>
+
 # WEB Dashboard
+
+</center>
 
 This project - is web dashboard allowed access to critical important information in real-time
 and displaying data dynamics.
