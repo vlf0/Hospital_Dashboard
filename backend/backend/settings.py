@@ -22,8 +22,6 @@ ALLOWED_HOSTS = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    'http://localhost:3000',
-    'http://localhost:9000',
     'http://10.123.8.17:3000',
     'http://10.123.8.17:9000',
     'http://10.123.8.17:90',
@@ -229,3 +227,8 @@ CACHES = {
 }
 
 KEY_PREFIX = ''
+
+try:
+    from .settings_local import *
+except ImportError:
+    pass

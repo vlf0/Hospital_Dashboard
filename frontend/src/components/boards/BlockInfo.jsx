@@ -36,8 +36,4 @@ const BlockInfo = ({data, headerText}) => {
 
 };
 
-<<<<<<< HEAD
 export default BlockInfo;
-=======
-export default BlockInfo;
->>>>>>> 07e3ae2a2bd5da94925016810338cd63f70ae8b8

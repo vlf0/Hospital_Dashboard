@@ -10,6 +10,7 @@ settings_prod.py
 *.so
 *.xls
 *.xlsx
+settings_local.py
 
 # My dirs
 KIS_queries/
