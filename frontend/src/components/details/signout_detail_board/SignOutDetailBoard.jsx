@@ -1,9 +1,9 @@
-import React, { useState, useContext } from "react";
-import { useSpring, animated } from "react-spring";
-import DeadsChartDetail from "./DeadsChartDetail";
-import SignOutDetailTable from "./SignOutDetailTable";
-import DataContext from "../../DataContext";
-import { getMainDMK } from "../../Feauters";
+import React, { useState, useContext } from 'react';
+import { useSpring, animated } from 'react-spring';
+import DeadsChartDetail from './DeadsChartDetail';
+import SignOutDetailTable from './SignOutDetailTable';
+import DataContext from '../../DataContext';
+import { getMainDMK } from '../../Feauters';
 import '../signIn_detail_board/detail_blocks.css';
 
 

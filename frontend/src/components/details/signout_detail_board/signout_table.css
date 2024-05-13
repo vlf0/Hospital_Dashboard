@@ -1,5 +1,5 @@
 /* Add global styles for the table container */
-.deads-table {
+.table {
   color:#001a3f;
   font-family: 'nbold', sans-serif;
   font-size: 18px;
@@ -10,7 +10,7 @@
 }
   
 /* Style the table header */
-.deads-table th {
+.table th {
     font-size: 25px;
     font-family: 'nbold';
     background: linear-gradient(0deg, #b2b7c6, #f7b9cd);
@@ -20,7 +20,7 @@
   }
   
 /* Style the table body rows */
-.deads-table td {
+.table td {
   border-bottom: 1px solid #ddd;
   padding: 8px;
   text-align: center;
@@ -28,17 +28,17 @@
   border: 1px solid black;
 }
 
-.deads-table tr {
+.table tr {
   background-color: #c8c8c8; /* Change this color to your preference */
 }
 
 /* Style alternate rows differently */
-.deads-table tr:nth-child(even) {
+.table tr:nth-child(even) {
   background-color: #ccd0d9;
 }
 
 /* Style odd rows differently */
-.deads-table tr:nth-child(odd) {
+.table tr:nth-child(odd) {
   background-color: #ccd0d9;
 }
 

@@ -13,16 +13,16 @@ const InOARDetailTable = ({ departament }) => {
   let arrived = oars.oar_arrived;
   arrived = ArrivedOarTable(arrived);
 
-    // Отделение реанимации и интенсивной терапии № 1
-    const filteredData = arrived
-        .filter(dict => dict['Отделение'] === departament)
-        .map(({ Отделение, ...rest }) => rest);
+  // Отделение реанимации и интенсивной терапии № 1
+  const filteredData = arrived
+      .filter(dict => dict['Отделение'] === departament)
+      .map(({ Отделение, ...rest }) => rest);
 
   const columns = Object.keys(arrived[0])
-  .filter(key => key !== 'Отделение')
-  .map(key => ({
-    Header: key,
-    accessor: key,
+      .filter(key => key !== 'Отделение')
+      .map(key => ({
+        Header: key,
+        accessor: key,
   }));
 
   // Create a table instance
@@ -34,7 +34,7 @@ const InOARDetailTable = ({ departament }) => {
   return (
     <div className='deads-table-container'>
       <h2 className='detail_block_header'> Детализация по отделению </h2>
-      <table className='deads-table' {...getTableProps()} >
+      <table className='table' {...getTableProps()} >
         <thead>
           {headerGroups.map(headerGroup => (
             <tr {...headerGroup.getHeaderGroupProps()}>

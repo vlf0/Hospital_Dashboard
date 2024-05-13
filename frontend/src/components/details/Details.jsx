@@ -3,6 +3,7 @@ import { useSpring, animated } from 'react-spring';
 import SignInDetailBoard from './signIn_detail_board/SigInDetailBoard';
 import SignOutDetailBoard from './signout_detail_board/SignOutDetailBoard';
 import OARDetailBoard from './OAR_detail_board/OARDetailBoard';
+import EmergencyRoomDetail from './emergency_details/EmergencyRoomDetail';
 import TopBlock from '../menu/TopBlock';
 import DataContext from '../DataContext';
 import { currentDatetime } from '../Feauters';
@@ -41,6 +42,9 @@ function DetailBoard({ sign }) {
     content = 
     <SignInDetailBoard />
     topBlockHeader = 'Детализация поступивших';
+  } else if (sign === 'emergencyRoom') {
+    content = <EmergencyRoomDetail />;
+    topBlockHeader = 'Детализация приёмного отделения';
   } else if (sign === 'out') {
     content = <SignOutDetailBoard />;
     topBlockHeader = 'Детализация выписанных';
