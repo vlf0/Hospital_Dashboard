@@ -4,17 +4,19 @@ import { useTable } from 'react-table';
 const refuseColumns = ['ФИО врача', 'кол-во отказов'];
 const readyData = [['Поляков И.С.', 13], ['Иванова А.Н.', 8], ['Сидоров П.В.', 5]];
 
-const RefuseDetailTable = ({ onRowClick }) => {
+const RefuseTable = React.memo(({ onRowClick }) => {
   const columns = React.useMemo(() =>
     refuseColumns.map(column => ({
       Header: column,
       accessor: column,
     })),
-  [refuseColumns]);
+    []
+  );
 
   const data = React.useMemo(() =>
     readyData.map(dataRow => Object.fromEntries(refuseColumns.map((col, index) => [col, dataRow[index]]))),
-  [readyData]);
+    []
+  );
 
   const {
     getTableProps,
@@ -25,7 +27,8 @@ const RefuseDetailTable = ({ onRowClick }) => {
   } = useTable({ columns, data });
 
   return (
-    <div className='deads-table-container'>
+    <>
+      <span className='detail_block_header'> Список сгруппированных отказов </span>
       <table {...getTableProps()} className='table'>
         <thead>
           {headerGroups.map(headerGroup => (
@@ -52,8 +55,8 @@ const RefuseDetailTable = ({ onRowClick }) => {
           })}
         </tbody>
       </table>
-    </div>
+    </>
   );
-};
+});
 
-export default RefuseDetailTable;
+export default RefuseTable;

@@ -11,41 +11,41 @@ const readyRuData = [
 const WaitingDetailTable = () => {
 
     const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } = useTable({
-        columns: waitingColumns.map(column => ({
-            Header: column,
-            accessor: column,
-        })),
-        data: readyRuData.map(dataRow =>  Object.fromEntries(waitingColumns.map((col, index) => [col, dataRow[index]]))),
+      columns: waitingColumns.map(column => ({
+        Header: column,
+        accessor: column,
+      })),
+      data: readyRuData.map(dataRow =>  Object.fromEntries(waitingColumns.map((col, index) => [col, dataRow[index]]))),
     });
 
     return (
-        <div className='deads-table-container'>
+      <>
+        <span className='detail_block_header'> Детализация по превышенному времени ожидания </span>
         <table {...getTableProps()} className='table'>
-            <thead>
-                {headerGroups.map(headerGroup => (
-                    <tr {...headerGroup.getHeaderGroupProps()}>
-                        {headerGroup.headers.map(column => (
-                            <th {...column.getHeaderProps()}>{column.render('Header')}</th>
-                        ))}
-                    </tr>
+          <thead>
+            {headerGroups.map(headerGroup => (
+              <tr {...headerGroup.getHeaderGroupProps()}>
+                {headerGroup.headers.map(column => (
+                  <th {...column.getHeaderProps()}>{column.render('Header')}</th>
                 ))}
-            </thead>
-            <tbody {...getTableBodyProps()}>
-                {rows.map(row => {
-                    prepareRow(row);
-                    return (
-                        <tr {...row.getRowProps()}>
-                            {row.cells.map(cell => (
-                                <td {...cell.getCellProps()}>{cell.render('Cell')}</td>
-                            ))}
-                        </tr>
-                    );
-                })}
-            </tbody>
+              </tr>
+            ))}
+          </thead>
+          <tbody {...getTableBodyProps()}>
+            {rows.map(row => {
+              prepareRow(row);
+              return (
+                <tr {...row.getRowProps()}>
+                  {row.cells.map(cell => (
+                    <td {...cell.getCellProps()}>{cell.render('Cell')}</td>
+                  ))}
+                </tr>
+              );
+            })}
+          </tbody>
         </table>
-        </div>
+      </>
     );
-
 };
 
 export default WaitingDetailTable;

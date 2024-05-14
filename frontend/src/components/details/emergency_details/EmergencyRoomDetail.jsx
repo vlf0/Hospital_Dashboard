@@ -1,8 +1,8 @@
 import React, { useState, useMemo } from "react";
 import { useSpring, animated } from "react-spring";
 import WaitingDetailTable from "./tables/WaitingTable";
-import RefuseDetailTable from "./tables/RefuseTable";
-import NewTable from "./tables/RefuseDetailTable";
+import RefuseTable from "./tables/RefuseTable";
+import RefuseDetailTable from "./tables/RefuseDetailTable";
 import './emergency_detail_block.css';
 
 const EmergencyRoomDetail = () => {
@@ -11,10 +11,16 @@ const EmergencyRoomDetail = () => {
   const [selectedDoctor, setSelectedDoctor] = useState(null);
 
   const toggleRefuseTableVisibility = () => {
+    if (isRefuseTableVisible) {
+      setSelectedDoctor(null);
+    }
     setIsRefuseTableVisible(!isRefuseTableVisible);
   };
 
   const toggleWaitingTableVisibility = () => {
+    if (isWaitingTableVisible) {
+      setSelectedDoctor(null);
+    }
     setIsWaitingTableVisible(!isWaitingTableVisible);
   };
 
@@ -29,6 +35,8 @@ const EmergencyRoomDetail = () => {
     config: { tension: 200, friction: 25 },
     delay: isRefuseTableVisible ? 30 : 0,
     width: '-webkit-fill-available',
+    padding: 10,
+    margin: 10
   });
 
   const springPropsWaiting = useSpring({
@@ -38,10 +46,12 @@ const EmergencyRoomDetail = () => {
     config: { tension: 200, friction: 25 },
     delay: isWaitingTableVisible ? 30 : 0,
     width: '-webkit-fill-available',
+    padding: 10,
+    margin: 10
   });
 
   const memoizedRefuseTable = useMemo(() => {
-    return isRefuseTableVisible && <RefuseDetailTable onRowClick={handleRowClick} />;
+    return isRefuseTableVisible && <RefuseTable onRowClick={handleRowClick} />;
   }, [isRefuseTableVisible]);
 
   const memoizedWaitingTable = useMemo(() => {
@@ -59,10 +69,6 @@ const EmergencyRoomDetail = () => {
               <div className='card_header'> 0 </div>
             </div>
           </div>
-          <animated.div style={springPropsRefuse}>
-            {memoizedRefuseTable}
-          </animated.div>
-          {selectedDoctor && <NewTable doctorName={selectedDoctor} />}
         </div>
 
         <div className='theLine'></div>
@@ -75,12 +81,15 @@ const EmergencyRoomDetail = () => {
               <div className='card_header'> 0 </div>
             </div>
           </div>
-          <animated.div style={springPropsWaiting}>
-            {memoizedWaitingTable}
-          </animated.div>
         </div>
       </div>
-
+      <animated.div className='deads-table-container' style={springPropsRefuse}>
+        {memoizedRefuseTable}
+      </animated.div>
+      <animated.div className='deads-table-container' style={springPropsWaiting}>
+        {memoizedWaitingTable}
+      </animated.div>
+      {selectedDoctor && <RefuseDetailTable doctorName={selectedDoctor} />}
     </>
   );
 };

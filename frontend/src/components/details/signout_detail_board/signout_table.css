@@ -1,3 +1,9 @@
+.deads-table-container {
+  display: flex;
+  flex-direction: column;
+  width: -webkit-fill-available;
+}
+
 /* Add global styles for the table container */
 .table {
   color:#001a3f;
