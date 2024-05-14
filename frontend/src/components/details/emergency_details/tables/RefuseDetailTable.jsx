@@ -1,22 +1,23 @@
-import React, { useContext } from 'react';
+import React from "react";
 import { useTable } from 'react-table';
 
 
-const waitingColumns = ['ФИО пациента', '№ ИБ', 'Отделение', 'Время ожидания', 'ФИО врача']
+const refuseDetailColumns = ['ФИО пациента', '№ ИБ', 'Диагноз', 'Причина отказа', 'Дата отказа']
 const readyRuData = [
-    ['Малышева Ольга Викторовна', '256-24', 'Неврологическое отделение', '145', 'Рыкова О.В.'],
-    ['Бобров Павел Максимович.', '302-24', 'Кардиологическое отделение','129', 'Буйлов А.В.']
+    ['Орлова Виктория Олеговна', '256-24', 'Неврологическое отделение', 'Не соответсвует профилю', '14.05.2024'],
+    ['Шнуров Александр Павлович', '302-24', 'Кардиологическое отделение', 'Не соответсвует профилю', '14.05.2024']
 ]
 
-const WaitingDetailTable = () => {
+const NewTable = ({ doctorName }) => {
 
     const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } = useTable({
-        columns: waitingColumns.map(column => ({
+        columns: refuseDetailColumns.map(column => ({
             Header: column,
             accessor: column,
         })),
-        data: readyRuData.map(dataRow =>  Object.fromEntries(waitingColumns.map((col, index) => [col, dataRow[index]]))),
+        data: readyRuData.map(dataRow =>  Object.fromEntries(refuseDetailColumns.map((col, index) => [col, dataRow[index]]))),
     });
+
 
     return (
         <div className='deads-table-container'>
@@ -45,7 +46,7 @@ const WaitingDetailTable = () => {
         </table>
         </div>
     );
-
 };
 
-export default WaitingDetailTable;
+
+export default NewTable;
