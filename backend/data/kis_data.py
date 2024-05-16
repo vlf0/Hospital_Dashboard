@@ -9,13 +9,16 @@ from django.conf import settings
 from django.db.utils import IntegrityError
 from django.db.models import Sum
 from .psycopg_module import BaseConnectionDB
-from .sql_queries import QuerySets
+from .sql_queries import QuerySets, EmergencyQueries
 from .serializers import (
      KISDataSerializer,
      KISTableSerializer,
      MainDataSerializer,
      AccumulativeDataSerializerSave,
-     ProfilesSerializer)
+     ProfilesSerializer,
+     EmergencyDataSerializer,
+     EmergencyDetailDataSerializer
+)
 from .models import Profiles, MainData, AccumulationOfIncoming
 
 KIS_DB = settings.DATABASES.get('kis_db')
@@ -180,7 +183,8 @@ class DataProcessing:
         :param dataset: *list*: A list of lists, where each inner list contains
          data corresponding to a row in the database.
         :type dataset: list[tuple]
-        :return: *list[CleanData]*: A list of `CleanData` class instances, each instantiated with data from the provided dataset.
+        :return: *list[CleanData]*: A list of `CleanData` class instances,
+         each instantiated with data from the provided dataset.
         """
         instances_list = [CleanData(**dict(zip(columns, row))) for row in dataset]
         return instances_list
@@ -273,7 +277,8 @@ class DataForDMK(DataProcessing):
         return {self.dmk_cols[-1]: self.count_dataset_total(reanimation_dataset)}
 
     @staticmethod
-    def get_dept_hosps(dh_dataset: list[tuple], raw_rtype: bool = False) -> list[dict[str, Union[int, str]]]:
+    def get_dept_hosps(dh_dataset: list[tuple], raw_rtype: bool = False) \
+            -> Union[list[dict[str, Union[int, str]]], list[tuple]]:
         """
         Get data related to hospitalized by depts patients.
 
@@ -311,6 +316,7 @@ class DataForDMK(DataProcessing):
         """
         if self.kisdata_obj.db_conn.conn is None:
             main_data = {i: None for i in self.dmk_cols}
+            dh_dataset = None
         else:
             gen = self.kisdata_obj.get_data_generator()
             arrived = self.get_arrived_data(next(gen))
@@ -361,7 +367,7 @@ class DataForDMK(DataProcessing):
                                         )
         return err_text
 
-    def save_to_dmk(self, chosen_date: str = None) -> list[Union[MainData, None], AccumulationOfIncoming]:
+    def save_to_dmk(self, chosen_date: str = None) -> list[Union[Union[MainData, None], AccumulationOfIncoming]]:
         """
         Save the prepared data to the DMK DB using the MainData model and its serializer.
 
@@ -372,8 +378,9 @@ class DataForDMK(DataProcessing):
         :raises SyntaxError: If there is a syntax error in the serializer.
         :raises AssertionError: If there is an assertion error during saving.
 
-        :return: List containing one MainData instance or None as a first list element and list of AccumulatedData instances
-         as a second element. If any error occurs - it write the logs to log-file.
+        :return: List containing one MainData instance or None as a first list element
+         and list of AccumulatedData instances as a second element.
+         If any error occurs - it write the logs to log-file.
         """
         common_dict = self.collect_data(chosen_date)
         main = common_dict['main_data']
@@ -399,7 +406,9 @@ class DataForDMK(DataProcessing):
             en_error = self.__translate(e)
             logger.error(en_error)
 
-    def save_accumulated(self, accum_data: dict) -> list[Union[MainData, Any], list[AccumulationOfIncoming]]:
+    @staticmethod
+    def save_accumulated(accum_data: dict)\
+            -> Union[list, list[Union[MainData, Any], list[AccumulationOfIncoming]]]:
         """
         Iterate through given Serializer and save a few new model instances.
 
@@ -636,22 +645,54 @@ class KISDataProcessing(DataProcessing):
         last_week = dates_period(7)
         kis = KISDataProcessing
         ready_queries = [QuerySets.chosen_date_query(query, day)[0] for day in last_week]
-        if kind == 'arrived':
-            processing = kis(KISData([query])).arrived_process
-        elif kind == 'signout':
-            processing = kis(KISData([query])).signout_process
+        processing = kis(KISData([query])).arrived_process if kind == 'arrived'\
+            else kis(KISData([query])).signout_process
         generator = KISData(ready_queries).get_data_generator()
         result = {f'{kind}_{day}': processing(next(generator)) for day in last_week}
         return result
 
 
-def collect_model() -> dict:
-    """Create postgres view contains all needed data of month plans table and return serialized data."""
-    data = Profiles.objects \
-        .select_related() \
-        .annotate(total=Sum('accumulationofincoming__number')) \
-        .values('name', 'total', 'plannumbers__plan') \
-        .filter(active=True) \
-        .filter(plannumbers__isnull=False)
-    accum_sr = ProfilesSerializer(data, many=True)
-    return accum_sr.data
+class EmergencyDataProcessing(DataProcessing):
+
+    eq = EmergencyQueries
+
+    def __init__(self, kisdata_obj):
+        super().__init__(kisdata_obj)
+        self.doc_names = None
+
+    def get_total_refuses(self, dataset: list[tuple]):
+        self.doc_names = [name[0] for name in dataset]
+        columns = self.eq.COLUMNS['total_refuse']
+        cleaned_dataset = self.create_instance(columns, dataset)
+        sr_data = EmergencyDataSerializer(cleaned_dataset, many=True).data
+        print(sr_data)
+
+    def get_detailed_refuses(self):
+        detail_refuse_query = self.eq().get_detail_refuse_query(self.doc_names)
+        self.kisdata_obj = KISData(detail_refuse_query)
+        gen = self.kisdata_obj.get_data_generator()
+        columns = self.eq.COLUMNS['detail_refuse']
+        cleaned_datasets = [self.create_instance(columns, dataset) for dataset in gen]
+        for i in res:
+            print(EmergencyDetailDataSerializer(i, many=True).data)
+
+    def get_results(self):
+        gen = self.kisdata_obj.get_data_generator()
+        self.get_total_refuses(next(gen))
+        self.get_detailed_refuses()
+
+
+class DMKManager:
+
+    @staticmethod
+    def collect_model() -> dict:
+        """Create postgres view contains all needed data of month plans table and return serialized data."""
+        data = Profiles.objects \
+            .select_related() \
+            .annotate(total=Sum('accumulationofincoming__number')) \
+            .values('name', 'total', 'plannumbers__plan') \
+            .filter(active=True) \
+            .filter(plannumbers__isnull=False)
+        accum_sr = ProfilesSerializer(data, many=True)
+        return accum_sr.data
+
