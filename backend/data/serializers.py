@@ -112,7 +112,6 @@ class KISTableSerializer(KISDataSerializer):
     diag_arr = serializers.CharField(read_only=True)
     diag_dead = serializers.CharField(read_only=True)
     # Fields to hospitalized in reanimation dataset related
-    # ages = serializers.IntegerField(read_only=True)
     doc_fio = serializers.CharField(read_only=True)
     diag_start = serializers.CharField(read_only=True)
     # Fields to moved to reanimation dataset related
@@ -120,15 +119,15 @@ class KISTableSerializer(KISDataSerializer):
     from_dept = serializers.CharField(read_only=True)
 
 
-class EmergencyDataSerializer(serializers.Serializer):
+class EmergencyDataSerializer(KISTableSerializer):
 
-    doc_fio = serializers.CharField(read_only=True)
     refuses_amount = serializers.IntegerField(read_only=True)
 
 
-class EmergencyDetailDataSerializer(KISDataSerializer, EmergencyDataSerializer):
+class EmergencyDetailDataSerializer(EmergencyDataSerializer, KISTableSerializer):
 
     diag = serializers.CharField(read_only=True)
     refuse_reason = serializers.CharField(read_only=True)
     refuse_date = serializers.DateTimeField(read_only=True)
+    waiting_time = serializers.TimeField(read_only=True)
 

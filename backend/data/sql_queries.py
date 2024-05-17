@@ -158,14 +158,24 @@ class QuerySets:
 
 class EmergencyQueries:
 
+    WAITINGS = """SELECT fio_pat, ib_num, dept, waiting_time, doc_fio FROM mm.waitings;"""
+
     TOTAL_REFUSE = """SELECT fio_doc, total_refuse FROM mm.total_refuse;"""
 
-    __DETAIL_REFUSE = """SELECT * FROM mm.refuse WHERE fio_doc = 0"""
+    __DETAIL_REFUSE = """
+                      SELECT fio_pat, ib_num, diag, refuse_reason, refuse_date, fio_doc
+                      FROM mm.refuse WHERE fio_doc = 0;
+                      """
 
     COLUMNS = {
         'total_refuse': ['doc_fio', 'refuses_amount'],
         'detail_refuse': ['pat_fio', 'ib_num', 'diag', 'refuse_reason', 'refuse_date', 'doc_fio'],
+        'waitings': ['pat_fio', 'ib_num', 'dept', 'waiting_time', 'doc_fio'],
     }
+
+    def get_emergency_queries(self):
+        queries_list = [self.WAITINGS, self.TOTAL_REFUSE]
+        return queries_list
 
     def get_detail_refuse_query(self, doc_names: list) -> list[str]:
         refuse_query = [self.__DETAIL_REFUSE.replace('0', f'\'{name}\'') for name in doc_names]

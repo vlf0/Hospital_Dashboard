@@ -660,12 +660,18 @@ class EmergencyDataProcessing(DataProcessing):
         super().__init__(kisdata_obj)
         self.doc_names = None
 
+    def get_waitings_patients(self, dataset: list[tuple]):
+        columns = self.eq.COLUMNS['waitings']
+        cleaned_dataset = self.create_instance(columns, dataset)
+        sr_data = EmergencyDetailDataSerializer(cleaned_dataset, many=True).data
+        return sr_data
+
     def get_total_refuses(self, dataset: list[tuple]):
         self.doc_names = [name[0] for name in dataset]
         columns = self.eq.COLUMNS['total_refuse']
         cleaned_dataset = self.create_instance(columns, dataset)
         sr_data = EmergencyDataSerializer(cleaned_dataset, many=True).data
-        print(sr_data)
+        return sr_data
 
     def get_detailed_refuses(self):
         detail_refuse_query = self.eq().get_detail_refuse_query(self.doc_names)
@@ -673,13 +679,16 @@ class EmergencyDataProcessing(DataProcessing):
         gen = self.kisdata_obj.get_data_generator()
         columns = self.eq.COLUMNS['detail_refuse']
         cleaned_datasets = [self.create_instance(columns, dataset) for dataset in gen]
-        for i in res:
-            print(EmergencyDetailDataSerializer(i, many=True).data)
+        sr_data_list = [EmergencyDetailDataSerializer(obj, many=True).data for obj in cleaned_datasets]
+        return sr_data_list
 
     def get_results(self):
         gen = self.kisdata_obj.get_data_generator()
-        self.get_total_refuses(next(gen))
-        self.get_detailed_refuses()
+        waitings = self.get_waitings_patients(next(gen))
+        total_refuses = self.get_total_refuses(next(gen))
+        detail_refuses = self.get_detailed_refuses()
+        result = {'waitings': waitings, 'total_refuses': total_refuses, 'detail_refuses': detail_refuses}
+        return result
 
 
 class DMKManager:

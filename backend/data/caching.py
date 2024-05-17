@@ -1,6 +1,12 @@
 """Provided class """
 from django.core.cache import cache
-from .kis_data import QuerySets, KISData, KISDataProcessing, DMKManager
+from .kis_data import (
+    QuerySets,
+    EmergencyQueries,
+    KISData,
+    KISDataProcessing,
+    EmergencyDataProcessing,
+    DMKManager)
 from .serializers import MainDataSerializer
 from .models import MainData
 
@@ -68,5 +74,15 @@ class Cacher:
         today_data = {'dmk': dmk, 'kis': kis}
         return today_data
 
+    @staticmethod
+    def emergency_caching():
+        queries_list = EmergencyQueries().get_emergency_queries()
+        emergency = KISData(queries_list)
+        result_data = EmergencyDataProcessing(emergency).get_results()
+        cache.set('emergency', result_data)
 
+    @staticmethod
+    def get_emergency_cache():
+        emergency = cache.get('emergency')
+        return emergency
 
