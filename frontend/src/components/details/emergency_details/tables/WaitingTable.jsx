@@ -1,26 +1,33 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { useTable } from 'react-table';
+import NoData from '../../../no_data/NoData';
+import { EmergencyTableProcess } from '../../../Feauters';
 
-
-const waitingColumns = ['ФИО пациента', '№ ИБ', 'Отделение', 'Время ожидания', 'ФИО врача']
-const readyRuData = [
-    ['Малышева Ольга Викторовна', '256-24', 'Неврологическое отделение', '145', 'Рыкова О.В.'],
-    ['Бобров Павел Максимович.', '302-24', 'Кардиологическое отделение','129', 'Буйлов А.В.']
-]
+const waitingColumns = ['ФИО пациента', '№ ИБ', 'Отделение', 'Время ожидания', 'ФИО врача'];
 
 const WaitingDetailTable = () => {
 
-    const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } = useTable({
-      columns: waitingColumns.map(column => ({
-        Header: column,
-        accessor: column,
-      })),
-      data: readyRuData.map(dataRow =>  Object.fromEntries(waitingColumns.map((col, index) => [col, dataRow[index]]))),
-    });
+  let waitingData = null;
+  waitingData = waitingData ? JSON.parse(waitingData) : null;
 
-    return (
-      <>
-        <span className='detail_block_header'> Детализация по превышенному времени ожидания </span>
+  const readyRuData = waitingData ? EmergencyTableProcess(waitingData.waitings) : [];
+
+  const columns = waitingColumns.map(key => ({
+    Header: key,
+    accessor: key,
+  }));
+
+  const tableInstance = useTable({
+    columns,
+    data: readyRuData,
+  });
+
+  const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } = tableInstance;
+
+  return (
+    <>
+      <span className='detail_block_header'> Детализация по превышенному времени ожидания </span>
+      {waitingData ? (
         <table {...getTableProps()} className='table'>
           <thead>
             {headerGroups.map(headerGroup => (
@@ -44,8 +51,11 @@ const WaitingDetailTable = () => {
             })}
           </tbody>
         </table>
-      </>
-    );
+      ) : (
+        <NoData />
+      )}
+    </>
+  );
 };
 
 export default WaitingDetailTable;

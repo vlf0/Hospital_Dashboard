@@ -11,23 +11,25 @@ import ArrivedDetails from './components/details/other_details/ArrivedDetails';
 
 function App() {
 
-  let data = sessionStorage.getItem('data')
+  let mainData = sessionStorage.getItem('main_data')
 
-  if (sessionStorage.getItem('data')) {
-    data = JSON.parse(data)
+  if (sessionStorage.getItem('main_data')) {
+    mainData = JSON.parse(mainData)
   }
   else {
-    const fetchedData = GetData('http://localhost:8000/api/v1/main_data/')
-    if (fetchedData) {
-      sessionStorage.setItem('data', JSON.stringify(fetchedData))
-      data = JSON.parse(sessionStorage.getItem('data'))
+    const fetchedMainData = GetData('http://localhost:8000/api/v1/main_data/')
+    const fethcedEmergencyData = GetData('http://localhost:8000/api/v1/emergency/')
+    if (fetchedMainData && fethcedEmergencyData) {
+      sessionStorage.setItem('main_data', JSON.stringify(fetchedMainData))
+      sessionStorage.setItem('emergency_data', JSON.stringify(fethcedEmergencyData))
+      mainData = JSON.parse(sessionStorage.getItem('main_data'))
     };
   }
 
-  if (data !== null) {
+  if (mainData !== null) {
 
     return (
-      <DataContext.Provider value={data}>
+      <DataContext.Provider value={mainData}>
         <Router>
           <Routes>
             <Route path="/" element={<GetAnalysis />} />

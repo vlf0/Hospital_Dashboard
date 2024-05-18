@@ -74,6 +74,21 @@ export function ensureArrayLength(array, desiredLength) {
   }
 };
 
+export function EmergencyTableProcess(dataset) {
+
+  const modifiedObjects = dataset.map(item => {
+    return {
+      'ФИО пациента': item.pat_fio,
+      '№ ИБ': item.ib_num,
+      'Отделение': item.dept,
+      'Время ожидания': item.waiting_time,
+      'ФИО врача': item.doc_fio
+    };
+  });  
+  
+  return modifiedObjects;
+};
+
 export function DeadTableProcess(dataset) {
   // Using map to transform each item in the dataset
   const modifiedObjects = dataset.map(item => {
@@ -92,7 +107,6 @@ export function DeadTableProcess(dataset) {
     };
   });
 
-  // Returning the array of modified objects
   return modifiedObjects;
 };
 
