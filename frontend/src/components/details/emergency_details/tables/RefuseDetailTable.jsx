@@ -1,13 +1,19 @@
 import React from "react";
 import { useTable } from 'react-table';
+import { RefuseDetailTableProcess } from "../../../Feauters";
 
 const refuseDetailColumns = ['ФИО пациента', '№ ИБ', 'Диагноз', 'Причина отказа', 'Дата отказа'];
-const readyRuData = [
-  ['Орлова Виктория Олеговна', '256-24', 'Неврологическое отделение', 'Не соответсвует профилю', '14.05.2024'],
-  ['Шнуров Александр Павлович', '302-24', 'Кардиологическое отделение', 'Не соответсвует профилю', '14.05.2024']
-];
+
 
 const RefuseDetailTable = React.memo(({ doctorName }) => {
+
+  let refuseDetailData = sessionStorage.getItem('emergency_data');
+  refuseDetailData = refuseDetailData ? JSON.parse(refuseDetailData) : null;
+  const flattenDetailArray = refuseDetailData.detail_refuses.flat();
+  const readyRuData = refuseDetailData ? RefuseDetailTableProcess(flattenDetailArray) : [];
+  const filteredData = readyRuData.filter(dict => dict['ФИО врача'] === doctorName);
+
+
   const columns = React.useMemo(() =>
     refuseDetailColumns.map(column => ({
       Header: column,
@@ -16,10 +22,7 @@ const RefuseDetailTable = React.memo(({ doctorName }) => {
     []
   );
 
-  const data = React.useMemo(() =>
-    readyRuData.map(dataRow => Object.fromEntries(refuseDetailColumns.map((col, index) => [col, dataRow[index]]))),
-    []
-  );
+  const data = React.useMemo(() => filteredData, [filteredData]);
 
   const {
     getTableProps,
@@ -30,7 +33,7 @@ const RefuseDetailTable = React.memo(({ doctorName }) => {
   } = useTable({ columns, data });
 
   return (
-    <>
+    <div className='deads-table-container'>
       <span className='detail_block_header'> Детализация отказов по врачу {doctorName} </span>
       <table {...getTableProps()} className='table'>
         <thead>
@@ -55,7 +58,7 @@ const RefuseDetailTable = React.memo(({ doctorName }) => {
           })}
         </tbody>
       </table>
-    </>
+    </div>
   );
 });
 

@@ -74,6 +74,34 @@ export function ensureArrayLength(array, desiredLength) {
   }
 };
 
+export function RefuseDetailTableProcess(dataset) {
+
+  const modifiedObjects = dataset.map(item => {
+    return {
+      'ФИО пациента': item.pat_fio,
+      '№ ИБ': item.ib_num,
+      'ФИО врача': item.doc_fio,
+      'Диагноз': item.diag,
+      'Причина отказа': item.refuse_reason,
+      'Дата отказа': item.refuse_date
+    };
+  });  
+  
+  return modifiedObjects;
+};
+
+export function TotalRefuseTableProcess(dataset) {
+
+  const modifiedObjects = dataset.map(item => {
+    return {
+      'ФИО врача': item.doc_fio,
+      'кол-во отказов': item.refuses_amount
+    };
+  });  
+  
+  return modifiedObjects;
+};
+
 export function EmergencyTableProcess(dataset) {
 
   const modifiedObjects = dataset.map(item => {

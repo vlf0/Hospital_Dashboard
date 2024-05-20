@@ -7,7 +7,7 @@ const waitingColumns = ['ФИО пациента', '№ ИБ', 'Отделени
 
 const WaitingDetailTable = () => {
 
-  let waitingData = null;
+  let waitingData = sessionStorage.getItem('emergency_data');
   waitingData = waitingData ? JSON.parse(waitingData) : null;
 
   const readyRuData = waitingData ? EmergencyTableProcess(waitingData.waitings) : [];

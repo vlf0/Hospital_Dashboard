@@ -1,10 +1,20 @@
 import React from 'react';
 import { useTable } from 'react-table';
+import { TotalRefuseTableProcess } from '../../../Feauters';
+import NoData from '../../../no_data/NoData';
+
 
 const refuseColumns = ['ФИО врача', 'кол-во отказов'];
-const readyData = [['Поляков И.С.', 13], ['Иванова А.Н.', 8], ['Сидоров П.В.', 5]];
+
 
 const RefuseTable = React.memo(({ onRowClick }) => {
+
+  let refuseData = null;
+  refuseData = refuseData ? JSON.parse(refuseData) : null;
+
+
+  // const readyRuData = refuseData ? TotalRefuseTableProcess(refuseData.total_refuses) : [];
+
   const columns = React.useMemo(() =>
     refuseColumns.map(column => ({
       Header: column,
@@ -13,10 +23,9 @@ const RefuseTable = React.memo(({ onRowClick }) => {
     []
   );
 
-  const data = React.useMemo(() =>
-    readyData.map(dataRow => Object.fromEntries(refuseColumns.map((col, index) => [col, dataRow[index]]))),
-    []
-  );
+  const data = React.useMemo(() => {
+    return refuseData ? TotalRefuseTableProcess(refuseData.total_refuses) : [];
+  }, [refuseData]);
 
   const {
     getTableProps,
@@ -29,7 +38,8 @@ const RefuseTable = React.memo(({ onRowClick }) => {
   return (
     <>
       <span className='detail_block_header'> Список сгруппированных отказов </span>
-      <table {...getTableProps()} className='table'>
+      {refuseData ? (
+        <table {...getTableProps()} className='table'>
         <thead>
           {headerGroups.map(headerGroup => (
             <tr {...headerGroup.getHeaderGroupProps()}>
@@ -55,6 +65,10 @@ const RefuseTable = React.memo(({ onRowClick }) => {
           })}
         </tbody>
       </table>
+      ) : (
+        <NoData />
+      )
+      }
     </>
   );
 });

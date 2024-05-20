@@ -83,13 +83,13 @@ const EmergencyRoomDetail = () => {
           </div>
         </div>
       </div>
-      <animated.div className='deads-table-container' style={springPropsRefuse}>
-        {memoizedRefuseTable}
-      </animated.div>
       <animated.div className='deads-table-container' style={springPropsWaiting}>
         {memoizedWaitingTable}
       </animated.div>
-      {selectedDoctor && <RefuseDetailTable doctorName={selectedDoctor} />}
+      <animated.div className='deads-table-container' style={springPropsRefuse}>
+        {memoizedRefuseTable}
+      </animated.div>
+      {selectedDoctor && <RefuseDetailTable className='deads-table-container' doctorName={selectedDoctor} />}
     </>
   );
 };
