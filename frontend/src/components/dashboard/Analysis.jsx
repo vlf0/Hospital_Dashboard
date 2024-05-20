@@ -37,7 +37,7 @@ function GetAnalysis() {
     <> 
 
       {/* <h1>{data.arrived}</h1> */}
-      <TopBlock textContent={'Оперативная сводка ГКБ Им. Демихова'} date={currentDatetime}/>
+      <TopBlock textContent={'Оперативная сводка'} date={currentDatetime}/>
       <animated.div className='main_dashboard' style={props}>
         <div className='board-cards'>
           <div className='cards_line'>

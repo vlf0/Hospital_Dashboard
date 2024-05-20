@@ -129,8 +129,8 @@ export function DeadTableProcess(dataset) {
       'Дата поступления': DateFormatting(item.arriving_dt),
       'Состояние при поступлении': item.state,
       'Кол-во койко дней': item.days,
-      'Дигноз при поступлении': item.diag_arr,
-      'Дигноз при выписке': item.diag_dead,
+      'Диaгноз при поступлении': item.diag_arr,
+      'Диaгноз при выписке': item.diag_dead,
       'Лечащий врач': item.doc_fio
     };
   });

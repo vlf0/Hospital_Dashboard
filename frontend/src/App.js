@@ -17,11 +17,11 @@ function App() {
     mainData = JSON.parse(mainData)
   }
   else {
-    const fetchedMainData = GetData('http://localhost:8000/api/v1/main_data/')
-    const fethcedEmergencyData = GetData('http://localhost:8000/api/v1/emergency/')
-    if (fetchedMainData && fethcedEmergencyData) {
+    const fetchedMainData = GetData('http://10.123.8.17:9000/api/v1/main_data/')
+    const fetchedEmergencyData = GetData('http://10.123.8.17:9000/api/v1/emergency/')
+    if (fetchedMainData && fetchedEmergencyData) {
       sessionStorage.setItem('main_data', JSON.stringify(fetchedMainData))
-      sessionStorage.setItem('emergency_data', JSON.stringify(fethcedEmergencyData))
+      sessionStorage.setItem('emergency_data', JSON.stringify(fetchedEmergencyData))
       mainData = JSON.parse(sessionStorage.getItem('main_data'))
     };
   }
