@@ -426,7 +426,6 @@ class DataForDMK(DataProcessing):
                 accum_sr.save()
                 saved_instances.append(accum_sr.save())
             except (ValidationError, SyntaxError, AssertionError, IntegrityError) as e:
-                print(e)
                 logger.error(e)
         return saved_instances
 

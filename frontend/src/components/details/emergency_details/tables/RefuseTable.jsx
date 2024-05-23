@@ -9,11 +9,9 @@ const refuseColumns = ['ФИО врача', 'кол-во отказов'];
 
 const RefuseTable = React.memo(({ onRowClick }) => {
 
-  let refuseData = null;
+  let refuseData = sessionStorage.getItem('emergency_data');
   refuseData = refuseData ? JSON.parse(refuseData) : null;
 
-
-  // const readyRuData = refuseData ? TotalRefuseTableProcess(refuseData.total_refuses) : [];
 
   const columns = React.useMemo(() =>
     refuseColumns.map(column => ({

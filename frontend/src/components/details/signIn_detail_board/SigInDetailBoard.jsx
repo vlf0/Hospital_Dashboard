@@ -25,11 +25,11 @@ const SignInDetailBoard = () => {
 
   const fetchDataFromApi = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/v1/main_data/');
+      const response = await fetch('http://10.123.8.17:9000/api/v1/main_data/');
       const newData = await response.json();
 
       // Update sessionStorage with the new data
-      sessionStorage.setItem('data', JSON.stringify(newData));
+      sessionStorage.setItem('main_data', JSON.stringify(newData));
 
       // Trigger re-render by toggling the reload state
       setReload(prevReload => !prevReload);

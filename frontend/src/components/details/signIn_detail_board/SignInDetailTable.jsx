@@ -1,21 +1,24 @@
 import React, { useEffect } from 'react';
 import { useTable } from 'react-table';
+import NoData from '../../no_data/NoData';
 import ScaleX from '../ScaleX';
 
 
 const SignInDetailTable = () => {
 
-    let data = JSON.parse(sessionStorage.getItem('data')).dmk.accum_dmk
+  let data = sessionStorage.getItem('main_data')
+  data = data ? JSON.parse(data).dmk.accum_dmk : [];
+
 
   const columns = [
     { Header: 'Профиль', 
       accessor: 'name',
         Cell: ({ cell }) => (
           <div style={{ 
-            color: '#001a3f', // Text color
-            fontSize: 20,     // Font size
-            fontWeight: 700,  // Font weight
-            fontFamily: 'nbold', // Font family
+            color: '#001a3f', 
+            fontSize: 20,     
+            fontWeight: 700,  
+            fontFamily: 'nbold', 
           }}>{cell.value}</div>
     ) },
     {
@@ -38,14 +41,11 @@ const SignInDetailTable = () => {
     }
   ];
 
-  // Create a table instance
   const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } = useTable({
     columns,
-    data, // Use the provided data directly
+    data,
   });
 
-  
-  // Use useEffect to trigger table update when data changes
   useEffect(() => {
     prepareRow(rows);
   }, [data, prepareRow, rows]);
@@ -53,7 +53,8 @@ const SignInDetailTable = () => {
   return (
     <div className='detail_block_header'>
       ПЛАН/ФАКТ по профилям
-      <table className='signin-table' {...getTableProps()}>
+      {data ? (
+        <table className='signin-table' {...getTableProps()}>
         <thead>
           {headerGroups.map(headerGroup => (
             <tr {...headerGroup.getHeaderGroupProps()}>
@@ -75,7 +76,12 @@ const SignInDetailTable = () => {
             );
           })}
         </tbody>
-      </table>
+        </table>
+      ) : (
+        <NoData />
+      )
+      }
+      
     </div>
   );
 };

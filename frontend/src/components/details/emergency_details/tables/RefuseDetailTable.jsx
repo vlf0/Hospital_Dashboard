@@ -13,7 +13,6 @@ const RefuseDetailTable = React.memo(({ doctorName }) => {
   const readyRuData = refuseDetailData ? RefuseDetailTableProcess(flattenDetailArray) : [];
   const filteredData = readyRuData.filter(dict => dict['ФИО врача'] === doctorName);
 
-
   const columns = React.useMemo(() =>
     refuseDetailColumns.map(column => ({
       Header: column,

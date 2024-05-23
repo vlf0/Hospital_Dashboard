@@ -6,6 +6,15 @@ import RefuseDetailTable from "./tables/RefuseDetailTable";
 import './emergency_detail_block.css';
 
 const EmergencyRoomDetail = () => {
+
+  let emergencyData = sessionStorage.getItem('emergency_data');
+  emergencyData = emergencyData  ? JSON.parse(emergencyData) : null;
+
+  let waitingAmount;
+  let refuseAmount;
+  waitingAmount = emergencyData ? emergencyData.waitings.length : 'Н/Д';
+  refuseAmount = emergencyData ? emergencyData.total_refuses.length : 'Н/Д';
+
   const [isRefuseTableVisible, setIsRefuseTableVisible] = useState(false);
   const [isWaitingTableVisible, setIsWaitingTableVisible] = useState(false);
   const [selectedDoctor, setSelectedDoctor] = useState(null);
@@ -66,7 +75,7 @@ const EmergencyRoomDetail = () => {
           <div className='blocks_container'>
             <div className='separated_detail_block_X' onClick={toggleRefuseTableVisibility}> 
               <div className='card_header'> Отказано </div>
-              <div className='card_header'> 0 </div>
+              <div className='card_header'> {refuseAmount} </div>
             </div>
           </div>
         </div>
@@ -78,7 +87,7 @@ const EmergencyRoomDetail = () => {
           <div className='blocks_container'>
             <div className='separated_detail_block_X' onClick={toggleWaitingTableVisibility}> 
               <div className='card_header'> Ожидание </div>
-              <div className='card_header'> 0 </div>
+              <div className='card_header'> {waitingAmount} </div>
             </div>
           </div>
         </div>

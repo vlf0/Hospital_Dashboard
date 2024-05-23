@@ -109,35 +109,35 @@ class QuerySets:
 
     DEADS = f"""
              SELECT
-             m.famaly_io(m.surname,m.name,m.patron) AS ФИО_Пациента,
-             .num||'-'||m.YEAR AS №ИБ,
-              CASE m.sex
+             mm.famaly_io(m.surname,m.name,m.patron) AS ФИО_Пациента,
+             m.num||'-'||m.YEAR AS №ИБ,
+               CASE m.sex
              	WHEN '1' THEN 'Муж'
              	WHEN '2' THEN 'Жен'	
-              END,
-             XTRACT(YEAR from age(m.beg_dt, p.birth)) as Возраст,
-             .dept_dt AS Дата_поступления,
-             c.gravity AS Состояние_при_поступлении,
-             m.dept_get_name(h.dept_id) AS Отделение, --отделение в которой умер пациент
+               END,
+             EXTRACT(YEAR from age(m.beg_dt, p.birth)) as Возраст,
+             h.dept_dt AS Дата_поступления,
+             ec.gravity AS Состояние_при_поступлении,
+             mm.dept_get_name(h.dept_id) AS Отделение, --отделение в которой умер пациент
              	   h.bed_days AS кол_во_койко_дней,
-                       (SELECT ic.kod
-                          FROM mm.ds ds
-                              JOIN mm.icd10 ic ON ic.id = ds.icd10_id
-                                  WHERE ds.ds_type_id = 4
-                                   	 AND ds.ehr_case_id = h.ehr_case_id
-                                       ORDER BY ds.create_dt DESC
-                                       LIMIT 1) AS Диаг_поступление,
-                         	    	h.final_diag_text AS Диаг_выписка,
-                                    mm.emp_get_fio_by_id (h.doctor_emp_id) AS Лечащий_врач
-             	    	
-             FROM mm.mdoc m
-             JOIN mm.hospdoc h ON h.mdoc_id = m.id
-             JOIN mm.people p ON p.id = m.people_id
-             JOIN mm.ehr_case ec ON ec.id = h.ehr_case_id
- 
-             WHERE h.leave_dt BETWEEN CURRENT_DATE - INTERVAL '18 hours' AND CURRENT_DATE + INTERVAL '6 hours'
-             AND h.hosp_outcome_id ='5' -- 5, умер в стационаре;
-             """
+                        (SELECT ic.kod
+                           FROM mm.ds ds
+                               JOIN mm.icd10 ic ON ic.id = ds.icd10_id
+                                   WHERE ds.ds_type_id = 4
+                                    	 AND ds.ehr_case_id = h.ehr_case_id
+                                        ORDER BY ds.create_dt DESC
+                                        LIMIT 1) AS Диаг_поступление,
+                          	    	h.final_diag_text AS Диаг_выписка,
+                                     mm.emp_get_fio_by_id (h.doctor_emp_id) AS Лечащий_врач
+                          	    	
+                          FROM mm.mdoc m
+                          JOIN mm.hospdoc h ON h.mdoc_id = m.id
+                          JOIN mm.people p ON p.id = m.people_id
+                          JOIN mm.ehr_case ec ON ec.id = h.ehr_case_id
+             
+                          WHERE h.leave_dt BETWEEN CURRENT_DATE - INTERVAL '18 hours' AND CURRENT_DATE + INTERVAL '6 hours'
+                          AND h.hosp_outcome_id ='5';
+                          """
 
     OAR_ARRIVED_QUERY = f"""
                          SELECT 
@@ -166,73 +166,71 @@ class QuerySets:
 
     OAR_MOVED_QUERY = f"""
                        SELECT 
-                       	    mm.famaly_io(m.surname,m.name,m.patron) AS ФИО_Пациента,
-                            m.num||'-'||m.YEAR AS №ИБ,
-                       	   EXTRACT(YEAR from age(m.beg_dt, p.birth)) as Возраст,
-                       	   mm.dept_get_name(h.dept_id) AS Отделение,
-                       	   mm.emp_get_fio_by_id (h.doctor_emp_id) AS Лечащий_врач,
-                       	   h.dept_dt AS Дата_перевода,   
+                	   mm.famaly_io(m.surname,m.name,m.patron) AS ФИО_Пациента,
+                       m.num||'-'||m.YEAR AS №ИБ,
+                	   EXTRACT(YEAR from age(m.beg_dt, p.birth)) as Возраст,
+                	   mm.dept_get_name(h.dept_id) AS Отделение,
+                	   mm.emp_get_fio_by_id (h.doctor_emp_id) AS Лечащий_врач,
+                	   h.dept_dt AS Дата_перевода,   
                        (SELECT d.name 
-                       		FROM mm.hosp_move_hist hmh
-                            JOIN mm.dept d ON d.id = hmh.dept_id
-                       	   WHERE hmh.mdoc_id = m.id
-                       	   	 AND hmh.out_dt = (SELECT max(hmh2.in_dt) 
-                       	   	                     FROM mm.hosp_move_hist hmh2
-                       	   	                    WHERE hmh2.mdoc_id = m.id) ) AS Из_отделения,   
-                       (SELECT ic.kod
-                       		FROM mm.ds ds
-                               JOIN mm.icd10 ic ON ic.id = ds.icd10_id
-                               WHERE ds.ds_kind_id = 1
-                               AND ds.ehr_case_id = h.ehr_case_id
-                               ORDER BY ds.create_dt DESC
-                               LIMIT 1) AS Диаг_поступление   
-                       FROM mm.mdoc m
-                       JOIN mm.hospdoc h ON h.mdoc_id = m.id
-                       JOIN mm.people p ON p.id = m.people_id
-
-                       WHERE h.hosp_dt <=CURRENT_DATE - INTERVAL '18 hours'
-                       AND h.dept_dt BETWEEN CURRENT_DATE - INTERVAL '18 hours' AND CURRENT_DATE + INTERVAL '6 hours'
-                       AND h.dept_id IN (SELECT d.id from mm.dept d WHERE d.dept_med_type_id = 10220)
-
-                       ORDER BY h.dept_id DESC;
-                       """
+                		FROM mm.hosp_move_hist hmh
+                        JOIN mm.dept d ON d.id = hmh.dept_id
+                	    WHERE hmh.mdoc_id = m.id
+                	   	 AND hmh.out_dt = (SELECT max(hmh2.in_dt) 
+                	   	                     FROM mm.hosp_move_hist hmh2
+                	   	                    WHERE hmh2.mdoc_id = m.id) ) AS Из_отделения,   
+                (SELECT ic.kod
+                		FROM mm.ds ds
+                        JOIN mm.icd10 ic ON ic.id = ds.icd10_id
+                        WHERE ds.ds_kind_id = 1
+                        AND ds.ehr_case_id = h.ehr_case_id
+                        ORDER BY ds.create_dt DESC
+                        LIMIT 1) AS Диаг_поступление   
+                FROM mm.mdoc m
+                JOIN mm.hospdoc h ON h.mdoc_id = m.id
+                JOIN mm.people p ON p.id = m.people_id
+                WHERE h.hosp_dt <=CURRENT_DATE - INTERVAL '18 hours'
+                AND h.dept_dt BETWEEN CURRENT_DATE - INTERVAL '18 hours' AND CURRENT_DATE + INTERVAL '6 hours'
+                AND h.dept_id IN (SELECT d.id from mm.dept d WHERE d.dept_med_type_id = 10220)
+                ORDER BY h.dept_id DESC;
+                """
 
     OAR_CURRENT_QUERY = f"""
                          SELECT 
-                         	   mm.famaly_io(m.surname,m.name,m.patron) AS ФИО_Пациента,
-                               m.num||'-'||m.YEAR AS №ИБ,
-                         	   EXTRACT(YEAR from age(m.beg_dt, p.birth)) as Возраст,
-                         	   mm.dept_get_name(h.dept_id) AS Отделение,
-                         	   mm.emp_get_fio_by_id (h.doctor_emp_id) AS Лечащий_врач,
-                         	   h.bed_days AS койко_дни,
+                         mm.famaly_io(m.surname,m.name,m.patron) AS ФИО_Пациента,
+                         m.num||'-'||m.YEAR AS №ИБ,
+                         EXTRACT(YEAR from age(m.beg_dt, p.birth)) as Возраст,
+                         mm.dept_get_name(h.dept_id) AS Отделение,
+                         mm.emp_get_fio_by_id (h.doctor_emp_id) AS Лечащий_врач,
+                         h.bed_days AS койко_дни,
  
-                         	   CASE WHEN EXISTS 
-                         	    (SELECT ic.kod
-                                    FROM mm.ds ds
-                                    JOIN mm.icd10 ic ON ic.id = ds.icd10_id
-                                    WHERE ds.ehr_case_id = h.ehr_case_id
-                                    AND ds.ds_kind_id IN ('1') 
-                                    AND ds.ds_type_id IN ('3')
-                                    AND ds.create_dt  = (SELECT  max(d2.create_dt) 
-                                     					  FROM mm.ds d2 
-                                     					 WHERE d2.mdoc_id = m.id
-                                     					   AND d2.ds_kind_id IN ('1') 
-                                    						   AND d2.ds_type_id IN ('3'))
-                                    						   LIMIT 1 )
-                                 THEN (SELECT ic.kod
-                         		         FROM mm.ds ds1
-                         		         JOIN mm.icd10 ic ON ic.id = ds1.icd10_id
-                         		         WHERE ds1.ehr_case_id = h.ehr_case_id
-                         				 	AND ds1.ds_kind_id IN ('1')
-                         		            AND ds1.ds_type_id IN ('3')
-                         		            AND ds1.create_dt  = (SELECT  max(d3.create_dt) 
-                                     					           FROM mm.ds d3 
-                                     					           WHERE d3.mdoc_id = m.id
-                                     					             AND d3.ds_kind_id IN ('1') 
-                                    						             AND d3.ds_type_id IN ('3'))
-                                    						             LIMIT 1 ) 
-                                 ELSE  'не установлен' 
-                         	    END AS Диаг_поступление
+                         CASE WHEN EXISTS 
+                          (SELECT ic.kod
+                              FROM mm.ds ds
+                              JOIN mm.icd10 ic ON ic.id = ds.icd10_id
+                              WHERE ds.ehr_case_id = h.ehr_case_id
+                              AND ds.ds_kind_id IN ('1') 
+                              AND ds.ds_type_id IN ('3')
+                              AND ds.create_dt  = (SELECT  max(d2.create_dt) 
+                               					  FROM mm.ds d2 
+                               					 WHERE d2.mdoc_id = m.id
+                               					   AND d2.ds_kind_id IN ('1') 
+                              						   AND d2.ds_type_id IN ('3'))
+                              						   LIMIT 1 )
+                           THEN (SELECT ic.kod
+                     	         FROM mm.ds ds1
+                     	         JOIN mm.icd10 ic ON ic.id = ds1.icd10_id
+                     	         WHERE ds1.ehr_case_id = h.ehr_case_id
+                     			 	AND ds1.ds_kind_id IN ('1')
+                     	            AND ds1.ds_type_id IN ('3')
+                     	            AND ds1.create_dt  = (SELECT  max(d3.create_dt) 
+                               					           FROM mm.ds d3 
+                               					           WHERE d3.mdoc_id = m.id
+                               					             AND d3.ds_kind_id IN ('1') 
+                              						             AND d3.ds_type_id IN ('3'))
+                              						             LIMIT 1 ) 
+                           ELSE  'не установлен' 
+                          END AS Диаг_поступление
  
                          FROM mm.mdoc m
                          JOIN mm.hospdoc h ON h.mdoc_id = m.id
@@ -350,18 +348,20 @@ class QuerySets:
 class EmergencyQueries:
 
     WAITINGS = """
-               SELECT count (m.id) AS cnt
-               FROM mm.mdoc m
-               JOIN mm.hospdoc h ON h.mdoc_id = m.id
-               JOIN mm.ehr_case ec ON ec.id = h.ehr_case_id
-               JOIN mm.ehr_case_title ect ON ect.caseid  = ec.id 
-               JOIN mm.dept d ON d.id = h.dept_id
-               JOIN mm.profile_med pm ON pm.id = d.profile_med_id 
+               SELECT 
+               mm.famaly_io (m.surname,m.name,m.patron) AS Фио_пациента,
+               m.num ||'-'|| m.YEAR AS №ИБ,
+               mm.dept_get_name(h.dept_id) AS Отделение,
+               to_char(h.hosp_dt - h.input_dt, 'HH24:MI:SS') AS Время,
+               mm.emp_get_fio_by_id (h.doctor_emp_id) AS Врач
+                                               
+               FROM mm.mdoc m 
+               JOIN mm.hospdoc h ON h.mdoc_id = m.id 
                
-               WHERE ec.create_dt BETWEEN CURRENT_DATE - INTERVAL '18 hours' AND CURRENT_DATE + INTERVAL '6 hours'
+               WHERE h.hosp_dt BETWEEN current_date - INTERVAL '1 day, -6 hours' AND current_date - INTERVAL '-6 hours'
+               AND h.dept_id NOT IN ('7f35c044-8375-4057-8d04-bba5573b4f85')
                AND (h.hosp_dt - h.input_dt) >= make_interval(hours => 2)
-               
-               ORDER BY cnt;
+               ORDER BY Время DESC;
                """
 
     TOTAL_REFUSE = """
@@ -372,17 +372,18 @@ class EmergencyQueries:
                    JOIN mm.ehr_case_title ect2 ON ect2.caseid  = a.ehr_case_id
                
                    WHERE ec.create_dt BETWEEN CURRENT_DATE - INTERVAL '18 hours' AND CURRENT_DATE + INTERVAL '6 hours'
-
+                   AND a.close_emp_id NOTNULL
                    GROUP BY a.close_emp_id;
                    """
 
     __DETAIL_REFUSE = """
                       SELECT mm.famaly_io (a.surname,a.name,a.patron) AS ФИО_пациента,
                       a.num||'-'||a.YEAR ||'-'||a.num_type AS №ИБ,
+                      ic.kod ||' '||d.TEXT AS Диагноз_пациента,
                       hrr.name AS Причина_отказа,
                       hr.end_dt AS Дата_отказа,
-                      ic.kod ||' '||d.TEXT AS Диагноз_пациента,
-                      mm.emp_get_fio_by_id (a.close_emp_id) as ФИО_врача
+                      mm.emp_get_fio_by_id(a.close_emp_id)
+                      
                          
                       FROM mm.ambticket a
                       JOIN mm.ehr_case ec ON a.ehr_case_id = ec.id
@@ -393,7 +394,8 @@ class EmergencyQueries:
                       LEFT JOIN mm.hosp_refuse_reason hrr ON hrr.id = hr.hosp_refuse_reason_type_id
                       
                       WHERE ec.create_dt BETWEEN CURRENT_DATE - INTERVAL '18 hours'
-                       AND CURRENT_DATE + INTERVAL '6 hours' AND mm.emp_get_fio_by_id (a.close_emp_id) = 0;
+                       AND CURRENT_DATE + INTERVAL '6 hours' 
+                       AND mm.emp_get_fio_by_id (a.close_emp_id) = 'passed_doc_fio';
                       """
 
     COLUMNS = {
@@ -407,7 +409,7 @@ class EmergencyQueries:
         return queries_list
 
     def get_detail_refuse_query(self, doc_names: list) -> list[str]:
-        refuse_query = [self.__DETAIL_REFUSE.replace('0', f'\'{name}\'') for name in doc_names]
+        refuse_query = [self.__DETAIL_REFUSE.replace('passed_doc_fio', f'{name}') for name in doc_names]
         return refuse_query
 
 

@@ -83,7 +83,7 @@ export function RefuseDetailTableProcess(dataset) {
       'ФИО врача': item.doc_fio,
       'Диагноз': item.diag,
       'Причина отказа': item.refuse_reason,
-      'Дата отказа': item.refuse_date
+      'Дата отказа': DateFormatting(item.refuse_date)
     };
   });  
   

@@ -60,6 +60,7 @@ class Cacher:
         self.dmk_cache()
         self.kis_cache()
         self.week_kis_cache()
+        self.emergency_cache()
 
     @staticmethod
     def get_chosen_date_cache(request):
@@ -75,7 +76,7 @@ class Cacher:
         return today_data
 
     @staticmethod
-    def emergency_caching():
+    def emergency_cache():
         queries_list = EmergencyQueries().get_emergency_queries()
         emergency = KISData(queries_list)
         result_data = EmergencyDataProcessing(emergency).get_results()
