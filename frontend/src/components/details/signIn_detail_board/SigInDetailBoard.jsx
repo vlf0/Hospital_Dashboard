@@ -29,7 +29,7 @@ const SignInDetailBoard = () => {
       const newData = await response.json();
 
       // Update sessionStorage with the new data
-      sessionStorage.setItem('data', JSON.stringify(newData));
+      sessionStorage.setItem('main_data', JSON.stringify(newData));
 
       // Trigger re-render by toggling the reload state
       setReload(prevReload => !prevReload);
@@ -44,52 +44,74 @@ const SignInDetailBoard = () => {
     };
   }, [reload]);
   
-
   
   return (
     <div className='detail_block'>
       <span className='detail_block_header'> Обратившиеся </span>
       <div className='blocks_container'>
         <div className='separated_detail_block'> 
-          <p> Отказано </p> {main_dmk.refused} 
+          <div className='card_header'> Отказано </div>
+          <div className='card_header'> {main_dmk.refused} </div>
         </div>
-        <div className='separated_detail_block'>
-        <p> Госпитализировано </p> {main_dmk.hosp}
+
+        <div className='separated_detail_block'> 
+          <div className='card_header'> Госпитализировано </div>
+          <div className='card_header'> {main_dmk.hosp} </div>
         </div>
       </div>
+
       <span className='detail_block_header'> Госпитализировано по каналам </span>
       <div className='blocks_container'>
         <div className='separated_detail_block'> 
-          <p> 103 </p> {kis.ch103} </div>
-        <div className='separated_detail_block'>
-           <p> Поликлиника </p> {kis.clinic_only} </div>
-        <div className='separated_detail_block'>
-           <p> 103 Поликлиника </p> {kis.ch103_clinic} </div>
-        <div className='separated_detail_block'>
-           <p> Самотёк </p> {kis.singly} </div>
-        <div className='separated_detail_block'>
-           <p> План </p> {'STUB'} </div>
+          <div className='card_header'> 103 </div>
+          <div className='card_header'> {kis.ch103} </div>
+        </div>
+        <div className='separated_detail_block'> 
+          <div className='card_header'> Поликлиника </div>
+          <div className='card_header'> {kis.clinic_only} </div>
+        </div>
+        <div className='separated_detail_block'> 
+          <div className='card_header'> 103 Поликлиника </div>
+          <div className='card_header'> {kis.ch103_clinic} </div>
+        </div>
+        <div className='separated_detail_block'> 
+          <div className='card_header'> Самотек </div>
+          <div className='card_header'> {kis.singly} </div>
+        </div>
+        <div className='separated_detail_block'> 
+          <div className='card_header'> План </div>
+          <div className='card_header'> {kis.plan} </div>
+        </div>
       </div>
+
       <span className='detail_block_header'> Госпитализировано в статусе </span>
       <div className='blocks_container'>
-        <div className='separated_detail_block'>
-          <p> ЗЛ </p> {kis.ZL} </div>
-        <div className='separated_detail_block'>
-          <p> Иногородние </p> {kis.foreign} </div>
         <div className='separated_detail_block'> 
-          <p> НР </p> {kis.nr} </div>
-        <div className='separated_detail_block'>  
-          <p> НИЛ </p> {kis.nil} </div>
-        <div className='separated_detail_block'>  
-          <p> ДМС </p> {kis.dms} </div>
-        <div className='separated_detail_block'>  
-          <p> Не указано </p> {kis.undefined} </div>
+          <div className='card_header'> ЗЛ </div>
+          <div className='card_header'> {kis.ZL} </div>
+        </div>
+        <div className='separated_detail_block'> 
+          <div className='card_header'> Иногородние </div>
+          <div className='card_header'> {kis.foreign} </div>
+        </div>
+        <div className='separated_detail_block'> 
+          <div className='card_header'> НР </div>
+          <div className='card_header'> {kis.nr} </div>
+        </div>
+        <div className='separated_detail_block'> 
+          <div className='card_header'> НИЛ </div>
+          <div className='card_header'> {kis.nil} </div>
+        </div>
+        <div className='separated_detail_block'> 
+          <div className='card_header'> ДМС </div>
+          <div className='card_header'> {kis.dms} </div>
+        </div>
+        <div className='separated_detail_block'> 
+          <div className='card_header'> Не указано </div>
+          <div className='card_header'> {kis.undefined} </div>
+        </div>
       </div>
       <SignInDetailTable key={reload}/>
-      {/* <button className="reload_button" onClick={fetchDataFromApi}>Обновить планы</button> */}
-
-
-
     </div>
   );
 };

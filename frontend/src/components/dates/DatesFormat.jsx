@@ -1,8 +1,15 @@
 function GetWeekDays() {
 
-  const daysOfWeek = ['Вск', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб']
+  const daysOfWeek = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб']
   
-  const today = new Date()
+  const today = new Date();
+  const currentTime = today.toLocaleTimeString();
+  const currentHour = currentTime.split(':')[0];
+
+  if (currentHour < 6) {
+    today.setDate(today.getDate() - 1);
+  }
+
   
   let weekDates = [];
   
@@ -24,16 +31,22 @@ export default GetWeekDays;
 
 
 export function GetDates() {
-  const today = new Date();
-
-  const weekDates = Array.from({ length: 7 }, (_, i) => {
-    const date = new Date(today);
-    date.setDate(today.getDate() - i);
-    return formatDate(date);
-  }).reverse();
-
-  return weekDates;
-}
+    const today = new Date();
+    const currentTime = today.toLocaleTimeString();
+    const currentHour = currentTime.split(':')[0];
+  
+    if (currentHour < 6) {
+      today.setDate(today.getDate() - 1);
+    }
+  
+    const weekDates = Array.from({ length: 7 }, (_, i) => {
+      const date = new Date(today);
+      date.setDate(today.getDate() - i);
+      return formatDate(date);
+    }).reverse();
+  
+    return weekDates;
+  }
 
 
 export function formatDate(date) {

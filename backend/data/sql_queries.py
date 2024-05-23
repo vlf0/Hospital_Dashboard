@@ -107,7 +107,7 @@ class QuerySets:
         'ОРИТ №3': 'oar3_d',
         'Кардиологическое отделение': 'cardio_d',
         'Хирургическое отделение': 'surgery_d',
-        'Терапевтичecкое отделение': 'therapy_d'
+        'Терапевтическое отделение': 'therapy_d'
     }
 
     def queryset_for_dmk(self):
@@ -154,4 +154,37 @@ class QuerySets:
                      ({id_cnt}, '{dates}', {number}, '{profile_id}');
                      """
         return raw_query
+
+
+class EmergencyQueries:
+
+
+    WAITINGS = """
+               SELECT fio_pat, ib_num, dept, waiting_time, doc_fio from mm.waitings;
+               """
+
+    TOTAL_REFUSE = """
+                   SELECT fio_doc, total_refuse FROM mm.total_refuse;
+                   """
+
+    __DETAIL_REFUSE = """
+                      SELECT fio_pat, ib_num, diag, refuse_reason, refuse_date, fio_doc
+                       FROM mm.refuse WHERE fio_doc = 'passed_doc_fio';
+                      """
+
+    COLUMNS = {
+        'total_refuse': ['fio_doc', 'refuses_amount'],
+        'detail_refuse': ['fio_pat', 'ib_num', 'diag', 'refuse_reason', 'refuse_date', 'fio_doc'],
+        'waitings': ['fio_pat', 'ib_num', 'dept', 'waiting_time', 'doc_fio'],
+    }
+
+    def get_emergency_queries(self):
+        queries_list = [self.WAITINGS, self.TOTAL_REFUSE]
+        return queries_list
+
+    def get_detail_refuse_query(self, doc_names: list) -> list[str]:
+        refuse_query = [self.__DETAIL_REFUSE.replace('passed_doc_fio', f'{name}') for name in doc_names]
+        return refuse_query
+
+
 

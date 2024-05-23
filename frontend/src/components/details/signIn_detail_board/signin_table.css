@@ -1,39 +1,31 @@
 /* Add global styles for the table container */
 .signin-table {
-  font-family: 'Arial', sans-serif;
-  border-collapse: collapse; /* Collapse borders to avoid spacing issues */
-  width: 100%; /* Optional: Set the table width to 100% */
-  border: 1px solid black; /* Add a border to the entire table */
+  font-family:'nbold','Arial', sans-serif;
+  border-collapse: collapse; 
+  width: 100%; 
+  border: 1px solid black; 
   margin-top: 12px;
 }
   
 /* Style the table header */
 .signin-table th {
-  background: linear-gradient(0deg, #5b8bc6d6, #6eeeff87);
+  font-family: 'nbold';
+  background: linear-gradient(0deg, #b2b7c6, #f4d3dd);
   padding: 8px;
   text-align: center;
-  border: 1px solid black; /* Add a border to each header cell */
+  border: 1px solid black;
 }
   
 /* Style the table body rows */
 .signin-table td {
-  border-bottom: 1px solid #ddd;
+  font-family: 'nbold'; 
   padding: 8px;
-  text-align: center;
-  font-weight: lighter;
+  text-align: right;
+  font-weight: bold;
   border: 1px solid black; 
 }
 
 .signin-table tr {
-  background-color: #c8c8c8; /* Change this color to your preference */
+  background-color: #b2b7c6; 
 }
 
-/* Style alternate rows differently */
-/* .signin-table tr:nth-child(even) {
-  background-color: #99c7ff;
-} */
-
-/* Style odd rows differently */
-/* .signin-table tr:nth-child(odd) {
-  background-color: #c8c8c8;
-} */

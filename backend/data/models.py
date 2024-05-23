@@ -1,5 +1,6 @@
 """Responsible for models (tables in DMK BD)."""
 from django.db import models
+from django.contrib import admin
 from .models_managers import CustomManager
 
 

@@ -1,6 +1,12 @@
 """Provided class """
 from django.core.cache import cache
-from .kis_data import QuerySets, KISData, KISDataProcessing, collect_model
+from .kis_data import (
+    QuerySets,
+    EmergencyQueries,
+    KISData,
+    KISDataProcessing,
+    EmergencyDataProcessing,
+    DMKManager)
 from .serializers import MainDataSerializer
 from .models import MainData
 
@@ -16,7 +22,7 @@ class Cacher:
         Retrieves main DMK data from the database, serializes it, and stores it in the cache.
         """
         main_dmk = MainDataSerializer(MainData.objects.custom_filter(), many=True).data
-        accum_dmk = collect_model()
+        accum_dmk = DMKManager.collect_model()
         dmk = {'main_dmk': main_dmk, 'accum_dmk': accum_dmk}
         cache.set('dmk', dmk)
 
@@ -54,6 +60,7 @@ class Cacher:
         self.dmk_cache()
         self.kis_cache()
         self.week_kis_cache()
+        self.emergency_cache()
 
     @staticmethod
     def get_chosen_date_cache(request):
@@ -68,5 +75,15 @@ class Cacher:
         today_data = {'dmk': dmk, 'kis': kis}
         return today_data
 
+    @staticmethod
+    def emergency_cache():
+        queries_list = EmergencyQueries().get_emergency_queries()
+        emergency = KISData(queries_list)
+        result_data = EmergencyDataProcessing(emergency).get_results()
+        cache.set('emergency', result_data)
 
+    @staticmethod
+    def get_emergency_cache():
+        emergency = cache.get('emergency')
+        return emergency
 

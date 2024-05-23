@@ -1,21 +1,24 @@
 import React, { useEffect } from 'react';
 import { useTable } from 'react-table';
+import NoData from '../../no_data/NoData';
 import ScaleX from '../ScaleX';
 
 
 const SignInDetailTable = () => {
 
-  let data = JSON.parse(sessionStorage.getItem('data')).dmk.accum_dmk
+  let data = sessionStorage.getItem('main_data')
+  data = data ? JSON.parse(data).dmk.accum_dmk : [];
+
 
   const columns = [
     { Header: 'Профиль', 
       accessor: 'name',
         Cell: ({ cell }) => (
           <div style={{ 
-            color: '#1a1a1a', // Text color
-            fontSize: 16,     // Font size
-            fontWeight: 700,  // Font weight
-            fontFamily: 'sans-serif', // Font family
+            color: '#001a3f', 
+            fontSize: 20,     
+            fontWeight: 700,  
+            fontFamily: 'nbold', 
           }}>{cell.value}</div>
     ) },
     {
@@ -24,28 +27,25 @@ const SignInDetailTable = () => {
       Cell: ({ cell, row }) => (<ScaleX hospFact={cell.value} hospPlan={row.original.plan} />), 
     },
     {
-      Header: 'Percents',
+      Header: '% выполнения',
       Cell: ({ row }) => {
         const percent = ((row.values.total / row.original.plan) * 100);
         const formattedPercent = percent.toFixed(0) + '%'; // Add "%" at the end
-        return <div style={{ color: percent > 100 ? '#12702b' : '#47010f',
-                             fontSize: 14,
+        return <div style={{ color: percent > 100 ? '#278f49' : '#e9306a',
+                             fontSize: 20,
                              fontWeight: 700,
-                             fontFamily: 'sans-serif'
+                             fontFamily: 'nbold'
                             }
                           }>{formattedPercent}</div>;
       }
     }
   ];
 
-  // Create a table instance
   const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } = useTable({
     columns,
-    data, // Use the provided data directly
+    data,
   });
 
-  
-  // Use useEffect to trigger table update when data changes
   useEffect(() => {
     prepareRow(rows);
   }, [data, prepareRow, rows]);
@@ -53,7 +53,8 @@ const SignInDetailTable = () => {
   return (
     <div className='detail_block_header'>
       ПЛАН/ФАКТ по профилям
-      <table className='signin-table' {...getTableProps()}>
+      {data ? (
+        <table className='signin-table' {...getTableProps()}>
         <thead>
           {headerGroups.map(headerGroup => (
             <tr {...headerGroup.getHeaderGroupProps()}>
@@ -75,7 +76,12 @@ const SignInDetailTable = () => {
             );
           })}
         </tbody>
-      </table>
+        </table>
+      ) : (
+        <NoData />
+      )
+      }
+      
     </div>
   );
 };

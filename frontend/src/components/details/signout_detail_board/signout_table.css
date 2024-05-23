@@ -1,6 +1,16 @@
+.deads-table-container {
+  display: flex;
+  flex-direction: column;
+  width: -webkit-fill-available;
+  margin: 10px;
+  padding: 10px;
+}
+
 /* Add global styles for the table container */
-.deads-table {
-  font-family: 'Arial', sans-serif;
+.table {
+  color:#001a3f;
+  font-family: 'nbold', sans-serif;
+  font-size: 18px;
   border-collapse: collapse; /* Collapse borders to avoid spacing issues */
   width: 100%; /* Optional: Set the table width to 100% */
   border: 1px solid black; /* Add a border to the entire table */
@@ -8,15 +18,17 @@
 }
   
 /* Style the table header */
-.deads-table th {
-  background: linear-gradient(0deg, #5b8bc6d6, #6eeeff87);
-  padding: 8px;
-  text-align: center;
-  border: 1px solid black; /* Add a border to each header cell */
-}
+.table th {
+    font-size: 25px;
+    font-family: 'nbold';
+    background: linear-gradient(0deg, #b2b7c6, #f7b9cd);
+    padding: 8px;
+    text-align: center;
+    border: 1px solid black; /* Add a border to each header cell */
+  }
   
 /* Style the table body rows */
-.deads-table td {
+.table td {
   border-bottom: 1px solid #ddd;
   padding: 8px;
   text-align: center;
@@ -24,16 +36,24 @@
   border: 1px solid black;
 }
 
-.deads-table tr {
+.table tr {
   background-color: #c8c8c8; /* Change this color to your preference */
 }
 
 /* Style alternate rows differently */
-.deads-table tr:nth-child(even) {
-  background-color: #99c7ff;
+.table tr:nth-child(even) {
+  background-color: #ccd0d9;
 }
 
 /* Style odd rows differently */
-.deads-table tr:nth-child(odd) {
-  background-color: #c8c8c8;
+.table tr:nth-child(odd) {
+  background-color: #ccd0d9;
+}
+
+.card_header { 
+  width: -webkit-fill-available;
+}
+
+.card_data { 
+  width: -webkit-fill-available;
 }

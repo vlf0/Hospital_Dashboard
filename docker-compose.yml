@@ -3,12 +3,18 @@ version: '3'
 services:
   backend:
     build: ./backend/.
+    environment:
+      - DJANGO_SETTINGS_MODULE=backend.settings_docker
     ports:
       - "8000:8000"
     volumes:
       - "static:/usr/src/Dashboard/static"
     networks:
       - one_net
+    depends_on:
+      - database
+    links:
+      - "database:database"
   database:
     build: ./postgres/.
     environment:
@@ -23,20 +29,12 @@ services:
       - ./postgres/.:/docker-entrypoint-initdb.d
     networks:
       - one_net
-    depends_on:
-      - backend
-    links:
-      - "backend:backend"
   redis:
     build: ./redis/.
     ports:
       - "6379:6379"
     networks:
       - one_net
-    depends_on:
-      - backend
-    links:
-      - "backend:backend"
   nginx:
     build: ./nginx/.
     ports:

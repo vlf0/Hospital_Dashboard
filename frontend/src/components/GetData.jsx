@@ -18,10 +18,6 @@ function GetData(urlPath) {
       fetchData();
     }, [urlPath]);
 
-    if (!data || data.length === 0) {
-      return '';
-    }
-
     return data;
 };
 

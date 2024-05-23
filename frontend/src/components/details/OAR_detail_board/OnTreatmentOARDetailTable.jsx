@@ -31,7 +31,7 @@ const InOARDetailTable = ({ departament }) => {
   return (
     <div className='deads-table-container'>
       <h2 className='detail_block_header'> Детализация по отделению </h2>
-      <table className='deads-table' {...getTableProps()} >
+      <table className='table' {...getTableProps()} >
         <thead>
           {headerGroups.map(headerGroup => (
             <tr {...headerGroup.getHeaderGroupProps()}>

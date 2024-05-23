@@ -9,36 +9,36 @@ import ArrivedDetails from './components/details/other_details/ArrivedDetails';
 
 
 
-
-
 function App() {
 
-  let data = sessionStorage.getItem('data')
+  let mainData = sessionStorage.getItem('main_data')
 
-  if (sessionStorage.getItem('data')) {
-    data = JSON.parse(data)
+  if (sessionStorage.getItem('main_data')) {
+    mainData = JSON.parse(mainData)
   }
   else {
-    const fetchedData = GetData('http://localhost:8000/api/v1/main_data/')
-    if (fetchedData) {
-      sessionStorage.setItem('data', JSON.stringify(fetchedData))
-      data = JSON.parse(sessionStorage.getItem('data'))
+    const fetchedMainData = GetData('http://localhost:8000/api/v1/main_data/')
+    const fetchedEmergencyData = GetData('http://localhost:8000/api/v1/emergency/')
+    if (fetchedMainData && fetchedEmergencyData) {
+      sessionStorage.setItem('main_data', JSON.stringify(fetchedMainData))
+      sessionStorage.setItem('emergency_data', JSON.stringify(fetchedEmergencyData))
+      mainData = JSON.parse(sessionStorage.getItem('main_data'))
     };
   }
 
-
-  if (data) {
+  if (mainData !== null) {
 
     return (
-      <DataContext.Provider value={data}>
+      <DataContext.Provider value={mainData}>
         <Router>
           <Routes>
             <Route path="/" element={<GetAnalysis />} />
-            <Route path="/arrived_detail" element={<DetailBoard sign={'in'} textHeader={'Детализация обратившихся'} />} />
-            <Route path="/signout_detail" element={<DetailBoard sign={'out'} textHeader={'Детализация выписанных'} />} />
-            <Route path="/OAR_detail" element={<DetailBoard sign={'oar'} textHeader={'Детализация реанимационных отделений'} />} />
+            <Route path="/arrived_detail" element={<DetailBoard sign={'in'} />} />
+            <Route path="/signout_detail" element={<DetailBoard sign={'out'} />} />
+            <Route path="/OAR_detail" element={<DetailBoard sign={'oar'} />} />
             <Route path="/details" element={<ArrivedDetails />} />
-            {/* <Route path="/arrived" element={<ArrivedDetails />} /> */}
+            <Route path="/emergency_detail" element={<DetailBoard sign={'emergencyRoom'} />} />
+
           </Routes>
         </Router>
       </DataContext.Provider>

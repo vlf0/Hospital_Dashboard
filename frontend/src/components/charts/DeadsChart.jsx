@@ -14,8 +14,8 @@ Chart.register(AnnotationPlugin);
 Chart.register(ChartDataLabels);
 
 
-Chart.defaults.font.size = 12;
-Chart.defaults.color = '#090b1f';  
+Chart.defaults.font.size = 18;
+Chart.defaults.color = '#001a3f';  
 
 
 const DeadsChart = () => {
@@ -32,8 +32,8 @@ const DeadsChart = () => {
             {
               label: 'total',
               data: mappedData,
-              backgroundColor: ['#212e93b3'],
-              borderColor: '#090b1f',
+              backgroundColor: ['#1a2a56'],
+              borderColor: '#e9306a',
               borderWidth: 1,
             },
         ],
@@ -52,7 +52,12 @@ const DeadsChart = () => {
                 ticks: {
 
                     beginAtZero: true,
-                    color: '#090b1f',    
+                    color: '#090b1f', 
+                    font: {
+                        weight: 'bold',
+                        family: 'nbold',
+                        size: 20
+                    },   
                 },
             },
             y: {
@@ -63,7 +68,11 @@ const DeadsChart = () => {
                   },
              
                 ticks: {
-                    font: {weight: 'bold'},
+                    font: {
+                        weight: 'bold',
+                        family: 'nbold',
+                        size: 20
+                    },
                 },
             },
         },
@@ -73,15 +82,16 @@ const DeadsChart = () => {
                 display: true,
                 labels: {
                     title: {
-                        color: 'black',
+                        color: '#001a3f',
                         font: {
-                          size: 13,
+                          size: 25,
+                          family: 'nbold'
                         },
                         anchor: 'end',
                         align: 'end',
                         formatter: (title, context) => {
                             if (context.dataset.data[context.dataIndex] === null) {
-                              return 'N/A';
+                              return 'Н/Д';
                             }
                             return title; // Use the default title if the value is not null
                           },
@@ -94,9 +104,10 @@ const DeadsChart = () => {
             title: {
                 display: true,
                 text: 'Динамика умерших за неделю',
-                color: '#090b1f',
+                color: '#001a3f',
                 font: {
-                    size: 13
+                    size: 30,
+                    family: 'nbold'
                 },
                 padding: {
                     bottom: 30,

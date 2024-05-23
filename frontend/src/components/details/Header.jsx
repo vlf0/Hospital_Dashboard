@@ -6,8 +6,10 @@ const Header = ({textHeader, date}) => {
 
   return (
     <>
-    <p className='main_header'> {textHeader}</p>
-    <span className='now_date'> по состоянию на {date}</span>
+    <div className='main_header'> 
+      {textHeader} 
+      <span className='now_date'> по состоянию на {date}</span>
+    </div>
     </>
   );
 };

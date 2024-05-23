@@ -1,0 +1,33 @@
+.emergency_detail_block {
+  width: -webkit-fill-available;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  position: relative;
+  height: max-content;
+  padding: 10px;
+  margin: 10px;
+  justify-content: space-around;
+}
+
+.refuse_detail_block {
+  width: -webkit-fill-available;
+  display: flex;
+  flex-direction: column;
+  margin-right: 5px;
+}
+
+.wait_detail_block {
+  width: -webkit-fill-available;
+  display: flex;
+  flex-direction: column;
+  margin-left: 5px;
+}
+
+.theLine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px; 
+  background-color: black;
+}

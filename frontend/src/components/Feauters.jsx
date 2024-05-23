@@ -74,8 +74,50 @@ export function ensureArrayLength(array, desiredLength) {
   }
 };
 
+export function RefuseDetailTableProcess(dataset) {
+
+  const modifiedObjects = dataset.map(item => {
+    return {
+      'ФИО пациента': item.pat_fio,
+      '№ ИБ': item.ib_num,
+      'ФИО врача': item.doc_fio,
+      'Диагноз': item.diag,
+      'Причина отказа': item.refuse_reason,
+      'Дата отказа': DateFormatting(item.refuse_date)
+    };
+  });  
+  
+  return modifiedObjects;
+};
+
+export function TotalRefuseTableProcess(dataset) {
+
+  const modifiedObjects = dataset.map(item => {
+    return {
+      'ФИО врача': item.doc_fio,
+      'кол-во отказов': item.refuses_amount
+    };
+  });  
+  
+  return modifiedObjects;
+};
+
+export function EmergencyTableProcess(dataset) {
+
+  const modifiedObjects = dataset.map(item => {
+    return {
+      'ФИО пациента': item.pat_fio,
+      '№ ИБ': item.ib_num,
+      'Отделение': item.dept,
+      'Время ожидания': item.waiting_time,
+      'ФИО врача': item.doc_fio
+    };
+  });  
+  
+  return modifiedObjects;
+};
+
 export function DeadTableProcess(dataset) {
-  console.log(dataset)
   // Using map to transform each item in the dataset
   const modifiedObjects = dataset.map(item => {
     return {
@@ -87,12 +129,12 @@ export function DeadTableProcess(dataset) {
       'Дата поступления': DateFormatting(item.arriving_dt),
       'Состояние при поступлении': item.state,
       'Кол-во койко дней': item.days,
-      'Дигноз при поступлении': item.diag_arr,
-      'Дигноз при выписке': item.diag_dead
+      'Диaгноз при поступлении': item.diag_arr,
+      'Диaгноз при выписке': item.diag_dead,
+      'Лечащий врач': item.doc_fio
     };
   });
 
-  // Returning the array of modified objects
   return modifiedObjects;
 };
 
@@ -172,31 +214,37 @@ export function DeadsOarTable(dataset) {
 
 
 export function GetNameOfDay(dateString) {
-  return ['Вск', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб']
+  return ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб']
   [new Date(dateString).getDay()];
 }
 
 
-
-export function getYesterdayDate() {
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-  return yesterday
-}
-
-
-
 export function getMainDMK(dmkData, day) {
 
-  let mainDMK;
-  const index = dmkData.findIndex(item => item.dates === formatDate(day));
-
-  if (index !== -1) {
-    mainDMK = dmkData[index];
-  } else {
-    mainDMK = { dates: formatDate(day), arrived: null, hosp: null, refused: null,
-                signout: null, deads: null, reanimation: null };
-  }
+    let today = new Date();
+    let yesterday = new Date();
+    yesterday.setDate(today.getDate() - 1)
   
-  return mainDMK;
+    const currentTime = today.toLocaleTimeString();
+    const currentHour = currentTime.split(':')[0];
+  
+    if (day === 'yesterday') {
+      today.setDate(today.getDate() - 1);
+      yesterday.setDate(yesterday.getDate() - 1);
+    } 
+  
+    let formattedDate;
+    currentHour >= 6 ? formattedDate = formatDate(today) : formattedDate = formatDate(yesterday);
+  
+    let mainDMK;
+    const index = dmkData.findIndex(item => item.dates === formattedDate);
+  
+    if (index !== -1) {
+      mainDMK = dmkData[index];
+    } else {
+      mainDMK = { dates: formattedDate, arrived: null, hosp: null, refused: null,
+                  signout: null, deads: null, reanimation: null };
+    }
+    
+    return mainDMK;
 }

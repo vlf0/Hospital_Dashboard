@@ -7,7 +7,7 @@ ENV PYTHONUNBUFFERED 1
 ENV PYTHONDONTWRITEBYTECODE 1
 
 # Creating working directory
-WORKDIR /usr/src/Dashboard
+WORKDIR /usr/src/Dashboard/backend
 
 COPY . .
 

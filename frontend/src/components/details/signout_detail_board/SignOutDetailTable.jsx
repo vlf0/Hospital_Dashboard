@@ -7,7 +7,7 @@ import './signout_table.css';
 
 const deadsColumns = ['ФИО', '№ ИБ', 'Пол', 'Возраст', 'Отделение', 'Дата поступления',
                       'Состояние при поступлении', 'Кол-во койко дней',
-                      'Дигноз при поступлении', 'Дигноз при выписке']
+                      'Диагноз при поступлении', 'Диагноз при выписке', 'Лечащий врач']
 
 const SignOutDetailTable = () => {
   let kisDeads = useContext(DataContext).kis;
@@ -37,7 +37,7 @@ const SignOutDetailTable = () => {
   return (
     <div className='deads-table-container'>
       <h2 className='detail_block_header'> Детализация по умершим </h2>
-      <table className='deads-table' {...getTableProps()} >
+      <table className='table' {...getTableProps()} >
         <thead>
           {headerGroups.map(headerGroup => (
             <tr {...headerGroup.getHeaderGroupProps()}>

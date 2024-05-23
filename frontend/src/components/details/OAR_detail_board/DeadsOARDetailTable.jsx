@@ -7,8 +7,8 @@ import '../signout_detail_board/signout_table.css';
 
 
 const oarDeadsColumns = ['ФИО', '№ ИБ', 'Пол', 'Возраст', 'Дата поступления',
-                      'Состояние при поступлении', 'Кол-во койко дней',
-                      'Дигноз при поступлении', 'Дигноз при выписке']
+                         'Состояние при поступлении', 'Кол-во койко дней',
+                         'Диaгноз при поступлении', 'Диaгноз при выписке']
 
 
 const DeadsOARDetailTable = ({ departament }) => {
@@ -53,7 +53,7 @@ const DeadsOARDetailTable = ({ departament }) => {
   return (
     <div className='deads-table-container'>
       <h2 className='detail_block_header'> Детализация по отделению </h2>
-      <table className='deads-table' {...getTableProps()} >
+      <table className='table' {...getTableProps()} >
         <thead>
           {headerGroups.map(headerGroup => (
             <tr {...headerGroup.getHeaderGroupProps()}>

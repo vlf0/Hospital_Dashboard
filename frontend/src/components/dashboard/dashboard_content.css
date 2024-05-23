@@ -1,11 +1,13 @@
 .board-cards {
   display: flex;
-  flex-direction: column;
+  justify-content: space-around;
+  flex-direction: row;
   position: relative;
   height: -webkit-fill-available;
-  box-shadow: 4px 13px 20px 0px #434343;
-  background: linear-gradient(358deg, #818181, #939393);
-  border: 1px solid #1e2630a1;
+  box-shadow: 4px 13px 20px 0px #001a3f;
+  /*background: linear-gradient(358deg, #818181, #939393);*/
+  background: #b2b7c6;
+  border: 1px solid #001a3f;
   border-radius: 5px;
   margin: 15px;
   margin-top: 0;
@@ -23,9 +25,10 @@
   flex-direction: row;
   position: relative;
   height: -webkit-fill-available;
-  /* box-shadow: 4px 13px 20px 0px #434343;
-  background: linear-gradient(358deg, #598593, #939393);
-  border: 1px solid #1e2630a1; */
+  box-shadow: 4px 13px 20px 0px #001a3f;
+  /*background: linear-gradient(358deg, #598593, #939393);*/
+  background: #b2b7c6;
+  border: 1px solid #1e2630a1;
   border-radius: 5px;
   margin: 15px;
   margin-top: 0;
