@@ -21,7 +21,8 @@ class Cacher:
 
         Retrieves main DMK data from the database, serializes it, and stores it in the cache.
         """
-        main_dmk = MainDataSerializer(MainData.objects.custom_filter(), many=True).data
+        queryset = MainData.objects.custom_filter().select_related('maindatadetails')
+        main_dmk = MainDataSerializer(queryset, many=True).data
         accum_dmk = DMKManager.collect_model()
         dmk = {'main_dmk': main_dmk, 'accum_dmk': accum_dmk}
         cache.set('dmk', dmk)

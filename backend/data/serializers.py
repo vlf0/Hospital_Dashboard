@@ -1,14 +1,27 @@
 """Responsible for serializers."""
 from rest_framework import serializers
-from .models import MainData, AccumulationOfIncoming, Profiles
+from .models import MainData, AccumulationOfIncoming, Profiles, MainDataDetails
+
+
+class MainDataDetailsSerializer(serializers.ModelSerializer):
+
+    maindata_id = serializers.PrimaryKeyRelatedField(source='maindata',
+                                                     queryset=MainData.objects.all(),
+                                                     write_only=True)
+
+    class Meta:
+        model = MainDataDetails
+        fields = ['maindata_id', 'registered_patients']
 
 
 class MainDataSerializer(serializers.ModelSerializer):
     """Serialize data of MainData model."""
 
+    detailing = MainDataDetailsSerializer(source='maindatadetails', read_only=True)
+
     class Meta:
         model = MainData
-        fields = ['dates', 'arrived', 'hosp', 'refused', 'signout', 'deads', 'reanimation']
+        fields = ['dates', 'arrived', 'hosp', 'refused', 'signout', 'deads', 'reanimation', 'detailing']
 
 
 class ProfilesSerializer(serializers.ModelSerializer):

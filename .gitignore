@@ -3,7 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 config_data.txt
-settings_prod.py
+settings_local.py
+settings_docker.py
+initial_script.py
 # all python files in the root dir
 /*.py
 # C extensions
@@ -15,6 +17,8 @@ settings_prod.py
 # My dirs
 KIS_queries/
 envs/
+feauters/
+postgres/data/
 
 # Distribution / packaging
 .Python

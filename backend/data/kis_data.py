@@ -10,16 +10,18 @@ from django.db.utils import IntegrityError
 from django.db.models import Sum
 from .psycopg_module import BaseConnectionDB
 from .sql_queries import QuerySets, EmergencyQueries
+from .models import Profiles, MainData, AccumulationOfIncoming, MainDataDetails
 from .serializers import (
-     KISDataSerializer,
-     KISTableSerializer,
-     MainDataSerializer,
-     AccumulativeDataSerializerSave,
-     ProfilesSerializer,
-     EmergencyDataSerializer,
-     EmergencyDetailDataSerializer
+    KISDataSerializer,
+    KISTableSerializer,
+    MainDataSerializer,
+    MainDataDetailsSerializer,
+    AccumulativeDataSerializerSave,
+    ProfilesSerializer,
+    EmergencyDataSerializer,
+    EmergencyDetailDataSerializer
 )
-from .models import Profiles, MainData, AccumulationOfIncoming
+
 
 KIS_DB = settings.DATABASES.get('kis_db')
 logger = logging.getLogger('data.kis_data.DataForDMK')
@@ -163,13 +165,9 @@ class DataProcessing:
         :type mapping: dict[str, str]
         :return: *list*: List of list - first it is column names, second is calculated amount of patients.
         """
-        # Creating 1 row inside dataset instead many.
         stacked_tuples_dataset = [tuple(chain.from_iterable(map(tuple, dataset)))]
-        # Getting column names from stacked tuple of KIS data.
         ru_columns = list(stacked_tuples_dataset[0][::2])
-        # Creating en columns for matching to KIS serializer fields.
         en_columns = [mapping[column] for column in ru_columns]
-        # Created dataset manually as list.
         counted_pats = list(stacked_tuples_dataset[0][1::2])
         return [en_columns, counted_pats]
 
@@ -215,6 +213,7 @@ class DataForDMK(DataProcessing):
 
     qs = QuerySets
     dmk_cols = qs.DMK_COLUMNS
+    details_cols = qs.DMK_DETAILS_COLUMNS
 
     def __init__(self, kisdata_obj):
         """
@@ -246,15 +245,27 @@ class DataForDMK(DataProcessing):
             return [total_amount, positive_amount]
         return [total_amount, positive_amount, negative_amount]
 
-    def get_arrived_data(self, arrived_dataset) -> dict:
+    def get_arrived_data(self, arrived_dataset) -> tuple:
         """
-        Get data related to arrivals, hosp and refused patients.
+        Get main data related to arrivals, hosp and refused patients and their details.
 
-        :return: *dict*: Dictionary containing arrived, hospitalized, and refused data.
+        :param arrived_dataset: *list*: The dataset to count.
         """
-        result_keys = self.dmk_cols[0:3]
-        ready_values = self.count_data(arrived_dataset, 0, 1)
-        return dict(zip(result_keys, ready_values))
+        registered_pats = self.filter_dataset(arrived_dataset, 3, 'ЗЛ')
+        registered_pats_amount = self.count_dataset_total(registered_pats)
+        details_dict = {'registered_patients': registered_pats_amount}
+
+        def get_main_arrived(dataset=arrived_dataset) -> dict:
+            """
+            Get main data related to arrivals, hosp and refused patients.
+
+            :return: *dict*: Dictionary containing arrived, hospitalized, and refused data.
+            """
+            result_keys = self.dmk_cols[0:3]
+            ready_values = self.count_data(dataset, 0, 1)
+            main_arrived = dict(zip(result_keys, ready_values))
+            return main_arrived
+        return get_main_arrived, details_dict
 
     def get_signout_data(self, signout_dataset) -> dict:
         """
@@ -316,20 +327,25 @@ class DataForDMK(DataProcessing):
         """
         if self.kisdata_obj.db_conn.conn is None:
             main_data = {i: None for i in self.dmk_cols}
+            details_arrived = {i: None for i in self.details_cols}
             dh_dataset = None
         else:
             gen = self.kisdata_obj.get_data_generator()
-            arrived = self.get_arrived_data(next(gen))
+            main_arrived_func, details_arrived = self.get_arrived_data(next(gen))
+            main_arrived = main_arrived_func()
             signout = self.get_signout_data(next(gen))
             deads = self.get_reanimation_data(next(gen))
             dh_dataset = self.get_dept_hosps(next(gen))
-            main_data = arrived | signout | deads
+            main_data = main_arrived | signout | deads
         # Add dates key-value pair to collected data dict.
         today_dict = {'dates': today()}
         if chosen_date is not None:
             today_dict = {'dates': chosen_date}
         ready_main_data = today_dict | main_data
-        return {'main_data': ready_main_data, 'accum_data': dh_dataset}
+        result_dict = {'main_data': ready_main_data,
+                       'main_details_data': details_arrived,
+                       'accum_data': dh_dataset}
+        return result_dict
 
     @staticmethod
     def __check_data(data: list[dict]) -> None:
@@ -385,9 +401,11 @@ class DataForDMK(DataProcessing):
         common_dict = self.collect_data(chosen_date)
         main = common_dict['main_data']
         accum = common_dict['accum_data']
+        main_details = common_dict['main_details_data']
         main_res = self.save_main(main)
+        main_details_res = self.save_details_data(main_details)
         accum_res = self.save_accumulated(accum)
-        return [main_res, accum_res]
+        return [main_res, main_details_res, accum_res]
 
     def save_main(self, main_data: dict) -> Union[MainData, None]:
         """
@@ -400,14 +418,29 @@ class DataForDMK(DataProcessing):
         main_sr = MainDataSerializer(data=main_data)
         try:
             main_sr.is_valid(raise_exception=True)
-            main_sr.save()
-            return main_sr.save()
+            saved_instance = main_sr.save()
+            return saved_instance
+        except (ValidationError, SyntaxError, AssertionError, IntegrityError) as e:
+            en_error = self.__translate(e)
+            logger.error(en_error)
+
+    def save_details_data(self, details_data: dict) -> Union[MainDataDetails, None]:
+        last_maindata = MainData.objects.last()
+        maindata_id = last_maindata.id
+        details_data.update({'maindata_id': maindata_id})
+        # ready_dict = {'maindata_id': maindata_id} | details_data
+        # print(ready_dict)
+        main_details_sr = MainDataDetailsSerializer(data=details_data)
+        try:
+            main_details_sr.is_valid(raise_exception=True)
+            saved_instance = main_details_sr.save()
+            return saved_instance
         except (ValidationError, SyntaxError, AssertionError, IntegrityError) as e:
             en_error = self.__translate(e)
             logger.error(en_error)
 
     @staticmethod
-    def save_accumulated(accum_data: dict)\
+    def save_accumulated(accum_data: dict) \
             -> Union[list, list[Union[MainData, Any], list[AccumulationOfIncoming]]]:
         """
         Iterate through given Serializer and save a few new model instances.
@@ -516,15 +549,10 @@ class KISDataProcessing(DataProcessing):
         :param arrived_dataset: Dataset from DB as a list of tuples.
         :return: Serialized data.
         """
-        # Defining columns for serializer and values for filtering datasets.
         columns, channels, statuses = self.qs.COLUMNS['arrived'], self.qs.channels, self.qs.statuses
-        # Getting first dataset by generator.
         hosp_data = self.filter_dataset(arrived_dataset, 0, 1)
-        # Calculating channels numbers.
         sorted_channels_datasets = self.__count_values(hosp_data, 2, channels)
-        # Calculating patients statuses.
         sorted_statuses_datasets = self.__count_values(hosp_data, -1, statuses)
-        # Creating 1 row data in dataset.
         summary_dataset = [tuple(sorted_channels_datasets+sorted_statuses_datasets)]
         ready_dataset = self.__result_for_sr(columns, summary_dataset)
         return self.__serialize(ready_dataset)

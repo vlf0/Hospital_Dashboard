@@ -26,6 +26,16 @@ class MainData(models.Model):
         ]
 
 
+class MainDataDetails(models.Model):
+    """
+    Represent table with detailing of main data.
+
+    Using for potential adding new fields related to details of some field from MaiData model.
+    """
+    maindata = models.OneToOneField(MainData, on_delete=models.CASCADE, primary_key=True)
+    registered_patients = models.IntegerField()
+
+
 class Profiles(models.Model):
 
     profile_id = models.IntegerField(primary_key=True)
@@ -79,4 +89,3 @@ class PlanNumbers(models.Model):
 
     def __str__(self):
         return f'Profile_id: {self.profile.profile_id}, Профиль: {self.profile.name}, Текущий план: {self.plan}'
-
