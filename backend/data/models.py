@@ -89,3 +89,17 @@ class PlanNumbers(models.Model):
 
     def __str__(self):
         return f'Profile_id: {self.profile.profile_id}, Профиль: {self.profile.name}, Текущий план: {self.plan}'
+
+
+class ChartPlans(models.Model):
+    """Represent table containing values of plans for main charts."""
+
+    chart_name = models.CharField(max_length=25, null=False)
+    plan_value = models.IntegerField()
+
+    class Meta:
+        verbose_name = 'План'
+        verbose_name_plural = 'Планы по пациентам'
+        ordering = ['chart_name']
+
+

@@ -32,9 +32,10 @@ export function CustomMap(currentDay, yesterday, branch) {
 
 
 export function Persents(today, yesterday) {
-
-    let percent = ((today-yesterday)/yesterday*100).toFixed(1)
-    percent = percent.toString() + '%'
+    const result = today-yesterday;
+    yesterday = (yesterday === 0) ? today : yesterday;
+    let percent = (result/yesterday*100).toFixed(1);
+    percent = percent.toString() + '%';
     percent = percent.replace('-', '');
     return percent
 };
@@ -51,7 +52,12 @@ export const extractProperties = (dataList, propertyKey) => {
 
 
 export const extractDetailsProperties = (dataList, propertyKey) => {
-  return dataList.map(item => ({ dates: item.dates, [propertyKey]: item[propertyKey]['registered_patients'] }));
+  return dataList.map(item => {
+    const propertyValue = item[propertyKey];
+    const registeredPatients = propertyValue && propertyValue['registered_patients'] ? propertyValue['registered_patients'] : null;
+    
+    return { dates: item.dates, [propertyKey]: registeredPatients };
+  });
 };
 
 

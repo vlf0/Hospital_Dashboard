@@ -7,8 +7,8 @@ from .kis_data import (
     KISDataProcessing,
     EmergencyDataProcessing,
     DMKManager)
-from .serializers import MainDataSerializer
-from .models import MainData
+from .serializers import MainDataSerializer, ChartPlansSerializer
+from .models import MainData, ChartPlans
 
 
 class Cacher:
@@ -21,10 +21,12 @@ class Cacher:
 
         Retrieves main DMK data from the database, serializes it, and stores it in the cache.
         """
-        queryset = MainData.objects.custom_filter().select_related('maindatadetails')
-        main_dmk = MainDataSerializer(queryset, many=True).data
+        main_queryset = MainData.objects.custom_filter().select_related('maindatadetails')
+        plans_queryset = ChartPlans.objects.all()
+        main_dmk = MainDataSerializer(main_queryset, many=True).data
+        plans_dmk = ChartPlansSerializer(plans_queryset, many=True).data
         accum_dmk = DMKManager.collect_model()
-        dmk = {'main_dmk': main_dmk, 'accum_dmk': accum_dmk}
+        dmk = {'main_dmk': main_dmk, 'plans_dmk': plans_dmk, 'accum_dmk': accum_dmk}
         cache.set('dmk', dmk)
 
     @staticmethod

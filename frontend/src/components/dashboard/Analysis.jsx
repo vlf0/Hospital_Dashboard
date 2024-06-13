@@ -1,4 +1,5 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState  } from 'react';
+import { mainSocket } from '../../';
 import { useSpring, animated } from 'react-spring';
 import ArrivedChart from '../charts/ArrivedChart';
 import SignOutChart from '../charts/SignOutChart';
@@ -9,8 +10,8 @@ import DataContext from '../DataContext';
 import { CustomMap } from '../Feauters';
 import { currentDatetime } from '../Feauters';
 import { getMainDMK } from '../Feauters';
-import "../parent.css" 
-import './dashboard_content.css'
+import '../parent.css';
+import './dashboard_content.css';
 
 
 function GetAnalysis() {
@@ -33,6 +34,29 @@ function GetAnalysis() {
   const deads = CustomMap(currentDay, yesterday, 'deads')
   const reanimation = CustomMap(currentDay, yesterday, 'reanimation')
 
+  const [reload, setReload] = useState(false);
+
+  const fetchDataFromApi = async () => {
+    try {
+      const response = await fetch('http://localhost:8000/api/v1/main_data/');
+      const newData = await response.json();
+
+      // Update sessionStorage with the new data
+      sessionStorage.setItem('main_data', JSON.stringify(newData));
+
+      // Trigger re-render by toggling the reload state
+      setReload(prevReload => !prevReload);
+    } catch (error) {
+      console.error('Error fetching new data:', error);
+    }
+  };
+
+  useEffect(() => {
+    mainSocket.onmessage = () => {
+      fetchDataFromApi();
+    };
+  }, [reload]);
+
   return (
     <> 
 
@@ -52,7 +76,7 @@ function GetAnalysis() {
           </div>
         </div>
         <div className='board-charts'>
-          <ArrivedChart />
+          <ArrivedChart key={reload}/>
           <SignOutChart /> 
           <DeadsChart />
         </div>

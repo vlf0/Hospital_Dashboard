@@ -2,11 +2,10 @@ from django.contrib import messages
 from django.urls import reverse
 from django.contrib import admin
 from django.shortcuts import redirect
-from .models import Profiles, PlanNumbers
+from .models import Profiles, PlanNumbers, ChartPlans
 from .caching import Cacher
 from .consumers import trigger_notification
-from .forms import KISProfileChosingForm, QuerySets
-from .kis_data import KISData
+from .forms import KISProfileChosingForm
 from django_celery_beat.models import (
     IntervalSchedule,
     CrontabSchedule,
@@ -46,7 +45,7 @@ class ProfilesAdmin(admin.ModelAdmin):
         return super().add_view(request, form_url, extra_context=extra_context)
 
     def save_model(self, request, obj, form, change) -> None:
-        """Override method so that perform renewing data in cache."""
+        """Override method so that perform renewing data in cache and re-render responsible react component."""
         obj_id, obj_name = request.POST.get('id'), request.POST.get('name')
         change_url = reverse('admin:data_profiles_change', args=(obj_id,))
         method_type = request.path.split('/')[-2]
@@ -83,7 +82,7 @@ class ProfilesAdmin(admin.ModelAdmin):
 class PlanNumbersAdmin(admin.ModelAdmin):
 
     def save_model(self, request, obj, form, change) -> None:
-        """Override method so that perform renewing data in cache."""
+        """Override method so that perform renewing data in cache and re-render responsible react component."""
         super().save_model(request, obj, form, change)
         Cacher().dmk_cache()
         trigger_notification()
@@ -94,5 +93,15 @@ class PlanNumbersAdmin(admin.ModelAdmin):
         trigger_notification()
 
 
+class ChartPlansAdmin(admin.ModelAdmin):
+
+    def save_model(self, request, obj, form, change) -> None:
+        """Override method so that perform renewing data in cache and re-render responsible react component."""
+        super().save_model(request, obj, form, change)
+        Cacher().dmk_cache()
+        trigger_notification()
+
+
 admin.site.register(Profiles, ProfilesAdmin)
 admin.site.register(PlanNumbers, PlanNumbersAdmin)
+admin.site.register(ChartPlans, ChartPlansAdmin)

@@ -15,6 +15,10 @@ import "./arrived_chart.css";
 Chart.register(AnnotationPlugin);
 Chart.register(ChartDataLabels);
 
+// const first = [9, 35, 9, 15, 9, 9, 9]
+// const second = [15, 55, 35, 9, 9, 9, 9]
+// const maind = [20, 100, 35, 18, 18, 18, 18]
+
 
 const ArrivedChart = () => {
     
@@ -28,10 +32,12 @@ const ArrivedChart = () => {
       }
     };
 
+    let arrivedPlanValue = sessionStorage.getItem('main_data');
+    arrivedPlanValue = JSON.parse(arrivedPlanValue)
+    arrivedPlanValue = arrivedPlanValue.dmk.plans_dmk[0].plan_value
 
-    const planValue = 15;
-
-    const dmk_charts = useContext(DataContext).dmk.main_dmk;
+    const dmkData = useContext(DataContext).dmk
+    const dmk_charts = dmkData.main_dmk;
     const mainPairValues = extractProperties(dmk_charts, 'arrived');
     const detailsPairValues = extractDetailsProperties(dmk_charts, 'detailing')
 
@@ -41,6 +47,14 @@ const ArrivedChart = () => {
 
     const mappedWeek = GetWeekDays();
     const barOptions = GetDates();
+
+    let dynamicPadding = 0;
+    if (mappedDetailsData.every(value => value >= 8)) {
+      if (mappedDetailsData.every(value => value >= 4)) {
+        dynamicPadding = 20;
+      } else {dynamicPadding = 14;}
+      dynamicPadding = 0;
+    }
 
     const dataWithDates = mappedWeek.map((weekDay, index) => ({
       label: weekDay,
@@ -66,7 +80,7 @@ const ArrivedChart = () => {
                           size: 25,
                           family:'nbold'
                           },
-                        anchor: 'center',
+                        // anchor: 'start',
                         align: 'center',
                           formatter: (title, context) => {
                             if (context.dataset.data[context.dataIndex] === null) {
@@ -80,21 +94,22 @@ const ArrivedChart = () => {
                             if (context.dataset.data[context.dataIndex] === null) {
                                 return '';
                             }
-                            const percernts = ((title / planValue  * 100) - 100).toFixed(1);
+                            const percernts = ((title / arrivedPlanValue  * 100) - 100).toFixed(1);
                             const color = percernts < 0 ? '#e9306a' : 'blue';
 
                             return '\t' + percernts+'%';
                         },
-                        anchor: 'start',
-                        align: 'end',
+                        // anchor: 'center',
+                        align: 'start',
+                        padding: 8,
                         font: {
-                          size: 20,
+                          size: 19,
                           weight: 'bold',
                           family: 'nbold'
                           },
                         color: (context) => {
                           const value = context.dataset.data[context.dataIndex];
-                          const percent = ((value / planValue) * 100 - 100).toFixed(1);
+                          const percent = ((value / arrivedPlanValue) * 100 - 100).toFixed(1);
   
                           return percent < 0 ? '#e9306a' : '#25c445';
                         },
@@ -148,6 +163,7 @@ const ArrivedChart = () => {
                   drawTicks: true
                 },
                 ticks: {
+                    padding: dynamicPadding,
                     beginAtZero: true,
                     color: '#090b1f',  
                     font: {
@@ -164,18 +180,17 @@ const ArrivedChart = () => {
                 },
                 ticks: {
                     color: (context) => {
-                        if (context.tick.value === planValue) {
-                            return '#860000'; // Customize the color of the custom grid lines
+                        if (context.tick.value === arrivedPlanValue) {
+                            return '#860000';
                         } else {
-                            return '#001a3f'; // Default tick color
+                            return '#001a3f'; 
                         }
                     },
                     callback: (value, index, values) => {
-                        // Customize the tick value
-                        if (value === planValue) {
-                            return `план ${planValue}`; // Change the tick label for the value 60
+                        if (value === arrivedPlanValue) {
+                            return `план ${arrivedPlanValue}`; 
                         } else {
-                            return value; // Use the default tick label for other values
+                            return value; 
                         }
                     },
                     font: {
@@ -191,8 +206,8 @@ const ArrivedChart = () => {
                     annotations: {
                       line1: {
                         type: 'line',
-                        yMin: planValue,
-                        yMax: planValue,
+                        yMin: arrivedPlanValue,
+                        yMax: arrivedPlanValue,
                         borderColor: '#e9306a',
                         borderWidth: 2,
                       },
@@ -211,7 +226,7 @@ const ArrivedChart = () => {
                     
             },                
             padding: {
-              bottom: 30,
+              bottom: 40,
             }
             },
         },
