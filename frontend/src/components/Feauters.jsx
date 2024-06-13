@@ -50,6 +50,11 @@ export const extractProperties = (dataList, propertyKey) => {
 };
 
 
+export const extractDetailsProperties = (dataList, propertyKey) => {
+  return dataList.map(item => ({ dates: item.dates, [propertyKey]: item[propertyKey]['registered_patients'] }));
+};
+
+
 export function mapArrivedValues(data, dateArray, propertyKey) {
   const result = Array(dateArray.length).fill(null);
 

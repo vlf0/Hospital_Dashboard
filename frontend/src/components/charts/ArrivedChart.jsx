@@ -8,6 +8,7 @@ import DataContext from '../DataContext';
 import GetWeekDays from '../dates/DatesFormat';
 import { mapArrivedValues } from '../Feauters';
 import { extractProperties } from '../Feauters';
+import { extractDetailsProperties } from '../Feauters';
 import { GetDates } from '../dates/DatesFormat';
 import "./arrived_chart.css";
 
@@ -28,11 +29,15 @@ const ArrivedChart = () => {
     };
 
 
-    const planValue = 135;
+    const planValue = 15;
 
     const dmk_charts = useContext(DataContext).dmk.main_dmk;
-    const pairValues = extractProperties(dmk_charts, 'arrived');
-    const mappedData = mapArrivedValues(pairValues, GetDates(), 'arrived');
+    const mainPairValues = extractProperties(dmk_charts, 'arrived');
+    const detailsPairValues = extractDetailsProperties(dmk_charts, 'detailing')
+
+    const mappedMainData = mapArrivedValues(mainPairValues, GetDates(), 'arrived');
+    const mappedDetailsData = mapArrivedValues(detailsPairValues, GetDates(), 'detailing');
+    const otherPatients = mappedMainData.map((num, index) => num - mappedDetailsData[index]);
 
     const mappedWeek = GetWeekDays();
     const barOptions = GetDates();
@@ -46,12 +51,87 @@ const ArrivedChart = () => {
         labels: mappedWeek,
         datasets: [
             {
-              label: 'total',
-              data: mappedData,
+              label: 'Зарегистрированные',
+              data: mappedDetailsData,
+              backgroundColor: ['#267cab'],
+              borderColor: '#e9306a',
+              borderWidth: 1,
+              srtDates: dataWithDates,
+              datalabels: {
+                display: true,
+                labels: {
+                    title: {
+                        color: '#001a3f',
+                        font: {
+                          size: 25,
+                          family:'nbold'
+                          },
+                        anchor: 'center',
+                        align: 'center',
+                          formatter: (title, context) => {
+                            if (context.dataset.data[context.dataIndex] === null) {
+                              return 'Н/Д';
+                            }
+                            return title; 
+                          },
+                    },
+                    value: {
+                        formatter: (title, context) => {
+                            if (context.dataset.data[context.dataIndex] === null) {
+                                return '';
+                            }
+                            const percernts = ((title / planValue  * 100) - 100).toFixed(1);
+                            const color = percernts < 0 ? '#e9306a' : 'blue';
+
+                            return '\t' + percernts+'%';
+                        },
+                        anchor: 'start',
+                        align: 'end',
+                        font: {
+                          size: 20,
+                          weight: 'bold',
+                          family: 'nbold'
+                          },
+                        color: (context) => {
+                          const value = context.dataset.data[context.dataIndex];
+                          const percent = ((value / planValue) * 100 - 100).toFixed(1);
+  
+                          return percent < 0 ? '#e9306a' : '#25c445';
+                        },
+                    },
+                },
+
+            },
+            },
+            {
+              label: 'Всего',
+              data: otherPatients,
               backgroundColor: ['#1a2a56'],
               borderColor: '#e9306a',
               borderWidth: 1,
-              srtDates: dataWithDates
+              srtDates: dataWithDates,
+              datalabels: {
+                display: true,
+                labels: {
+                    title: {
+                        color: '#001a3f',
+                        font: {
+                          size: 25,
+                          family:'nbold'
+                          },
+                        anchor: 'end',
+                        align: 'end',
+                        formatter: (title, context) => {
+                          if (context.dataset.data[context.dataIndex] === null) {
+                              return 'Н/Д';
+                          }
+                          // Use value from mappedMainData
+                          const mainDataValue = mappedMainData[context.dataIndex];
+                          return mainDataValue;
+                      },
+                    },
+                },
+            },
             },
         ],
     };
@@ -62,6 +142,7 @@ const ArrivedChart = () => {
         categoryPercentage: 0.9,
         scales: {
             x: {
+                stacked: true,
                 grid: { 
                   drawOnChartArea: false,
                   drawTicks: true
@@ -76,6 +157,7 @@ const ArrivedChart = () => {
                 },
             },
             y: {
+                stacked: true,
                 grid: {
                   drawOnChartArea: true,
                   drawTicks: true,
@@ -105,50 +187,6 @@ const ArrivedChart = () => {
             },
         },
         plugins: { 
-            datalabels: {
-                display: true,
-                labels: {
-                    title: {
-                        color: '#001a3f',
-                        font: {
-                          size: 25,
-                          family:'nbold'
-                          },
-                        anchor: 'end',
-                        align: 'end',
-                          formatter: (title, context) => {
-                            if (context.dataset.data[context.dataIndex] === null) {
-                              return 'Н/Д';
-                            }
-                            return title; // Use the default title if the value is not null
-                          },
-                    },
-                    value: {
-                        formatter: (title, context) => {
-                            if (context.dataset.data[context.dataIndex] === null) {
-                                return '';
-                            }
-                            const percernts = ((title / planValue  * 100) - 100).toFixed(1);
-                            const color = percernts < 0 ? '#e9306a' : 'blue';
-
-                            return '\t' + percernts+'%';
-                        },
-                        font: {
-                          size: 20,
-                          weight: 'bold',
-                          family: 'nbold'
-                          },
-                        color: (context) => {
-                          const value = context.dataset.data[context.dataIndex];
-                          const percent = ((value / planValue) * 100 - 100).toFixed(1);
-  
-                          return percent < 0 ? '#e9306a' : '#25c445';
-                        },
-                    },
-                },
-
-            },
-
             annotation: {
                     annotations: {
                       line1: {
