@@ -15,10 +15,6 @@ import "./arrived_chart.css";
 Chart.register(AnnotationPlugin);
 Chart.register(ChartDataLabels);
 
-// const first = [9, 35, 9, 15, 9, 9, 9]
-// const second = [15, 55, 35, 9, 9, 9, 9]
-// const maind = [20, 100, 35, 18, 18, 18, 18]
-
 
 const ArrivedChart = () => {
     
@@ -32,9 +28,12 @@ const ArrivedChart = () => {
       }
     };
 
-    let arrivedPlanValue = sessionStorage.getItem('main_data');
-    arrivedPlanValue = JSON.parse(arrivedPlanValue)
-    arrivedPlanValue = arrivedPlanValue.dmk.plans_dmk[0].plan_value
+    let arrivedPlanValue = 100;
+    let mainData = sessionStorage.getItem('main_data');
+    mainData = JSON.parse(mainData);
+    if (mainData.dmk.plans_dmk.length !== 0) {
+      arrivedPlanValue = mainData.dmk.plans_dmk[0].plan_value
+    }
 
     const dmkData = useContext(DataContext).dmk
     const dmk_charts = dmkData.main_dmk;
@@ -67,7 +66,7 @@ const ArrivedChart = () => {
             {
               label: 'Зарегистрированные',
               data: mappedDetailsData,
-              backgroundColor: ['#267cab'],
+              backgroundColor: ['#647fda'],
               borderColor: '#e9306a',
               borderWidth: 1,
               srtDates: dataWithDates,
@@ -94,8 +93,7 @@ const ArrivedChart = () => {
                             if (context.dataset.data[context.dataIndex] === null) {
                                 return '';
                             }
-                            const percernts = ((title / arrivedPlanValue  * 100) - 100).toFixed(1);
-                            const color = percernts < 0 ? '#e9306a' : 'blue';
+                            const percernts = (title / arrivedPlanValue  * 100).toFixed(1);
 
                             return '\t' + percernts+'%';
                         },
@@ -109,9 +107,9 @@ const ArrivedChart = () => {
                           },
                         color: (context) => {
                           const value = context.dataset.data[context.dataIndex];
-                          const percent = ((value / arrivedPlanValue) * 100 - 100).toFixed(1);
-  
-                          return percent < 0 ? '#e9306a' : '#25c445';
+                          const percent = ((value / arrivedPlanValue) * 100).toFixed(1);
+
+                          return percent < 100 ? '#e9306a' : '#25c445';
                         },
                     },
                 },
