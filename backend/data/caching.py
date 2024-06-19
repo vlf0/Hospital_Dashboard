@@ -3,9 +3,11 @@ from django.core.cache import cache
 from .kis_data import (
     QuerySets,
     EmergencyQueries,
+    PlanHospitalizationQueries,
     KISData,
     KISDataProcessing,
     EmergencyDataProcessing,
+    PlanHospitalizationDataProcessing,
     DMKManager)
 from .serializers import MainDataSerializer, ChartPlansSerializer
 from .models import MainData, ChartPlans
@@ -54,17 +56,6 @@ class Cacher:
         for row in common_dict.items():
             cache.set(f'{row[0]}', row[1])
 
-    def main_caching(self) -> None:
-        """
-        Cache main data.
-
-        Calls all static methods to set ready data to cache.
-        """
-        self.dmk_cache()
-        self.kis_cache()
-        self.week_kis_cache()
-        self.emergency_cache()
-
     @staticmethod
     def get_chosen_date_cache(request):
         kind = request.query_params.get('type', None)
@@ -74,8 +65,8 @@ class Cacher:
 
     @staticmethod
     def get_main_cache():
-        dmk, kis = cache.get('dmk'), cache.get('kis')
-        today_data = {'dmk': dmk, 'kis': kis}
+        dmk, kis, plan_hosp = cache.get('dmk'), cache.get('kis'),  cache.get('plan_hosp')
+        today_data = {'dmk': dmk, 'kis': kis, 'plan_hosp': plan_hosp}
         return today_data
 
     @staticmethod
@@ -90,3 +81,20 @@ class Cacher:
         emergency = cache.get('emergency')
         return emergency
 
+    @staticmethod
+    def plan_hosp_cache() -> None:
+        q = PlanHospitalizationQueries().get_plan_hosp_query()
+        plan_hosp = PlanHospitalizationDataProcessing(KISData(q)).get_results()
+        cache.set('plan_hosp', plan_hosp)
+
+    def main_caching(self) -> None:
+        """
+        Cache main data.
+
+        Calls all static methods to set ready data to cache.
+        """
+        self.dmk_cache()
+        self.kis_cache()
+        self.week_kis_cache()
+        self.emergency_cache()
+        self.plan_hosp_cache()

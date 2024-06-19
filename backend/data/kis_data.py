@@ -9,7 +9,7 @@ from django.conf import settings
 from django.db.utils import IntegrityError
 from django.db.models import Sum
 from .psycopg_module import BaseConnectionDB
-from .sql_queries import QuerySets, EmergencyQueries
+from .sql_queries import QuerySets, EmergencyQueries, PlanHospitalizationQueries
 from .models import Profiles, MainData, AccumulationOfIncoming, MainDataDetails
 from .serializers import (
     KISDataSerializer,
@@ -19,7 +19,8 @@ from .serializers import (
     AccumulativeDataSerializerSave,
     ProfilesSerializer,
     EmergencyDataSerializer,
-    EmergencyDetailDataSerializer
+    EmergencyDetailDataSerializer,
+    PlanHospSerializer
 )
 
 
@@ -715,6 +716,30 @@ class EmergencyDataProcessing(DataProcessing):
         total_refuses = self.get_total_refuses(next(gen))
         detail_refuses = self.get_detailed_refuses()
         result = {'waitings': waitings, 'total_refuses': total_refuses, 'detail_refuses': detail_refuses}
+        return result
+
+
+class PlanHospitalizationDataProcessing(DataProcessing):
+
+    ph = PlanHospitalizationQueries
+
+    def __init__(self, kisdata_obj):
+        super().__init__(kisdata_obj)
+
+    def get_plan_hosp(self, dataset: list[tuple]):
+        dates = sorted(set(obj[1] for obj in dataset if obj[0] == 1))
+        columns = tuple(['dept'] + [i.strftime('%a').lower() for i in dates] + ['other'])
+        depts = set(obj[2] for obj in dataset)
+        depts_dict = {dept: [row[3] for row in dataset if row[2] == dept] for dept in depts}
+        ready_to_clean_data = [tuple([i, *k]) for i, k in depts_dict.items()]
+        cleaned_dataset = self.create_instance(columns, ready_to_clean_data)
+        sr_data = PlanHospSerializer(cleaned_dataset, many=True).data
+        return sr_data
+
+    def get_results(self) -> dict:
+        gen = self.kisdata_obj.get_data_generator()
+        plan_hosp = self.get_plan_hosp(next(gen))
+        result = plan_hosp
         return result
 
 

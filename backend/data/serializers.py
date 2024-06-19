@@ -151,3 +151,15 @@ class EmergencyDetailDataSerializer(EmergencyDataSerializer, KISTableSerializer)
     refuse_date = serializers.DateTimeField(read_only=True)
     waiting_time = serializers.TimeField(read_only=True)
 
+
+class PlanHospSerializer(serializers.Serializer):
+
+    dept = serializers.CharField(read_only=True)
+    mon = serializers.IntegerField(read_only=True)
+    tue = serializers.IntegerField(read_only=True)
+    wed = serializers.IntegerField(read_only=True)
+    thu = serializers.IntegerField(read_only=True)
+    fri = serializers.IntegerField(read_only=True)
+    sat = serializers.IntegerField(read_only=True)
+    sun = serializers.IntegerField(read_only=True)
+    other = serializers.IntegerField(read_only=True)

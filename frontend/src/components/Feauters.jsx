@@ -149,6 +149,24 @@ export function DeadTableProcess(dataset) {
   return modifiedObjects;
 };
 
+export function PlanHospProcess(dataset) {
+  const modifiedObjects = dataset.map(item => {
+    return {
+      'Отделение': item.dept,
+      'Пн': item.mon,
+      'Вт': item.tue,
+      'Ср': item.wed,
+      'Чт': item.thu,
+      'Пт': item.fri,
+      'Сб': item.sat,
+      'Вс': item.sun,
+      'Вне диапазона': item.other
+    };
+  });
+
+  return modifiedObjects;
+};
+
 export function ArrivedOarTable(dataset) {
 
   const modifiedObjects = dataset.map(item => {

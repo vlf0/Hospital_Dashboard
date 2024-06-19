@@ -17,8 +17,8 @@ function App() {
     mainData = JSON.parse(mainData)
   }
   else {
-    const fetchedMainData = GetData('http://10.123.8.17:9000/api/v1/main_data/')
-    const fetchedEmergencyData = GetData('http://10.123.8.17:9000/api/v1/emergency/')
+    const fetchedMainData = GetData('http://localhost:8000/api/v1/main_data/')
+    const fetchedEmergencyData = GetData('http://localhost:8000/api/v1/emergency/')
     if (fetchedMainData && fetchedEmergencyData) {
       sessionStorage.setItem('main_data', JSON.stringify(fetchedMainData))
       sessionStorage.setItem('emergency_data', JSON.stringify(fetchedEmergencyData))
@@ -38,7 +38,7 @@ function App() {
             <Route path="/OAR_detail" element={<DetailBoard sign={'oar'} />} />
             <Route path="/details" element={<ArrivedDetails />} />
             <Route path="/emergency_detail" element={<DetailBoard sign={'emergencyRoom'} />} />
-
+            <Route path="/plan_hosp_detail" element={<DetailBoard sign={'planHosp'} />} />
           </Routes>
         </Router>
       </DataContext.Provider>

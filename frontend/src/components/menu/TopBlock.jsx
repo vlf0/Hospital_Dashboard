@@ -9,6 +9,7 @@ import './top_block.css';
 const menuUnitsMapping = {
     'arrived': 'Поступившие',
     'emergency': 'Приёмное отделение',
+    'plan_hosp': 'Плановая госпитализация',
     'signout': 'Выписанные',
     'oar': 'Реанимация'
 }

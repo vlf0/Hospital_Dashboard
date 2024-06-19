@@ -1,36 +1,30 @@
 import React, { useContext } from 'react';
 import { useTable } from 'react-table';
 import DataContext from '../../DataContext';
-import { DeadTableProcess } from '../../Feauters';
-import './signout_table.css';
+import { PlanHospProcess } from '../../Feauters'
+import '../signout_detail_board/signout_table.css';
 
+const hospPlanColumns = ['Отделение', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс', 'Вне диапазона']
 
-const deadsColumns = ['ФИО', '№ ИБ', 'Пол', 'Возраст', 'Отделение', 'Дата поступления',
-                      'Состояние при поступлении', 'Кол-во койко дней',
-                      'Диагноз при поступлении', 'Диагноз при выписке', 'Лечащий врач']
+const PlanHospDetailTable = () => {
 
-const SignOutDetailTable = () => {
-  let kisDeads = useContext(DataContext).kis;
-  kisDeads = kisDeads.deads;
-  const readyRuData = DeadTableProcess(kisDeads);
+  let planHospData = useContext(DataContext).plan_hosp;
+  const readyRuData = PlanHospProcess(planHospData);
 
-
-
-
-  const columns = deadsColumns.map(key => ({
+  const columns = hospPlanColumns.map(key => ({
     Header: key,
     accessor: key,
   }))
 
-  // Create a table instance
   const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } = useTable({
     columns,
     data: readyRuData,
   });
 
+
   return (
     <div className='deads-table-container'>
-      <h2 className='detail_block_header'> Детализация по умершим </h2>
+      <h2 className='detail_block_header'> Запланированные пациенты по дням </h2>
       <table className='table' {...getTableProps()} >
         <thead>
           {headerGroups.map(headerGroup => (
@@ -58,4 +52,4 @@ const SignOutDetailTable = () => {
   );
 };
 
-export default SignOutDetailTable;
+export default PlanHospDetailTable;
