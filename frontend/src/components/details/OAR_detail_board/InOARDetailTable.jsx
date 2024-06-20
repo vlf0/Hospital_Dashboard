@@ -5,21 +5,29 @@ import DataContext from '../../DataContext';
 import '../signout_detail_board/signout_table.css';
 
 
-
+const inOarColumns = ['ФИО', '№ ИБ', 'Возраст', 'Лечащий врач', 'Диагноз при поступлении']
 
 const InOARDetailTable = ({ departament }) => {
   const oars = useContext(DataContext).kis;
 
-  let arrived = oars.oar_arrived;
-  arrived = ArrivedOarTable(arrived);
+  let arrived;
+  let filteredData;
 
-  // Отделение реанимации и интенсивной терапии № 1
-  const filteredData = arrived
+  if (oars.oar_arrived.length > 0) {
+    arrived = ArrivedOarTable(oars.oar_arrived);
+    filteredData = arrived
+      .sort((a, b) => {
+        if (a['ФИО'] < b['ФИО']) return -1;
+        if (a['ФИО'] > b['ФИО']) return 1;
+        return 0;
+      })
       .filter(dict => dict['Отделение'] === departament)
       .map(({ Отделение, ...rest }) => rest);
-
-  const columns = Object.keys(arrived[0])
-      .filter(key => key !== 'Отделение')
+  } else {
+    filteredData = [];
+  }
+  
+  const columns = inOarColumns
       .map(key => ({
         Header: key,
         accessor: key,

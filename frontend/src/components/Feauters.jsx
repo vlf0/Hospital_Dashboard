@@ -5,15 +5,9 @@ export const currentDatetime = new Date().toLocaleDateString('ru-RU');
 
 
 export function DateFormatting(date) {
-  // const dateString = "2024-01-10T00:40:15+03:00";
   const dateTimeObject = new Date(date);
-  
-  // Subtract 3 hours
   const subtractedDate = subHours(dateTimeObject, 3);
-  
-  // Format the result
   const formattedSubtractedDate = format(subtractedDate, 'dd.MM.yyyy HH:mm:ss');
-  
   return formattedSubtractedDate
 };
 
@@ -168,7 +162,6 @@ export function PlanHospProcess(dataset) {
 };
 
 export function ArrivedOarTable(dataset) {
-
   const modifiedObjects = dataset.map(item => {
     return {
       'ФИО': item.pat_fio,
@@ -176,7 +169,7 @@ export function ArrivedOarTable(dataset) {
       'Возраст': item.age,
       'Отделение': item.dept,
       'Лечащий врач': item.doc_fio,
-      'Дигноз при поступлении': item.diag_start,
+      'Диагноз при поступлении': item.diag_start,
 
     };
   });
@@ -194,9 +187,9 @@ export function MovedOarTable(dataset) {
       'Возраст': item.age,
       'Отделение': item.dept,
       'Лечащий врач': item.doc_fio,
-      'Дигноз при поступлении': item.diag_start,
+      'Диагноз при поступлении': item.diag_start,
       'Дата перевода': DateFormatting(item.move_date),
-      'Переведен из': item.from_dept
+      'Переведён из': item.from_dept
     };
   });
 
@@ -213,7 +206,7 @@ export function CurrentOarTable(dataset) {
       'Отделение': item.dept,
       'Койко дней': item.days,
       'Лечащий врач': item.doc_fio,
-      'Дигноз при поступлении': item.diag_start
+      'Диагноз при поступлении': item.diag_start
     };
   });
 
@@ -233,8 +226,8 @@ export function DeadsOarTable(dataset) {
       'Дата поступления': DateFormatting(item.arriving_dt),
       'Состояние при поступлении': item.state,
       'Кол-во койко дней': item.days,
-      'Дигноз при поступлении': item.diag_arr,
-      'Дигноз при выписке': item.diag_dead
+      'Диагноз при поступлении': item.diag_arr,
+      'Диагноз при выписке': item.diag_dead
     };
   });
 
@@ -277,3 +270,10 @@ export function getMainDMK(dmkData, day) {
     
     return mainDMK;
 }
+
+export function getOrderedWeekDays() {
+  const days = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+  const currentDayIndex = (new Date().getDay() + 6) % 7;
+  return days.slice(currentDayIndex).concat(days.slice(0, currentDayIndex));
+}
+

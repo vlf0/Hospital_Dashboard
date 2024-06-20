@@ -1,20 +1,27 @@
 import React, { useContext } from 'react';
 import { useTable } from 'react-table';
 import DataContext from '../../DataContext';
-import { PlanHospProcess } from '../../Feauters'
+import { PlanHospProcess } from '../../Feauters';
+import { getOrderedWeekDays } from '../../Feauters';
 import '../signout_detail_board/signout_table.css';
 
-const hospPlanColumns = ['Отделение', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс', 'Вне диапазона']
 
 const PlanHospDetailTable = () => {
 
+  const orderedWeekDays = getOrderedWeekDays();
+  const hospPlanColumns = ['Отделение', ...orderedWeekDays, 'Вне диапазона']
+
   let planHospData = useContext(DataContext).plan_hosp;
-  const readyRuData = PlanHospProcess(planHospData);
+  const readyRuData = PlanHospProcess(planHospData).sort((a, b) => {
+    if (a['Отделение'] < b['Отделение']) return -1;
+    if (a['Отделение'] > b['Отделение']) return 1;
+    return 0;
+  });
 
   const columns = hospPlanColumns.map(key => ({
     Header: key,
     accessor: key,
-  }))
+  }));
 
   const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } = useTable({
     columns,

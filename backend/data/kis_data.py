@@ -733,7 +733,7 @@ class PlanHospitalizationDataProcessing(DataProcessing):
         depts_dict = {dept: [row[3] for row in dataset if row[2] == dept] for dept in depts}
         ready_to_clean_data = [tuple([i, *k]) for i, k in depts_dict.items()]
         cleaned_dataset = self.create_instance(columns, ready_to_clean_data)
-        sr_data = PlanHospSerializer(cleaned_dataset, many=True).data
+        sr_data = PlanHospSerializer(cleaned_dataset, many=True, day=columns[1]).data
         return sr_data
 
     def get_results(self) -> dict:

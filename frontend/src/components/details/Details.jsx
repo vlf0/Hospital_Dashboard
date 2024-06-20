@@ -53,10 +53,13 @@ function DetailBoard({ sign }) {
     topBlockHeader = 'Детализация выписанных';
   } else if (sign === 'oar') {
       content = <div className='detail_block'>
-                <OARDetailBoard dept={'Отделение реанимации и интенсивной терапии № 1'} values={oar2} deads={deads.oar1_d} />
+                <OARDetailBoard dept={'ОРИТ №1'} values={oar2} deads={deads.oar1_d} />
+                <OARDetailBoard dept={'ОРИТ №2'} values={oar5} deads={deads.oar2_d} />          
+                <OARDetailBoard dept={'ОРИТ №3'} values={oar1} deads={deads.oaronmk_d} />
+                {/* <OARDetailBoard dept={'Отделение реанимации и интенсивной терапии № 1'} values={oar2} deads={deads.oar1_d} />
                 <OARDetailBoard dept={'Отделение реанимации и интенсивной терапии № 2'} values={oar5} deads={deads.oar2_d} />          
                 <OARDetailBoard dept={'Отделение реанимации и интенсивной терапии для больных с ОНМК'} values={oar1} deads={deads.oaronmk_d} />
-                <OARDetailBoard dept={'Отделение реанимации и интенсивной терапии для больных с острым инфарктом миокарда'} values={oar4} deads={deads.oaroim_d} />
+                <OARDetailBoard dept={'Отделение реанимации и интенсивной терапии для больных с острым инфарктом миокарда'} values={oar4} deads={deads.oaroim_d} /> */}
               </div>
     topBlockHeader = 'Детализация по реанимациям';
   };

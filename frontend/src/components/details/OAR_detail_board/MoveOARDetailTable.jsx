@@ -4,23 +4,34 @@ import { MovedOarTable } from '../../Feauters';
 import DataContext from '../../DataContext';
 import '../signout_detail_board/signout_table.css';
 
-const InOARDetailTable = ({ departament }) => {
+const moveOarColumns = ['ФИО', '№ ИБ', 'Возраст', 'Лечащий врач', 
+                        'Диагноз при поступлении', 'Дата перевода', 'Переведён из']
+
+const MoveOARDetailTable = ({ departament }) => {
   const oars = useContext(DataContext).kis;
 
-  let moved = oars.oar_moved;
-  moved = MovedOarTable(moved);
+  let moved;
+  let filteredData;
 
-  const filteredData = moved
-  .filter(dict => dict['Отделение'] === departament)
-  .map(({ Отделение, ...rest }) => rest);
+  if (oars.oar_moved.length > 0) {
+    moved = MovedOarTable(oars.oar_moved);
+    filteredData = moved
+      .sort((a, b) => {
+        if (a['ФИО'] < b['ФИО']) return -1;
+        if (a['ФИО'] > b['ФИО']) return 1;
+        return 0;
+      })
+      .filter(dict => dict['Отделение'] === departament)
+      .map(({ Отделение, ...rest }) => rest);
+  } else {
+    filteredData = [];
+  }
 
-
-  const columns = Object.keys(moved[0])
-  .filter(key => key !== 'Отделение')
-  .map(key => ({
+  const columns = moveOarColumns.map(key => ({
     Header: key,
     accessor: key,
   }));
+
 
   // Create a table instance
   const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } = useTable({
@@ -58,4 +69,4 @@ const InOARDetailTable = ({ departament }) => {
   );
 };
 
-export default InOARDetailTable;
+export default MoveOARDetailTable;

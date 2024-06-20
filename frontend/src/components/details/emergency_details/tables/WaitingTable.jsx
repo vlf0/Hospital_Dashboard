@@ -10,7 +10,11 @@ const WaitingDetailTable = () => {
   let waitingData = sessionStorage.getItem('emergency_data');
   waitingData = waitingData ? JSON.parse(waitingData) : null;
 
-  const readyRuData = waitingData ? EmergencyTableProcess(waitingData.waitings) : [];
+  const readyRuData = waitingData ? EmergencyTableProcess(waitingData.waitings).sort((a, b) => {
+    if (a['ФИО пациента'] < b['ФИО пациента']) return -1;
+    if (a['ФИО пациента'] > b['ФИО пациента']) return 1;
+    return 0;
+  }) : [];
 
   const columns = waitingColumns.map(key => ({
     Header: key,
@@ -19,7 +23,7 @@ const WaitingDetailTable = () => {
 
   const tableInstance = useTable({
     columns,
-    data: readyRuData,
+    data: readyRuData
   });
 
   const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } = tableInstance;

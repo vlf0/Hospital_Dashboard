@@ -22,7 +22,11 @@ const RefuseTable = React.memo(({ onRowClick }) => {
   );
 
   const data = React.useMemo(() => {
-    return refuseData ? TotalRefuseTableProcess(refuseData.total_refuses) : [];
+    return refuseData ? TotalRefuseTableProcess(refuseData.total_refuses).sort((a, b) => {
+      if (a['ФИО врача'] < b['ФИО врача']) return -1;
+      if (a['ФИО врача'] > b['ФИО врача']) return 1;
+      return 0;
+    }) : [];
   }, [refuseData]);
 
   const {

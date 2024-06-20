@@ -163,3 +163,15 @@ class PlanHospSerializer(serializers.Serializer):
     sat = serializers.IntegerField(read_only=True)
     sun = serializers.IntegerField(read_only=True)
     other = serializers.IntegerField(read_only=True)
+
+    def __init__(self, *args, **kwargs):
+        current_day = kwargs.pop('day', None)
+        super().__init__(*args, **kwargs)
+
+
+        week_days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
+        current_day_ind = week_days.index(current_day)
+        ordered_week = week_days[current_day_ind:] + week_days[:current_day_ind]
+        ordered_fields = ['dept'] + ordered_week + ['other']
+
+        self.fields = {field: self.fields[field] for field in ordered_fields}

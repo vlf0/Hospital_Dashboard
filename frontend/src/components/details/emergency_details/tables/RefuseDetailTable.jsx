@@ -10,7 +10,11 @@ const RefuseDetailTable = React.memo(({ doctorName }) => {
   let refuseDetailData = sessionStorage.getItem('emergency_data');
   refuseDetailData = refuseDetailData ? JSON.parse(refuseDetailData) : null;
   const flattenDetailArray = refuseDetailData.detail_refuses.flat();
-  const readyRuData = refuseDetailData ? RefuseDetailTableProcess(flattenDetailArray) : [];
+  const readyRuData = refuseDetailData ? RefuseDetailTableProcess(flattenDetailArray).sort((a, b) => {
+    if (a['ФИО пациента'] < b['ФИО пациента']) return -1;
+    if (a['ФИО пациента'] > b['ФИО пациента']) return 1;
+    return 0;
+  }) : [];
   const filteredData = readyRuData.filter(dict => dict['ФИО врача'] === doctorName);
 
   const columns = React.useMemo(() =>

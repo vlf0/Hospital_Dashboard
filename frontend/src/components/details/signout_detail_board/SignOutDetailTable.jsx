@@ -12,10 +12,11 @@ const deadsColumns = ['ФИО', '№ ИБ', 'Пол', 'Возраст', 'Отд�
 const SignOutDetailTable = () => {
   let kisDeads = useContext(DataContext).kis;
   kisDeads = kisDeads.deads;
-  const readyRuData = DeadTableProcess(kisDeads);
-
-
-
+  const readyRuData = DeadTableProcess(kisDeads).sort((a, b) => {
+    if (a['ФИО'] < b['ФИО']) return -1;
+    if (a['ФИО'] > b['ФИО']) return 1;
+    return 0;
+  });
 
   const columns = deadsColumns.map(key => ({
     Header: key,

@@ -14,35 +14,27 @@ const oarDeadsColumns = ['ФИО', '№ ИБ', 'Пол', 'Возраст', 'Да
 const DeadsOARDetailTable = ({ departament }) => {
   const oars = useContext(DataContext).kis;
 
-
-  let deads = oars.oar_deads;
-  deads = DeadsOarTable(deads);
-
-
-
+  let deads;
   let filteredData;
-  let columns;
 
-  if (deads.length !== 0) {
-
+  if (oars.deads.length > 0) {
+    deads = DeadsOarTable(oars.deads);
     filteredData = deads
-    .filter(dict => dict['Отделение'] === departament)
-    .map(({ Отделение, ...rest }) => rest);
-
-    columns = Object.keys(deads[0])
-    .filter(key => key !== 'Отделение')
-    .map(key => ({
-      Header: key,
-      accessor: key,
-    }));
+      .sort((a, b) => {
+        if (a['ФИО'] < b['ФИО']) return -1;
+        if (a['ФИО'] > b['ФИО']) return 1;
+        return 0;
+      })
+      .filter(dict => dict['Отделение'] === departament)
+      .map(({ Отделение, ...rest }) => rest);
   } else {
     filteredData = [];
-    columns = oarDeadsColumns.map(key => ({
-      Header: key,
-      accessor: key,
-    }));
   }
 
+  const columns = oarDeadsColumns.map(key => ({
+    Header: key,
+    accessor: key,
+  }));
 
   // Create a table instance
   const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } = useTable({

@@ -160,22 +160,22 @@ class QuerySets:
 class EmergencyQueries:
 
     WAITINGS = """
-               SELECT fio_pat, ib_num, dept, waiting_time, doc_fio from mm.waitings;
+               SELECT pat_fio, ib_num, dept, waiting_time, doc_fio from mm.waitings;
                """
 
     TOTAL_REFUSE = """
-                   SELECT fio_doc, total_refuse FROM mm.total_refuse;
+                   SELECT doc_fio, total_refuse FROM mm.total_refuse;
                    """
 
     __DETAIL_REFUSE = """
-                      SELECT fio_pat, ib_num, diag, refuse_reason, refuse_date, fio_doc
-                       FROM mm.refuse WHERE fio_doc = 'passed_doc_fio';
+                      SELECT pat_fio, ib_num, diag, refuse_reason, refuse_date, doc_fio
+                      FROM mm.refuse WHERE doc_fio = 'passed_doc_fio';
                       """
 
     COLUMNS = {
-        'total_refuse': ['fio_doc', 'refuses_amount'],
-        'detail_refuse': ['fio_pat', 'ib_num', 'diag', 'refuse_reason', 'refuse_date', 'fio_doc'],
-        'waitings': ['fio_pat', 'ib_num', 'dept', 'waiting_time', 'doc_fio'],
+        'total_refuse': ['doc_fio', 'refuses_amount'],
+        'detail_refuse': ['pat_fio', 'ib_num', 'diag', 'refuse_reason', 'refuse_date', 'doc_fio'],
+        'waitings': ['pat_fio', 'ib_num', 'dept', 'waiting_time', 'doc_fio'],
     }
 
     def get_emergency_queries(self) -> list[str]:
@@ -189,7 +189,7 @@ class EmergencyQueries:
 
 class PlanHospitalizationQueries:
 
-    PLAN_HOSP = """SELECT week, dates, dept, cnt_plan FROM mm.plan_hosp;"""
+    PLAN_HOSP = """SELECT week, dates, dept, cnt_plan FROM mm.plan_hosp ORDER BY dates asc;"""
 
     COLUMNS = {
         'common_field': ['week', 'dates', 'dept', 'cnt_plan']
