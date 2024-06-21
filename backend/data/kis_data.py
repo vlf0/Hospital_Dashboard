@@ -727,14 +727,24 @@ class PlanHospitalizationDataProcessing(DataProcessing):
         super().__init__(kisdata_obj)
 
     def get_plan_hosp(self, dataset: list[tuple]):
-        dates = sorted(set(obj[1] for obj in dataset if obj[0] == 1))
-        columns = tuple(['dept'] + [i.strftime('%a').lower() for i in dates] + ['other'])
-        depts = set(obj[2] for obj in dataset)
-        depts_dict = {dept: [row[3] for row in dataset if row[2] == dept] for dept in depts}
-        ready_to_clean_data = [tuple([i, *k]) for i, k in depts_dict.items()]
-        cleaned_dataset = self.create_instance(columns, ready_to_clean_data)
-        sr_data = PlanHospSerializer(cleaned_dataset, many=True, day=columns[1]).data
-        return sr_data
+            dates = sorted(set(obj[1] for obj in dataset if obj[0] == 1))
+            dates.pop()
+            columns = tuple(['dept'] + [i.strftime('%a').lower() for i in dates] + ['other'])
+            depts = set(obj[2] for obj in dataset)
+            depts_dict = {dept: [] for dept in depts}
+    
+            for date in dates:
+                for dept in depts:
+                    entry = next((item[3] for item in dataset if item[1] == date and item[2] == dept), 0)
+                    depts_dict[dept].append(entry)
+    
+            for dept in depts:
+                depts_dict[dept] += [item[3] for item in dataset if item[1] is None and item[2] == dept]
+    
+            ready_to_clean_data = [tuple([i, *k]) for i, k in depts_dict.items()]
+            cleaned_dataset = self.create_instance(columns, ready_to_clean_data)
+            sr_data = PlanHospSerializer(cleaned_dataset, many=True, day=columns[1]).data
+            return sr_data
 
     def get_results(self) -> dict:
         gen = self.kisdata_obj.get_data_generator()

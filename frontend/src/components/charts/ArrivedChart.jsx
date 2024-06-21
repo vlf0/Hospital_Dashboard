@@ -66,9 +66,7 @@ const ArrivedChart = () => {
             {
               label: 'Зарегистрированные',
               data: mappedDetailsData,
-              backgroundColor: ['#647fda'],
-              borderColor: '#e9306a',
-              borderWidth: 1,
+              backgroundColor: ['#4084DD'],
               srtDates: dataWithDates,
               datalabels: {
                 display: true,
@@ -120,8 +118,6 @@ const ArrivedChart = () => {
               label: 'Всего',
               data: otherPatients,
               backgroundColor: ['#1a2a56'],
-              borderColor: '#e9306a',
-              borderWidth: 1,
               srtDates: dataWithDates,
               datalabels: {
                 display: true,
@@ -212,7 +208,8 @@ const ArrivedChart = () => {
                     },
               },
             legend: {
-                display: false,
+                padding: {bottom: 2},
+                display: true,
             },
             title: {
                 display: true,
@@ -224,7 +221,7 @@ const ArrivedChart = () => {
                     
             },                
             padding: {
-              bottom: 40,
+              bottom: 15,
             }
             },
         },
