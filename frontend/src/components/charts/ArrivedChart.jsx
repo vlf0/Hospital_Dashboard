@@ -12,12 +12,30 @@ import { extractDetailsProperties } from '../Feauters';
 import { GetDates } from '../dates/DatesFormat';
 import "./arrived_chart.css";
 
+
+const plugin = {
+
+  id: "increase-legend-spacing",
+  beforeInit(chart: any) {
+    // Get reference to the original fit function
+    const originalFit = chart.legend.fit;
+
+    // Override the fit function
+    chart.legend.fit = function fit() {
+      // Call original function and bind scope in order to use `this` correctly inside it
+      originalFit.bind(chart.legend)();
+      // Change the height as suggested in another answers
+      this.height += 35;
+    }
+  }
+};
+Chart.register(plugin);
 Chart.register(AnnotationPlugin);
 Chart.register(ChartDataLabels);
 
 
 const ArrivedChart = () => {
-    
+
     const navigate = useNavigate();
     const handleClick = (event, chartElements) => {
       if (chartElements.length > 0) {
@@ -59,14 +77,17 @@ const ArrivedChart = () => {
       label: weekDay,
       date: barOptions[index]
     }));
-    
+
+
     const arrived_data = {
         labels: mappedWeek,
         datasets: [
             {
               label: 'Зарегистрированные',
               data: mappedDetailsData,
-              backgroundColor: ['#4084DD'],
+              backgroundColor: ['#647fda'],
+              borderColor: '#e9306a',
+              borderWidth: 1,
               srtDates: dataWithDates,
               datalabels: {
                 display: true,
@@ -83,7 +104,7 @@ const ArrivedChart = () => {
                             if (context.dataset.data[context.dataIndex] === null) {
                               return 'Н/Д';
                             }
-                            return title; 
+                            return title;
                           },
                     },
                     value: {
@@ -118,6 +139,8 @@ const ArrivedChart = () => {
               label: 'Всего',
               data: otherPatients,
               backgroundColor: ['#1a2a56'],
+              borderColor: '#e9306a',
+              borderWidth: 1,
               srtDates: dataWithDates,
               datalabels: {
                 display: true,
@@ -147,19 +170,19 @@ const ArrivedChart = () => {
 
     const chartOptions = {
         barThickness: 'flex',
-        barPercentage: 0.9, 
+        barPercentage: 0.9,
         categoryPercentage: 0.9,
         scales: {
             x: {
                 stacked: true,
-                grid: { 
+                grid: {
                   drawOnChartArea: false,
                   drawTicks: true
                 },
                 ticks: {
                     padding: dynamicPadding,
                     beginAtZero: true,
-                    color: '#090b1f',  
+                    color: '#090b1f',
                     font: {
                         weight: 'bold',
                         family: 'nbold',
@@ -177,14 +200,14 @@ const ArrivedChart = () => {
                         if (context.tick.value === arrivedPlanValue) {
                             return '#860000';
                         } else {
-                            return '#001a3f'; 
+                            return '#001a3f';
                         }
                     },
                     callback: (value, index, values) => {
                         if (value === arrivedPlanValue) {
-                            return `план ${arrivedPlanValue}`; 
+                            return `план ${arrivedPlanValue}`;
                         } else {
-                            return value; 
+                            return value;
                         }
                     },
                     font: {
@@ -195,7 +218,7 @@ const ArrivedChart = () => {
                 },
             },
         },
-        plugins: { 
+        plugins: {
             annotation: {
                     annotations: {
                       line1: {
@@ -208,7 +231,6 @@ const ArrivedChart = () => {
                     },
               },
             legend: {
-                padding: {bottom: 2},
                 display: true,
             },
             title: {
@@ -218,11 +240,11 @@ const ArrivedChart = () => {
                 font: {
                     size: 30,
                     family: 'nbold'
-                    
-            },                
-            padding: {
-              bottom: 15,
-            }
+
+                },
+                padding: {
+                  bottom: 0,
+                }
             },
         },
         onClick: handleClick
