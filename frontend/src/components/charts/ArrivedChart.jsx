@@ -83,7 +83,7 @@ const ArrivedChart = () => {
         labels: mappedWeek,
         datasets: [
             {
-              label: 'Зарегистрированные',
+              label: 'ЗЛ',
               data: mappedDetailsData,
               backgroundColor: ['#647fda'],
               borderColor: '#e9306a',

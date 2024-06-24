@@ -123,7 +123,6 @@ export function EmergencyTableProcess(dataset) {
 };
 
 export function DeadTableProcess(dataset) {
-  // Using map to transform each item in the dataset
   const modifiedObjects = dataset.map(item => {
     return {
       'ФИО': item.pat_fio,
@@ -277,3 +276,22 @@ export function getOrderedWeekDays() {
   return days.slice(currentDayIndex).concat(days.slice(0, currentDayIndex));
 }
 
+
+export function GetFutureWeek() {
+  const today = new Date();
+
+  const weekDates = Array.from({ length: 7 }, (_, i) => {
+    const date = new Date(today);
+    date.setDate(today.getDate() + i);
+
+    const dayOfWeek = date.toLocaleDateString('ru-RU', { weekday: 'short' });
+    const dayOfWeekCapitalized = dayOfWeek.charAt(0).toUpperCase() + dayOfWeek.slice(1);
+
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+
+    return `${dayOfWeekCapitalized} ${day}.${month}`;
+  });
+
+  return weekDates;
+}

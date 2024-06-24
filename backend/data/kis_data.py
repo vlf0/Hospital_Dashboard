@@ -23,7 +23,6 @@ from .serializers import (
     PlanHospSerializer
 )
 
-
 KIS_DB = settings.DATABASES.get('kis_db')
 logger = logging.getLogger('data.kis_data.DataForDMK')
 today = date.today
@@ -728,7 +727,6 @@ class PlanHospitalizationDataProcessing(DataProcessing):
 
     def get_plan_hosp(self, dataset: list[tuple]):
             dates = sorted(set(obj[1] for obj in dataset if obj[0] == 1))
-            dates.pop()
             columns = tuple(['dept'] + [i.strftime('%a').lower() for i in dates] + ['other'])
             depts = set(obj[2] for obj in dataset)
             depts_dict = {dept: [] for dept in depts}
@@ -739,7 +737,7 @@ class PlanHospitalizationDataProcessing(DataProcessing):
                     depts_dict[dept].append(entry)
     
             for dept in depts:
-                depts_dict[dept] += [item[3] for item in dataset if item[1] is None and item[2] == dept]
+                depts_dict[dept] += [item[3] for item in dataset if item[1] is None and item[2] == dept] or [0]
     
             ready_to_clean_data = [tuple([i, *k]) for i, k in depts_dict.items()]
             cleaned_dataset = self.create_instance(columns, ready_to_clean_data)
