@@ -5,9 +5,9 @@ from datetime import date, timedelta
 from collections import Counter
 from itertools import chain
 from rest_framework.exceptions import ValidationError
-from django.conf import settings
 from django.db.utils import IntegrityError
 from django.db.models import Sum
+from django.db import connections
 from .psycopg_module import BaseConnectionDB
 from .sql_queries import QuerySets, EmergencyQueries, PlanHospitalizationQueries
 from .models import Profiles, MainData, AccumulationOfIncoming, MainDataDetails
@@ -23,7 +23,6 @@ from .serializers import (
     PlanHospSerializer
 )
 
-KIS_DB = settings.DATABASES.get('kis_db')
 logger = logging.getLogger('data.kis_data.DataForDMK')
 today = date.today
 
@@ -80,11 +79,12 @@ class KISData:
         :param query_sets: *list*: A list containing the data queries
          and queries of its columns. Each query pair is a list.
         """
+        self.con = connections.settings['kis_db']
         self.query_sets = query_sets
-        self.db_conn = BaseConnectionDB(dbname=KIS_DB['NAME'],
-                                        host=KIS_DB['HOST'],
-                                        user=KIS_DB['USER'],
-                                        password=KIS_DB['PASSWORD']
+        self.db_conn = BaseConnectionDB(dbname=self.con['NAME'],
+                                        host=self.con['HOST'],
+                                        user=self.con['USER'],
+                                        password=self.con['PASSWORD']
                                         )
         self.cursor = self.db_conn.execute_query
 
@@ -119,7 +119,7 @@ class DataProcessing:
 
     qs = QuerySets
 
-    def __init__(self, kisdata_obj):
+    def __init__(self, kisdata_obj: KISData):
         """
         Initialize the DataProcessing instance.
 
@@ -128,42 +128,35 @@ class DataProcessing:
         self.kisdata_obj = kisdata_obj
 
     @staticmethod
-    def filter_dataset(dataset, ind, value) -> list:
+    def filter_dataset(dataset: list[tuple], ind: int, value: Union[int, str, Any]) -> list:
         """
         Filter passed dataset based on index and value.
 
-        :param dataset: *list*: The dataset to filter.
-        :type dataset: list[tuple]
-        :param ind: *int*: Index to filter on.
-        :type ind: int
-        :param value: *int, str*: Value to match in the filter.
-        :type value: int or str
-        :return: *list*: Filtered dataset.
+        :param dataset: list: The dataset to filter.
+        :param ind: int: Index to filter on.
+        :param value: int, str: Value to match in the filter.
+        :return: list: Filtered dataset.
         """
         return [row for row in dataset if row[ind] == value]
 
     @staticmethod
-    def count_dataset_total(dataset):
+    def count_dataset_total(dataset: list[tuple]) -> int:
         """
         Count the total number of rows in the dataset.
 
-        :param dataset: *list*: The dataset to count.
-        :type dataset: list[tuple]
-        :return: *int*: Total number of rows.
-
+        :param dataset: list: The dataset to count.
+        :return: int: Total number of rows.
         """
         return len(dataset)
 
     @staticmethod
-    def slice_dataset(dataset, mapping) -> list[list]:
+    def slice_dataset(dataset: list[tuple], mapping: dict) -> list[list]:
         """
         Gather all the split lines into one to separate it into data and fields.
 
-        :param dataset: *list*: Dataset for processing.
-        :type dataset: list[tuple]
-        :param mapping: *dict*: Dictionary for matching Russian column names and English ones.
-        :type mapping: dict[str, str]
-        :return: *list*: List of list - first it is column names, second is calculated amount of patients.
+        :param dataset: list: Dataset for processing.
+        :param mapping: dict: Dictionary for matching Russian column names and English ones.
+        :return: list: List of list - first it is column names, second is calculated amount of patients.
         """
         stacked_tuples_dataset = [tuple(chain.from_iterable(map(tuple, dataset)))]
         ru_columns = list(stacked_tuples_dataset[0][::2])
@@ -172,16 +165,14 @@ class DataProcessing:
         return [en_columns, counted_pats]
 
     @staticmethod
-    def create_instance(columns, dataset) -> list[CleanData]:
+    def create_instance(columns: list, dataset: list[tuple]) -> list[CleanData]:
         """
         Create instances of a target class with data retrieved from the database.
 
-        :param columns: *list*: A list of column names representing the attributes of the `CleanData` instances.
-        :type columns: list[str]
-        :param dataset: *list*: A list of lists, where each inner list contains
+        :param columns: list: A list of column names representing the attributes of the `CleanData` instances.
+        :param dataset: list: A list of lists, where each inner list contains
          data corresponding to a row in the database.
-        :type dataset: list[tuple]
-        :return: *list[CleanData]*: A list of `CleanData` class instances,
+        :return: list[CleanData]: A list of `CleanData` class instances,
          each instantiated with data from the provided dataset.
         """
         instances_list = [CleanData(**dict(zip(columns, row))) for row in dataset]
@@ -428,8 +419,6 @@ class DataForDMK(DataProcessing):
         last_maindata = MainData.objects.last()
         maindata_id = last_maindata.id
         details_data.update({'maindata_id': maindata_id})
-        # ready_dict = {'maindata_id': maindata_id} | details_data
-        # print(ready_dict)
         main_details_sr = MainDataDetailsSerializer(data=details_data)
         try:
             main_details_sr.is_valid(raise_exception=True)

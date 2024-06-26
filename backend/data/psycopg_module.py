@@ -77,7 +77,7 @@ class BaseConnectionDB:
         try:
             self.conn = psycopg2.connect(user=self.user, password=self.password,
                                          dbname=self.dbname, host=self.host, port=self.port)
-        except (OperationalError, UnicodeDecodeError, UndefinedTable,
+        except (OperationalError, UnicodeDecodeError,
                 SyntaxError, ProgrammingError) as connection_error:
             self.error = connection_error
             logger.error(str(self.error).rstrip('\n'))
@@ -126,9 +126,12 @@ class BaseConnectionDB:
         :return: *list*: Result set as a list of tuples.
         """
         cursor = self.conn.cursor()
-        cursor.execute(query)
-        queryset = cursor.fetchall()
-        return queryset
+        try:
+            cursor.execute(query)
+            queryset = cursor.fetchall()
+            return queryset
+        except (ProgrammingError, UndefinedTable) as e:
+            pass
 
     @property
     def get_connection_data(self):

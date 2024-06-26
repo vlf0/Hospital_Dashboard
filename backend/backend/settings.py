@@ -126,13 +126,17 @@ DATABASES = {
         'HOST': env.db('KIS_URL')['HOST'],
         'PORT': env.db('KIS_URL')['PORT'],
         'OPTIONS': {
-            'options': '-c search_path=mm'  # Specify the schema here
+            'options': '-c search_path=mm,public',
         },
+        'TEST': {
+            'DEPENDENCIES': [],
+        }
     }
 }
 
-# Password validation
-# https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
+DATABASE_ROUTERS = [
+    'data.db_routers.KisDbRouter'
+]
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -161,7 +165,6 @@ USE_TZ = True
 
 STATIC_ROOT = f'{SITE_ROOT}/backend/static'
 
-# Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
 
 # Default primary key field type
@@ -227,3 +230,5 @@ CACHES = {
 }
 
 KEY_PREFIX = ''
+
+TEST_RUNNER = 'data.custom_test_runner.CustomTestRunner'
