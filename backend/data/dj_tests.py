@@ -1,6 +1,6 @@
 import random
+import pytest
 from types import GeneratorType
-from django.test import TestCase
 from data.kis_data import (
     KISData,
     QuerySets,
@@ -9,29 +9,24 @@ from data.kis_data import (
 )
 
 
-class CleanDataTest(TestCase):
+class TestCleanData:
 
-    databases = []
-
-    def test_check_instance_attrs(self) -> None:
+    def test_check_instance_attrs(self):
         inst = CleanData(first=1, second='true')
-        self.assertEqual((inst.first, inst.second), (1, 'true'))
+        assert (inst.first, inst.second) == (1, 'true')
 
 
-class KISDataTest(TestCase):
+@pytest.mark.django_db(databases=['kis_db'])
+class TestKISData:
 
-    databases = ['kis_db']
-
-    def test_get_data_generator(self) -> None:
-
+    def test_get_data_generator(self):
         queries = QuerySets()
         generator = KISData(queries.queryset_for_kis()).get_data_generator()
-        self.assertIsInstance(generator, GeneratorType)
+        assert isinstance(generator, GeneratorType)
 
 
-class DataProcessingTest(TestCase):
+class TestDataProcessing:
 
-    databases = []
     dataset = [
         (1, 'Alice', 'test1', 25),
         (2, 'Bob', 'test2', 40),
@@ -46,7 +41,7 @@ class DataProcessingTest(TestCase):
     def test_filter_dataset(self):
         for case in self.test_cases:
             filtered_dataset = DataProcessing.filter_dataset(self.dataset, case['ind'], case['value'])
-            self.assertEqual(filtered_dataset, case['expected'])
+            assert filtered_dataset == case['expected']
 
     def test_slice_dataset(self):
         mapping = {
@@ -61,12 +56,10 @@ class DataProcessingTest(TestCase):
         ]
         case = ['surgery_d', 'therapy_d', 'cardio_d']
         sliced_dataset = DataProcessing.slice_dataset(dataset, mapping)
-        self.assertEqual(sliced_dataset[0], case)
+        assert sliced_dataset[0] == case
 
     def test_create_instance(self):
         columns = ['id', 'name', 'info', 'age']
         new_instances_list = DataProcessing.create_instance(columns, self.dataset)
         random_instance = random.choice(range(len(new_instances_list)))
-        self.assertIsInstance(new_instances_list[random_instance], CleanData)
-
-
+        assert isinstance(new_instances_list[random_instance], CleanData)
