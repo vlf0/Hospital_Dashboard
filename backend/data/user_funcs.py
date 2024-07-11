@@ -12,3 +12,4 @@ class DaysSuffixManager:
         elif '1' < self.num[-1] < '5':
             head = 'дня'
         return head
+
