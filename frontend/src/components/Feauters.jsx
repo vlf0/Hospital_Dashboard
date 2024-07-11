@@ -1,7 +1,7 @@
 import { format, subHours } from 'date-fns';
 import { formatDate } from './dates/DatesFormat';
 
-export const currentDatetime = new Date().toLocaleDateString('ru-RU');
+export const currentDatetime = new Date().toLocaleDateString('ru-RU') + 'г. 06:00ч.';
 
 
 export function DateFormatting(date) {

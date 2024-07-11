@@ -94,7 +94,7 @@ class BaseConnectionDB:
         Read-only property represent boll status in integer format.
 
         :return: *int*: Connection status. If return "0" - connection is opened now.
-         If "1" - connection is already closed. If "-2" - connection is already closed.
+         If "1" - connection is already closed. If "-2" - was not opened or closed with error.
         """
         if self.error is not None:
             return -2, self.error
@@ -131,6 +131,7 @@ class BaseConnectionDB:
             queryset = cursor.fetchall()
             return queryset
         except (ProgrammingError, UndefinedTable) as e:
+            print(e)
             pass
 
     @property

@@ -34,7 +34,7 @@ const TopBlock = ({ textContent, menu_point, date }) => {
   return (
 
     <animated.div
-      className='parent_block'
+      className='parent_block sticky-top'
       style={props}>
 
       <div className='logo_with_header'>

@@ -13,7 +13,7 @@ const EmergencyRoomDetail = () => {
   let waitingAmount;
   let refuseAmount;
   waitingAmount = emergencyData ? emergencyData.waitings.length : 'Н/Д';
-  refuseAmount = emergencyData ? emergencyData.total_refuses.length : 'Н/Д';
+  refuseAmount = emergencyData ? emergencyData.total_refuses.reduce((sum, item) => sum + item.refuses_amount, 0) : 'Н/Д';
 
   const [isRefuseTableVisible, setIsRefuseTableVisible] = useState(false);
   const [isWaitingTableVisible, setIsWaitingTableVisible] = useState(false);

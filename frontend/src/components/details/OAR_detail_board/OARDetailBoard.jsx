@@ -13,10 +13,18 @@ const OARDetailBoard = ({ dept, values, deads }) => {
   const [selectedValue, setSelectedValue] = useState(null);
 
   const toggleDeadTableVisibility = (type, event) => {
-      const department = event.currentTarget.getAttribute('orit-name');
-    setIsOARTableVisible(!isOARTableVisible);
-    setTableType(type);
-    setSelectedValue(department);
+    const department = event.currentTarget.getAttribute('orit-name');
+    if (isOARTableVisible && tableType === type && selectedValue === department) {
+      // If the same table is clicked again, close it
+      setIsOARTableVisible(false);
+      setTableType(null);
+      setSelectedValue(null);
+    } else {
+      // Open the clicked table
+      setIsOARTableVisible(true);
+      setTableType(type);
+      setSelectedValue(department);
+    }
   };
 
   // Spring effect of appearance

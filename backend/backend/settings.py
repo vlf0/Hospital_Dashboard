@@ -117,7 +117,8 @@ CHANNEL_LAYERS = {
 
 # Get the DB creds from .env file
 DATABASES = {
-    'default': env.db('DMK_URL'),
+    'default': {},
+    'dmk': env.db('DMK_URL'),
     'kis_db': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': env.db('KIS_URL')['NAME'],
@@ -129,13 +130,14 @@ DATABASES = {
             'options': '-c search_path=mm,public',
         },
         'TEST': {
+            'NAME': 'test_kis_db',
             'DEPENDENCIES': [],
         }
     }
 }
 
 DATABASE_ROUTERS = [
-    'data.db_routers.KisDbRouter'
+    'data.db_routers.DMKDBRouter'
 ]
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -230,5 +232,3 @@ CACHES = {
 }
 
 KEY_PREFIX = ''
-
-TEST_RUNNER = 'data.custom_test_runner.CustomTestRunner'

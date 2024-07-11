@@ -6,6 +6,7 @@ from data.kis_data import (
     QuerySets,
     CleanData,
     DataProcessing,
+    DataForDMK,
 )
 
 
@@ -16,7 +17,6 @@ class TestCleanData:
         assert (inst.first, inst.second) == (1, 'true')
 
 
-@pytest.mark.django_db(databases=['kis_db'])
 class TestKISData:
 
     def test_get_data_generator(self):
@@ -29,13 +29,19 @@ class TestDataProcessing:
 
     dataset = [
         (1, 'Alice', 'test1', 25),
-        (2, 'Bob', 'test2', 40),
-        (3, 'Charlie', 'test3', 32)
+        (1, 'Bob', 'test2', 40),
+        (1, 'Charlie', 'test3', 32),
+        (1, 'Brad', 'test4', 12),
+        (1, 'Helen', 'test5', 16),
+        (1, 'Lynn', 'test6', 26),
+        (0, 'Karl', 'test7', 84),
+        (0, 'Kris', 'test8', 62),
+        (0, 'Bella', 'test9', 77),
     ]
     test_cases = [
-        {'ind': 1, 'value': 'Bob', 'expected': [(2, 'Bob', 'test2', 40)]},
+        {'ind': 1, 'value': 'Bob', 'expected': [(1, 'Bob', 'test2', 40)]},
         {'ind': 1, 'value': 'Dilan', 'expected': []},
-        {'ind': 2, 'value': 'test3', 'expected': [(3, 'Charlie', 'test3', 32)]}
+        {'ind': 2, 'value': 'test3', 'expected': [(1, 'Charlie', 'test3', 32)]}
     ]
 
     def test_filter_dataset(self):
@@ -63,3 +69,14 @@ class TestDataProcessing:
         new_instances_list = DataProcessing.create_instance(columns, self.dataset)
         random_instance = random.choice(range(len(new_instances_list)))
         assert isinstance(new_instances_list[random_instance], CleanData)
+
+
+class TestDataForDMK(TestDataProcessing):
+
+    dmk = DataForDMK(KISData)
+
+    def test_count_data(self):
+        test_case = [9, 6, 3]
+        result = self.dmk.count_data(self.dataset, 0, 1)
+        assert result == test_case
+
