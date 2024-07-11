@@ -86,8 +86,6 @@ const ArrivedChart = () => {
               label: 'ЗЛ',
               data: mappedDetailsData,
               backgroundColor: ['#647fda'],
-              borderColor: '#e9306a',
-              borderWidth: 1,
               srtDates: dataWithDates,
               datalabels: {
                 display: true,
@@ -139,8 +137,6 @@ const ArrivedChart = () => {
               label: 'Всего',
               data: otherPatients,
               backgroundColor: ['#1a2a56'],
-              borderColor: '#e9306a',
-              borderWidth: 1,
               srtDates: dataWithDates,
               datalabels: {
                 display: true,
