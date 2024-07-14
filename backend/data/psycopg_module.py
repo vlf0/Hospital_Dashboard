@@ -2,7 +2,7 @@
 import logging
 from typing import Any
 from psycopg2 import OperationalError, ProgrammingError
-from psycopg2.errors import UndefinedTable, SyntaxError
+from psycopg2.errors import UndefinedTable, SyntaxError, InFailedSqlTransaction
 import psycopg2
 
 logger = logging.getLogger('data.psycopg_module.BaseConnectionDB')
@@ -85,7 +85,6 @@ class BaseConnectionDB:
     def close_connection(self) -> None:
         """Save commits and close the database connection and all its cursors."""
         if self.conn is not None:
-            self.conn.commit()
             self.conn.close()
 
     @property
@@ -100,23 +99,29 @@ class BaseConnectionDB:
             return -2, self.error
         return self.conn.closed
 
-    def execute_query(self, query):
+    def execute_query(self, query, insert=False):
         """
         Execute a SQL query.
 
         :param query: *str*: The SQL query to be executed.
-        :type query: str
-
+        :param insert: Bool value response for fetching result of query if it is.
         :return: *list*: The result of the query execution - list of tuples.
         """
         if self.error:
             return [('Error', self.error)]
-        result = self.__execute_get(query)
+        cursor = self.conn.cursor()
+        if insert:
+            self.__execute_insert(query, cursor)
+            self.conn.commit()
+            return
+        result = self.__execute_get(query, cursor)
         if self.auto_close:
             self.close_connection()
+        cursor.close()
         return result
 
-    def __execute_get(self, query):
+    @staticmethod
+    def __execute_get(query, cursor) -> list:
         """
         Execute a SQL SELECT query and return the result set getting all rows.
 
@@ -125,7 +130,6 @@ class BaseConnectionDB:
 
         :return: *list*: Result set as a list of tuples.
         """
-        cursor = self.conn.cursor()
         try:
             cursor.execute(query)
             queryset = cursor.fetchall()
@@ -133,6 +137,13 @@ class BaseConnectionDB:
         except (ProgrammingError, UndefinedTable) as e:
             print(e)
             pass
+
+    def __execute_insert(self, query: str, cursor) -> None:
+        try:
+            cursor.execute(query)
+            self.conn.commit()
+        except InFailedSqlTransaction as e:
+            self.conn.rollback()
 
     @property
     def get_connection_data(self):

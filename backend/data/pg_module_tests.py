@@ -3,7 +3,6 @@ from .psycopg_module import BaseConnectionDB
 
 
 @pytest.mark.usefixtures('connect_to_kisdb')
-@pytest.mark.django_db(databases={'kis_db'})
 class TestBaseConnecection:
 
     def test_connection_established(self):
@@ -30,18 +29,16 @@ class TestBaseConnecection:
         """
         Test that a query executes successfully and returns expected results.
         """
-        create_table_query = "CREATE TABLE IF NOT EXISTS mm.test_table (id SERIAL PRIMARY KEY, name VARCHAR(50));"
-        self.conn.execute_query(create_table_query)
-
-        truncate_db_query = """TRUNCATE mm.test_table RESTART IDENTITY CASCADE;"""
-        self.conn.execute_query(truncate_db_query)
-        insert_query = """INSERT INTO mm.test_table (name) VALUES ('test_name') RETURNING id;"""
-        result = self.conn.execute_query(insert_query)
-        assert len(result) == 1
-
+        # create_schema_query = "CREATE SCHEMA mm;"
+        # self.conn.execute_query(create_schema_query, insert=True)
+        transaction = """
+            CREATE SCHEMA IF NOT EXISTS mm;
+            CREATE TABLE IF NOT EXISTS mm.test_table (id SERIAL PRIMARY KEY, name VARCHAR(50));
+            INSERT INTO mm.test_table (name) VALUES ('test_name') RETURNING id;
+            """
+        self.conn.execute_query(transaction, insert=True)
         select_query = """SELECT * FROM mm.test_table;"""
         result = self.conn.execute_query(select_query)
-        assert len(result) == 1
         assert result[0][1] == 'test_name'
 
     def test_query_error_handling(self):

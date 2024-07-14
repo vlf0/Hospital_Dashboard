@@ -19,7 +19,7 @@ But full independent production test stend in process now and will be allow soon
 ___
 **Main section**:
 
-![Image alt](https://github.com/vlf0/Dashboard_media/blob/main/media/Screenshot_2.png)
+![Image alt](https://github.com/vlf0/Dashboard_media/blob/main/media/m1.png)
 ___
 **First section of detalization**:
 
@@ -39,6 +39,14 @@ ___
 
 ![Image alt](https://github.com/vlf0/Dashboard_media/blob/main/media/Screenshot_7.png)
 ___
+**Fifth section of detalization**:
+
+![Image alt](https://github.com/vlf0/Dashboard_media/blob/main/media/m2.png)
+___
+**Sixth section of detalization**:
+
+![Image alt](https://github.com/vlf0/Dashboard_media/blob/main/media/m4.png)
+___
 **Django admin panel**:
 
 ![Image alt](https://github.com/vlf0/Dashboard_media/blob/main/media/Screenshot_8.png)
@@ -49,6 +57,6 @@ ___
 ___
 **Video**:
 
-[See video on youtube](https://youtu.be/5iOVHWt5Nmo/)
+[See video on youtube](https://youtu.be/q1TYwLYQbUI)
 ___
 Collaborators - [Anton Ryadovoy](https://github.com/AntonRyadovoy).

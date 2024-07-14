@@ -4,7 +4,7 @@ class DMKDBRouter:
     'backend' application to use the 'kis_db' database.
     """
 
-    route_app_labels = {'data'}
+    route_app_labels = {'data', 'django_celery_beat'}
 
     def db_for_read(self, model, **hints):
         """
