@@ -221,7 +221,8 @@ LOGGING = {
 CELERY_BROKER_URL = env.str('BROKER_URL')
 CELERY_RESULT_BACKEND = env.str('RESULT_URL')
 CELERY_TIMEZONE = 'Europe/Moscow'
-CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+CELERY_BEAT_SCHEDULER = 'backend.beat_scheduler:MyCeleryDBScheduler'
+CELERY_BEAT_MAX_LOOP_INTERVAL = 86350
 
 CACHES = {
     'default': {
