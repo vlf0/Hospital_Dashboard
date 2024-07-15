@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
-from data.kis_data import KISData, DataForDMK, QuerySets
+from data.kis_data import KISData, DataForDMK, MainQueries
 from datetime import date, timedelta
+
 
 class Command(BaseCommand):
     help = 'Command for initial collecting and processing data due week and saving to DMK db.'
@@ -11,7 +12,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         """Start handling."""
         days = options['days']
-        qs = QuerySets()
+        qs = MainQueries()
         dates = self.get_dates(days)
         self.populate_model(dates, qs)
 
@@ -23,9 +24,9 @@ class Command(BaseCommand):
         return dates
 
     @staticmethod
-    def populate_model(dates: list, queries: QuerySets) -> None:
+    def populate_model(dates: list, queries: MainQueries) -> None:
         """Iterate over dates list, process queries for chosen date and save results to db."""
         for day in dates:
-            chosen_date_query = queries.chosen_date_query(queries.queryset_for_dmk(), day)
+            chosen_date_query = queries.chosen_date_query(queries.create_dmk_query(), day)
             kis_obj = KISData(chosen_date_query)
             DataForDMK(kis_obj).save_to_dmk(day)

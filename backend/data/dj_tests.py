@@ -3,7 +3,7 @@ import pytest
 from types import GeneratorType
 from data.kis_data import (
     KISData,
-    QuerySets,
+    MainQueries,
     CleanData,
     DataProcessing,
     DataForDMK,
@@ -20,8 +20,8 @@ class TestCleanData:
 class TestKISData:
 
     def test_get_data_generator(self):
-        queries = QuerySets()
-        generator = KISData(queries.queryset_for_kis()).get_data_generator()
+        queries = MainQueries()
+        generator = KISData(queries.create_kis_query()).get_data_generator()
         assert isinstance(generator, GeneratorType)
 
 

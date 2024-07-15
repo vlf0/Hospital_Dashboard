@@ -29,8 +29,6 @@ class TestBaseConnecection:
         """
         Test that a query executes successfully and returns expected results.
         """
-        # create_schema_query = "CREATE SCHEMA mm;"
-        # self.conn.execute_query(create_schema_query, insert=True)
         transaction = """
             CREATE SCHEMA IF NOT EXISTS mm;
             CREATE TABLE IF NOT EXISTS mm.test_table (id SERIAL PRIMARY KEY, name VARCHAR(50));

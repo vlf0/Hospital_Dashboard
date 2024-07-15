@@ -1,5 +1,5 @@
 import pytest
-from .user_funcs import DaysSuffixManager
+from data.user_funcs import DaysSuffixManager
 
 
 @pytest.mark.parametrize("num, expected_suffix",

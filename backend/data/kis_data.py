@@ -9,7 +9,7 @@ from django.db.utils import IntegrityError
 from django.db.models import Sum
 from django.db import connections
 from .psycopg_module import BaseConnectionDB
-from .sql_queries import QuerySets, EmergencyQueries, PlanHospitalizationQueries
+from .sql_queries import MainQueries, EmergencyQueries, PlanHospitalizationQueries
 from .models import Profiles, MainData, AccumulationOfIncoming, MainDataDetails
 from .serializers import (
     KISDataSerializer,
@@ -117,7 +117,7 @@ class DataProcessing:
       - count_dataset_total(dataset) -> int: Count the total number of rows in the dataset.
     """
 
-    qs = QuerySets
+    qs = MainQueries
 
     def __init__(self, kisdata_obj: KISData):
         """
@@ -202,7 +202,7 @@ class DataForDMK(DataProcessing):
       - save_to_dmk(): Save the prepared data to the DMK DB using the MainData model and its serializer.
     """
 
-    qs = QuerySets
+    qs = MainQueries
     dmk_cols = qs.DMK_COLUMNS
     details_cols = qs.DMK_DETAILS_COLUMNS
 
@@ -458,9 +458,6 @@ class KISDataProcessing(DataProcessing):
 
     Used for getting and processing KIS DB data directly.
 
-    Class attributes:
-      querysets: QuerySets instance for getting access to its attrs and methods permanent.
-
     Attributes:
       kisdata_obj: (KISData): The KISData instance.
       Its method giving us generator. Needed for connection status checking.
@@ -660,7 +657,7 @@ class KISDataProcessing(DataProcessing):
     def get_week_kis_data(query: str, kind: str):
         last_week = dates_period(7)
         kis = KISDataProcessing
-        ready_queries = [QuerySets.chosen_date_query(query, day)[0] for day in last_week]
+        ready_queries = [MainQueries.chosen_date_query(query, day)[0] for day in last_week]
         processing = kis(KISData([query])).arrived_process if kind == 'arrived'\
             else kis(KISData([query])).signout_process
         generator = KISData(ready_queries).get_data_generator()
