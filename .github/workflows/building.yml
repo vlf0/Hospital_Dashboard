@@ -63,7 +63,9 @@ jobs:
           source venv/bin/activate
           python3 -m pytest /home/runner/work/Hospital_Dashboard/Hospital_Dashboard/backend/data
       - name: Get branch name
-        run: git_branch=${GITHUB_REF#refs/heads/}
+        run: |
+          git_branch=${GITHUB_REF#refs/heads/}
+          echo branch=$git_branch >> $GITHUB_ENV
       - name: Create Pull Request
         run: |
           curl -L \
@@ -74,6 +76,6 @@ jobs:
             -d '{
                   "title": "Automated pull request",
                   "body": "This is an automated pull request created by GitHub Actions.",
-                  "head": "$git_branch",
+                  "head": "${{ env.branch }}",
                   "base": "main"
                 }'
