@@ -1,5 +1,8 @@
 name: Testing and building
-on: [push, workflow_dispatch]
+on:
+  push:
+    branches:
+      - staging
 jobs:
   testing:
     runs-on: ubuntu-latest
@@ -61,4 +64,32 @@ jobs:
         run: |
           source venv/bin/activate
           python3 -m pytest /home/runner/work/Hospital_Dashboard/Hospital_Dashboard/backend/data
+      - name: Create Pull Request
+        run: |
+          curl -L \
+            -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/vlf0/Hospital_Dashboard/pulls \
+            -d '{
+                  "title": "Automated pull request",
+                  "body": "This is an automated pull request created by GitHub Actions.",
+                  "head": "staging",
+                  "base": "main"
+                }'
+          
+          
+
+#      - name: Create Pull Request
+#        uses: peter-evans/create-pull-request@v6
+#        with:
+#          token: ${{ secrets.GITHUB_TOKEN }}
+#          commit-message: Automate updating main branch
+#          branch: main
+#          body: Request to merging new feature
+#      - name: Cleanup
+#        run: |
+#          git checkout main  # Switch back to the main branch
+#          git branch -D temporary-branch  # Delete the temporary branch locally
+
 
