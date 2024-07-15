@@ -20,13 +20,25 @@ def connect_to_kisdb(request):
 
 
 @pytest.fixture
-def connect_to_dmk(request):
+def main_sql_queries(request):
+    date = '2025-01-01'
+    query = """
+        SELECT * FROM mm.test
+        WHERE ec.create_dt BETWEEN CURRENT_DATE - INTERVAL '18 hours'
+        AND CURRENT_DATE + INTERVAL '6 hours'
+    """
+    answer = f"""
+        SELECT * FROM mm.test
+        WHERE ec.create_dt BETWEEN DATE '2025-01-01' - INTERVAL '18 hours'
+        AND DATE '2025-01-01' + INTERVAL '6 hours'
+    """
+    request.cls.date = date
+    request.cls.query = query
+    request.cls.answer = answer
 
-    conn = BaseConnectionDB(dbname=conn_dmk['NAME'],
-                            host=conn_dmk['HOST'],
-                            user=conn_dmk['USER'],
-                            password=conn_dmk['PASSWORD']
-                            )
-    request.cls.conn = conn
-    yield
-    conn.close_connection()
+
+@pytest.fixture
+def emergency_sql_queries(request):
+    initials = ['Bob', 'Fred', 'Helen']
+    request.cls.initials = initials
+

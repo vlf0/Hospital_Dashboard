@@ -3,7 +3,7 @@ from celery import shared_task
 from django_celery_beat.models import PeriodicTask, CrontabSchedule, MultipleObjectsReturned
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import connection
-from .kis_data import DataForDMK, KISData, QuerySets
+from .kis_data import DataForDMK, KISData, MainQueries
 from .models import AccumulationOfIncoming
 from .caching import Cacher
 
@@ -16,7 +16,7 @@ def cache_all_data():
      Update the MainData model with the collected data.
      Do this everyday at 6:00 AM by schedule.
     """
-    ready_data = DataForDMK(KISData(QuerySets().queryset_for_dmk()))
+    ready_data = DataForDMK(KISData(MainQueries().create_dmk_query()))
     ready_data.save_to_dmk()
     Cacher().main_caching()
 

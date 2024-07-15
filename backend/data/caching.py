@@ -1,7 +1,7 @@
 """Provided class """
 from django.core.cache import cache
 from .kis_data import (
-    QuerySets,
+    MainQueries,
     EmergencyQueries,
     PlanHospitalizationQueries,
     KISData,
@@ -38,7 +38,7 @@ class Cacher:
 
         Processes data from KIS DB, creates ready dictionaries, and stores them in the cache.
         """
-        p_kis = KISDataProcessing(KISData(QuerySets().queryset_for_kis())).create_ready_dicts()
+        p_kis = KISDataProcessing(KISData(MainQueries().create_kis_query())).create_ready_dicts()
         cache.set('kis', p_kis)
 
     @staticmethod
@@ -49,7 +49,7 @@ class Cacher:
         Retrieves weekly KIS data for arrivals and signouts, combines them into a common dictionary,
         and stores each row in the cache.
         """
-        q = QuerySets
+        q = MainQueries
         arrived = KISDataProcessing.get_week_kis_data(q.ARRIVED, 'arrived')
         signout = KISDataProcessing.get_week_kis_data(q.SIGNOUT, 'signout')
         common_dict = arrived | signout
