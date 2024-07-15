@@ -78,18 +78,3 @@ jobs:
                   "base": "main"
                 }'
           
-          
-
-#      - name: Create Pull Request
-#        uses: peter-evans/create-pull-request@v6
-#        with:
-#          token: ${{ secrets.GITHUB_TOKEN }}
-#          commit-message: Automate updating main branch
-#          branch: main
-#          body: Request to merging new feature
-#      - name: Cleanup
-#        run: |
-#          git checkout main  # Switch back to the main branch
-#          git branch -D temporary-branch  # Delete the temporary branch locally
-
-

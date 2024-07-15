@@ -42,7 +42,6 @@ class MyCeleryDBScheduler(DatabaseScheduler):
             self._dirty |= _failed
 
     def schedule_changed(self):
-        print('cycle')
         try:
             close_old_connections()
             db = router.db_for_write(self.Model)
