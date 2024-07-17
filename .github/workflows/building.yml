@@ -12,6 +12,7 @@ jobs:
       KIS_URL: ${{ secrets.KIS_URL }}
       BROKER_URL: ${{ secrets.BROKER_URL }}
       RESULT_URL: ${{ secrets.RESULT_URL }}
+      TG_TOKEN: ${{ secrets.TG_TOKEN }}
       KIS_USER: ${{ secrets.KIS_USER }}
       DMK_USER: ${{ secrets.DMK_USER }}
       KIS_PASS: ${{ secrets.KIS_PASS }}
@@ -57,6 +58,7 @@ jobs:
           echo 'DMK_URL'=${{ env.DMK_URL }} >> $GITHUB_ENV
           echo 'BROKER_URL'=${{ env.BROKER_URL }} >> $GITHUB_ENV
           echo 'RESULT_URL'=${{ env.RESULT_URL }} >> $GITHUB_ENV
+          echo 'TG_TOKEN'=${{ env.TG_TOKEN }} >> $GITHUB_ENV
           cat $GITHUB_ENV
       - name: Testing app
         run: |

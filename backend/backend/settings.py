@@ -217,9 +217,12 @@ LOGGING = {
     }
 }
 
+TG_TOKEN_DMK = env.str('TG_TOKEN')
+
 # Celery settings
 CELERY_BROKER_URL = env.str('BROKER_URL')
 CELERY_RESULT_BACKEND = env.str('RESULT_URL')
+CELERY_RESULT_EXPIRES = 3600
 CELERY_TIMEZONE = 'Europe/Moscow'
 CELERY_BEAT_SCHEDULER = 'backend.beat_scheduler:MyCeleryDBScheduler'
 CELERY_BEAT_MAX_LOOP_INTERVAL = 86350
