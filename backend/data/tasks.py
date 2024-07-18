@@ -21,7 +21,7 @@ async def bot_send_message(message: str) -> None:
 
     :param message: The message to send.
     """
-    chat_ids = [406086387, 678666905]
+    chat_ids = [406086387, 678666905, 893047326]
     url = f'https://api.telegram.org/bot{TG_TOKEN_DMK}/sendMessage'
     my_payload = {'chat_id': 0, 'text': message}
     async with ClientSession() as session:
