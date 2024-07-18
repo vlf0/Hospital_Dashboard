@@ -133,8 +133,8 @@ export function DeadTableProcess(dataset) {
       'Дата поступления': DateFormatting(item.arriving_dt),
       'Состояние при поступлении': item.state,
       'Кол-во койко дней': item.days,
-      'Диaгноз при поступлении': item.diag_arr,
-      'Диaгноз при выписке': item.diag_dead,
+      'Диагноз при поступлении': item.diag_arr,
+      'Диагноз при выписке': item.diag_dead,
       'Лечащий врач': item.doc_fio
     };
   });
@@ -225,8 +225,8 @@ export function DeadsOarTable(dataset) {
       'Дата поступления': DateFormatting(item.arriving_dt),
       'Состояние при поступлении': item.state,
       'Кол-во койко дней': item.days,
-      'Диагноз при поступлении': item.diag_arr,
-      'Диагноз при выписке': item.diag_dead
+      'Диaгноз при поступлении': item.diag_arr,
+      'Диaгноз при выписке': item.diag_dead
     };
   });
 
